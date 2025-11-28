@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sistema Digital de Causas - Poder Judicial de Misiones</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-dark: #1a2332;
+      --primary-light: #f5f7fa;
+      --accent-blue: #0f3a7d;
+      --accent-light: #e8eef5;j
+      --text-primary: #1a2332;
+      --text-secondary: #6b7280;
+      --border-light: #d1d5db;
+      --border-dark: #9ca3af;
+      --success: #059669;
+      --transition: all 0.3s ease;
+      --primary: oklch(0.6723 0.1606 244.9955);
+      --secondary: oklch(0.1884 0.0128 248.5103);
+      --background: oklch(1.0000 0 0);
+      --foreground: oklch(0.1884 0.0128 248.5103);
+      --card: oklch(0.9784 0.0011 197.1387);
+      --card-foreground: oklch(0.1884 0.0128 248.5103);
+      --muted: oklch(0.9222 0.0013 286.3737);
+      --muted-foreground: oklch(0.1884 0.0128 248.5103);
+      --border: oklch(0.9317 0.0118 231.6594);
+      --radius: 1.3rem;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background-color: var(--primary-light);
+      color: var(--text-primary);
+      line-height: 1.5;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    @keyframes sparkle {
+      0%, 100% {
+        opacity: 0;
+        transform: scale(0);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Contenedores de página */
+    .page {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .page.active {
+      display: flex;
+      z-index: 10;
+    }
+
+    /* ============ PÁGINA DE ACCESO ============ */
+    #access-page {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      background-color: var(--primary-light);
+    }
+
+    .access-wrapper {
+      width: 100%;
+      max-width: 500px;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    .access-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .access-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .access-header p {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background-color: var(--accent-blue);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-submit:hover {
+      background-color: #0d2a52;
+      box-shadow: 0 2px 8px rgba(15, 58, 125, 0.2);
+    }
+
+    .btn-submit:active {
+      transform: translateY(1px);
+    }
+
+    .access-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* ============ PÁGINA DE CARGA ============ */
+    #loading-page {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      background-color: var(--primary-light);
+      animation: slideDown 0.5s ease-out;
+    }
+
+    .loading-wrapper {
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      animation: slideUp 0.5s ease-out 0.1s both;
+    }
+
+    .loading-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2rem;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 4px;
+      background-color: var(--accent-light);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background-color: var(--accent-blue);
+      border-radius: 2px;
+      transition: width 0.2s ease-out;
+    }
+
+    .progress-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* ============ PÁGINA PRINCIPAL (INFORMACIÓN) ============ */
+    #main-page {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      background-color: var(--primary-light);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .main-wrapper {
+      width: 100%;
+      max-width: 700px;
+      animation: slideUp 0.5s ease-out 0.2s both;
+    }
+
+    .main-header {
+      background-color: var(--accent-blue);
+      color: white;
+      padding: 2rem;
+      border-radius: 8px 8px 0 0;
+      border-bottom: 1px solid #0d2a52;
+    }
+
+    .main-header h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: -0.3px;
+    }
+
+    .main-content {
+      background-color: white;
+      border: 1px solid var(--border-light);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .content-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .content-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .content-section h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .content-section p {
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      line-height: 1.7;
+      text-align: justify;
+    }
+
+    .content-section p strong {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .info-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: #ecfdf5;
+      color: var(--success);
+      padding: 0.6rem 1rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+
+    .info-badge::before {
+      content: '✓';
+      font-weight: 700;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      justify-content: center;
+    }
+
+    .btn-continuar {
+      padding: 0.85rem 2rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background-color: var(--accent-blue);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-continuar:hover {
+      background-color: #0d2a52;
+      box-shadow: 0 2px 8px rgba(15, 58, 125, 0.2);
+    }
+
+    .btn-continuar:active {
+      transform: translateY(1px);
+    }
+
+    /* ============ PÁGINA DE LOGIN/REGISTRO ============ */
+    #index-page {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: var(--background);
+      min-height: 100vh;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      min-height: 650px;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    /* Panel izquierdo - Imagen responsiva */
+    .image-panel {
+      flex: 1.2;
+      background: var(--primary);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .image-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .panel-text-content {
+      color: white;
+      text-align: center;
+      z-index: 2;
+      padding: 20px;
+    }
+
+    .panel-text-content h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 1s ease forwards;
+    }
+
+    /* Panel central - Icono animado */
+    .center-panel {
+      flex: 1;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .center-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.05)"/></svg>');
+      background-size: cover;
+    }
+
+    .brand-content {
+      text-align: center;
+      z-index: 2;
+      position: relative;
+    }
+
+    .animated-icon {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 30px;
+      position: relative;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+      animation: float 6s ease-in-out infinite;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 6px solid rgba(255, 255, 255, 0.3);
+      font-size: 80px;
+    }
+
+    .icon-glow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 70%);
+      border-radius: 50%;
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      animation: sparkle 3s linear infinite;
+      opacity: 0;
+    }
+
+    .sparkle:nth-child(1) {
+      top: 15%;
+      left: 15%;
+      animation-delay: 0s;
+    }
+
+    .sparkle:nth-child(2) {
+      top: 25%;
+      right: 20%;
+      animation-delay: 0.5s;
+    }
+
+    .sparkle:nth-child(3) {
+      bottom: 20%;
+      left: 25%;
+      animation-delay: 1s;
+    }
+
+    .sparkle:nth-child(4) {
+      bottom: 10%;
+      right: 15%;
+      animation-delay: 1.5s;
+    }
+
+    .brand-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .brand-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 400;
+      max-width: 300px;
+      line-height: 1.5;
+    }
+
+    /* Panel derecho - Formularios */
+    .right-panel {
+      flex: 1.2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 50px 40px;
+      background: white;
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-header h2 {
+      font-size: 1.8rem;
+      color: var(--foreground);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .form-header p {
+      color: var(--muted-foreground);
+      font-size: 0.95rem;
+    }
+
+    .form {
+      position: relative;
+      width: 100%;
+      opacity: 1;
+      visibility: visible;
+      transition: all 0.3s ease;
+    }
+
+    .form.hidden {
+      opacity: 0;
+      visibility: hidden;
+      position: absolute;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--foreground);
+      font-size: 0.9rem;
+    }
+
+    .input-with-icon {
+      position: relative;
+    }
+
+    .input-with-icon i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    .input-with-icon input {
+      width: 100%;
+      padding: 14px 15px 14px 45px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background-color: white;
+    }
+
+    .input-with-icon input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      margin-bottom: 15px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(102, 126, 234, 0.1);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider span {
+      padding: 0 15px;
+      color: var(--muted-foreground);
+      font-size: 0.9rem;
+    }
+
+    .auth-message {
+      padding: 12px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .auth-message.error-message {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .auth-message.success-message {
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .card-footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .credit-message {
+      font-size: 0.8rem;
+      color: var(--muted-foreground);
+    }
+
+    .developer {
+      font-size: 0.75rem;
+      color: var(--muted-foreground);
+      margin-top: 5px;
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+      .access-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .main-header {
+        padding: 1.5rem;
+      }
+
+      .main-header h2 {
+        font-size: 1.1rem;
+      }
+
+      .main-content {
+        padding: 1.5rem;
+      }
+
+      .content-section p {
+        font-size: 0.9rem;
+      }
+
+      .login-container {
+        flex-direction: column;
+        min-height: auto;
+      }
+
+      .image-panel,
+      .center-panel,
+      .right-panel {
+        flex: 1;
+        padding: 30px 20px;
+      }
+
+      .panel-text-content h1 {
+        font-size: 1.8rem;
+      }
+
+      .brand-title {
+        font-size: 1.6rem;
+      }
+
+      .animated-icon {
+        width: 120px;
+        height: 120px;
+        font-size: 60px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 1rem;
+      }
+
+      .access-wrapper,
+      .loading-wrapper,
+      .main-wrapper {
+        max-width: 100%;
+      }
+
+      .access-header h1 {
+        font-size: 1.3rem;
+      }
+
+      .access-header p {
+        font-size: 0.9rem;
+      }
+
+      .btn-submit {
+        padding: 0.75rem 0.85rem;
+        font-size: 0.9rem;
+      }
+
+      .loading-title {
+        font-size: 1rem;
+      }
+
+      .main-header {
+        padding: 1.25rem;
+      }
+
+      .main-header h2 {
+        font-size: 1rem;
+      }
+
+      .main-content {
+        padding: 1.25rem;
+      }
+
+      .content-section h3 {
+        font-size: 0.9rem;
+      }
+
+      .content-section p {
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn-continuar {
+        width: 100%;
+      }
+
+      .login-container {
+        border-radius: 0;
+      }
+
+      .image-panel,
+      .center-panel,
+      .right-panel {
+        padding: 20px;
+      }
+
+      .panel-text-content h1 {
+        font-size: 1.5rem;
+      }
+
+      .brand-title {
+        font-size: 1.3rem;
+      }
+
+      .form-header h2 {
+        font-size: 1.3rem;
+      }
+
+      .animated-icon {
+        width: 100px;
+        height: 100px;
+        font-size: 50px;
+      }
+    }
+
+    /* Scroll personalizado */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--primary-light);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-dark);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-blue);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Página de acceso -->
+  <div id="access-page" class="page active">
+    <div class="access-wrapper">
+      <div class="access-header">
+        <h1>Sistema Digital de Causas</h1>
+        <p>Poder Judicial de Misiones</p>
+        <p>Defensoria Civil y Comercial 6</p>
+      </div>
+      <button class="btn-submit" id="btn-ingresar">Ingresar</button>
+      <div class="access-footer">
+        <p>Sistema seguro. Acceso restringido a personal autorizado.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Página de carga -->
+  <div id="loading-page" class="page">
+    <div class="loading-wrapper">
+      <p class="loading-title">Inicializando sistema...</p>
+      <div class="progress-container">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+      <p class="progress-text"><span id="progress-percentage">0</span>%</p>
+    </div>
+  </div>
+
+  <!-- Página principal (Información) -->
+  <div id="main-page" class="page">
+    <div class="main-wrapper">
+      <div class="main-header">
+        <h2>Información del Sistema</h2>
+      </div>
+      <div class="main-content">
+        <div class="content-section">
+          <h3>Descripción General</h3>
+          <p>El <strong>Sistema Digital de Causas</strong> pertenece a la Defensoría Civil y Comercial n° 6 del Poder Judicial de Misiones. Esta plataforma permite optimizar el seguimiento de los expedientes judiciales asignados para la intervención del Defensor Oficial, facilitando una gestión eficiente y transparente de los procesos legales.</p>
+        </div>
+        <div class="content-section">
+          <h3>Fuente de Datos</h3>
+          <p>La información recopilada en los registros del sistema digital corresponde a la plataforma SIGED del Poder Judicial de Misiones. La utilización de dicha información es <strong>exclusiva para el seguimiento de datos judiciales</strong>.</p>
+        </div>
+        <div class="content-section">
+          <h3>Normativa Legal</h3>
+          <p>El uso indebido de la información contenida en este sistema será sujeto a las penalidades y sanciones establecidas por el Código Penal Argentino y normas reglamentarias del Poder Judicial de Misiones.</p>
+          <div class="info-badge">
+            Sistema Seguro y Certificado
+          </div>
+        </div>
+        <div class="button-group">
+          <button class="btn-continuar" id="btn-continuar">Continuar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Página de Login/Registro (index.html integrado) -->
+  <div id="index-page" class="page">
+    <div class="login-container fade-in">
+      <div class="image-panel">
+        <div class="panel-text-content">
+          <h1>Sistema Digital de Causas</h1>
+        </div>
+      </div>
+
+      <div class="center-panel">
+        <div class="brand-content">
+          <div class="animated-icon">
+            ⚖️
+            <div class="icon-glow"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+          </div>
+          <h1 class="brand-title">Defensoría Civil y Comercial 6</h1>
+          <p class="brand-subtitle">Defensor-Secretarios</p>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <div class="form-container">
+          <div class="form-header">
+            <h2>Acceso al Sistema</h2>
+            <p>Ingresa tus credenciales para continuar</p>
+          </div>
+          
+          <div id="authMessage" class="auth-message" style="display: none;"></div>
+          
+          <div style="position: relative; min-height: 300px;">
+            <div id="loginForm" class="form">
+              <div class="form-group">
+                <label for="loginEmail">Correo Electrónico</label>
+                <div class="input-with-icon">
+                  <i class="fas fa-envelope"></i>
+                  <input type="email" id="loginEmail" placeholder="usuario@defensoria.com" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="loginPassword">Contraseña</label>
+                <div class="input-with-icon">
+                  <i class="fas fa-lock"></i>
+                  <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+              </div>
+              
+              <button class="btn btn-primary" onclick="loginUser()">
+                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+              </button>
+              
+              <div class="divider">
+                <span>¿No tienes cuenta?</span>
+              </div>
+              
+              <button class="btn btn-secondary" onclick="showRegisterForm()">
+                <i class="fas fa-user-plus"></i> Crear Cuenta
+              </button>
+            </div>
+            
+            <div id="registerForm" class="form hidden">
+              <div class="form-group">
+                <label for="registerName">Nombre Completo</label>
+                <div class="input-with-icon">
+                  <i class="fas fa-user"></i>
+                  <input type="text" id="registerName" placeholder="Ingresa tu nombre completo" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="registerEmail">Correo Electrónico</label>
+                <div class="input-with-icon">
+                  <i class="fas fa-envelope"></i>
+                  <input type="email" id="registerEmail" placeholder="usuario@defensoria.com" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="registerPassword">Contraseña</label>
+                <div class="input-with-icon">
+                  <i class="fas fa-lock"></i>
+                  <input type="password" id="registerPassword" placeholder="Mínimo 6 caracteres" required>
+                </div>
+              </div>
+              
+              <button class="btn btn-primary" onclick="registerUser()">
+                <i class="fas fa-user-check"></i> Crear Cuenta
+              </button>
+              
+              <div class="divider">
+                <span>¿Ya tienes cuenta?</span>
+              </div>
+              
+              <button class="btn btn-secondary" onclick="showLoginForm()">
+                <i class="fas fa-arrow-left"></i> Volver al Login
+              </button>
+            </div>
+          </div>
+          
+          <div class="card-footer">
+            <div class="credit-message">Diseño y programación de:</div>
+            <div class="developer">Rómulo Fioravante - Leg2481 - Año 2025</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============ CONFIGURACIÓN GENERAL ============
+    const config = {
+      loadingDuration: 5000,
+      progressInterval: 30
+    };
+
+    // ============ REFERENCIAS A ELEMENTOS DEL DOM ============
+    const btnIngresar = document.getElementById('btn-ingresar');
+    const btnContinuar = document.getElementById('btn-continuar');
+    const accessPage = document.getElementById('access-page');
+    const loadingPage = document.getElementById('loading-page');
+    const mainPage = document.getElementById('main-page');
+    const indexPage = document.getElementById('index-page');
+    const progressBar = document.getElementById('progress-bar');
+    const progressPercentage = document.getElementById('progress-percentage');
+
+    // ============ EVENT LISTENERS PRINCIPALES ============
+    btnIngresar.addEventListener('click', () => {
+      transitionToLoading();
+    });
+
+    btnContinuar.addEventListener('click', () => {
+      transitionToExternalPage();
+    });
+
+    // ============ FUNCIONES DE TRANSICIÓN ============
+    function transitionToLoading() {
+      accessPage.classList.remove('active');
+      loadingPage.classList.add('active');
+      startProgressAnimation();
+    }
+
+    function transitionToExternalPage() {
+      mainPage.classList.remove('active');
+      loadingPage.classList.add('active');
+      
+      // Reiniciar la barra de progreso
+      progressBar.style.width = '0%';
+      progressPercentage.textContent = '0';
+      
+      startProgressAnimation(() => {
+        // Redirigir a la URL externa
+        window.location.href = 'https://sistemadigital.github.io/empleados/';
+      });
+    }
+
+    // ============ FUNCIONES DE ANIMACIÓN DE PROGRESO ============
+    function startProgressAnimation(callback) {
+      let progress = 0;
+      const increment = (config.progressInterval / config.loadingDuration) * 100;
+
+      const timer = setInterval(() => {
+        progress += increment;
+
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(timer);
+          updateProgressBar(progress);
+          
+          setTimeout(() => {
+            if (callback) {
+              callback();
+            } else {
+              completeLoading();
+            }
+          }, 300);
+        } else {
+          updateProgressBar(progress);
+        }
+      }, config.progressInterval);
+    }
+
+    function updateProgressBar(progress) {
+      const roundedProgress = Math.round(progress);
+      progressBar.style.width = roundedProgress + '%';
+      progressPercentage.textContent = roundedProgress;
+    }
+
+    function completeLoading() {
+      loadingPage.classList.remove('active');
+      mainPage.classList.add('active');
+    }
+
+    // ============ FUNCIONES DE FORMULARIO (LOGIN/REGISTRO) ============
+    function showRegisterForm() {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('registerForm').classList.remove('hidden');
+      document.getElementById('authMessage').style.display = 'none';
+    }
+
+    function showLoginForm() {
+      document.getElementById('registerForm').classList.add('hidden');
+      document.getElementById('loginForm').classList.remove('hidden');
+      document.getElementById('authMessage').style.display = 'none';
+    }
+
+    function showMessage(message, type) {
+      const messageDiv = document.getElementById('authMessage');
+      messageDiv.textContent = message;
+      messageDiv.className = 'auth-message ' + type + '-message';
+      messageDiv.style.display = 'block';
+      
+      setTimeout(() => {
+        messageDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    // ============ FUNCIONES DE AUTENTICACIÓN (SIMULADAS) ============
+    function loginUser() {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      if (!email || !password) {
+        showMessage('Por favor, complete todos los campos.', 'error');
+        return;
+      }
+
+      // Simulación de login (sin Firebase)
+      showMessage('Iniciando sesión...', 'success');
+      setTimeout(() => {
+        showMessage('Acceso concedido. Bienvenido al sistema.', 'success');
+      }, 1500);
+    }
+
+    function registerUser() {
+      const name = document.getElementById('registerName').value;
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+
+      if (!name || !email || !password) {
+        showMessage('Por favor, complete todos los campos.', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage('La contraseña debe tener al menos 6 caracteres.', 'error');
+        return;
+      }
+
+      // Simulación de registro (sin Firebase)
+      showMessage('Registrando cuenta...', 'success');
+      setTimeout(() => {
+        showMessage('¡Cuenta creada exitosamente!', 'success');
+        setTimeout(() => {
+          showLoginForm();
+        }, 2000);
+      }, 1500);
+    }
+
+    // ============ PERMITIR ENVIAR FORMULARIOS CON ENTER ============
+    document.addEventListener('DOMContentLoaded', function() {
+      const inputs = [
+        'loginEmail', 'loginPassword', 'registerName', 
+        'registerEmail', 'registerPassword'
+      ];
+      
+      inputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+          input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+              if (inputId.startsWith('login')) {
+                loginUser();
+              } else {
+                registerUser();
+              }
+            }
+          });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
