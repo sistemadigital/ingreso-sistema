@@ -311,6 +311,17 @@
       font-weight: 400;
     }
 
+    /* AÑADIDO: Estilo para el logo */
+    .access-logo {
+      display: block;
+      margin: 0 auto 1.5rem auto;
+      max-width: 150px;
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: var(--shadow-md);
+    }
+
     .access-footer {
       text-align: center;
       margin-top: 1.5rem;
@@ -805,6 +816,12 @@
         height: 120px;
         font-size: 60px;
       }
+
+      /* AÑADIDO: Responsive para el logo */
+      .access-logo {
+        max-width: 120px;
+        margin-bottom: 1rem;
+      }
     }
 
     @media (max-width: 480px) {
@@ -882,6 +899,12 @@
         height: 100px;
         font-size: 50px;
       }
+
+      /* AÑADIDO: Responsive para el logo */
+      .access-logo {
+        max-width: 100px;
+        margin-bottom: 0.75rem;
+      }
     }
 
     /* Scroll personalizado */
@@ -929,9 +952,11 @@
   <div id="access-page" class="page active" role="main" aria-label="Página de acceso al sistema">
     <div class="access-wrapper">
       <header class="access-header">
+        <!-- AÑADIDO: Imagen del logo -->
+        <img src="https://github.com/sistemadigital/ingreso-sistema/blob/main/celeste.png?raw=true" alt="Logo del Sistema Digital de Causas" class="access-logo">
         <h1>Sistema Digital de Causas</h1>
         <h2>Defensoría Civil y Comercial 6</h2>
-        <p>MINISTERIO PÚBLICO</p>
+        <p>MINISTERIO PÚBLICO DE MISIONES</p>
       </header>
       <button class="btn btn-primary btn-full" id="btn-ingresar">
         <span class="fas fa-sign-in-alt" aria-hidden="true"></span>
