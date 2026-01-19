@@ -314,7 +314,8 @@
     .access-logo {
       display: block;
       margin: 0 auto 1.5rem auto;
-      max-width: 150px;
+      /* CAMBIO AQUÍ: Aumentado de 150px a 250px para ser mediana y visible */
+      max-width: 250px; 
       width: 100%;
       height: auto;
       border-radius: 8px;
@@ -817,7 +818,8 @@
       }
 
       .access-logo {
-        max-width: 120px;
+        /* CAMBIO AQUÍ: Ajustado a 180px para mantener proporción en tablet */
+        max-width: 180px;
         margin-bottom: 1rem;
       }
     }
@@ -899,7 +901,8 @@
       }
 
       .access-logo {
-        max-width: 100px;
+         /* CAMBIO AQUÍ: Ajustado a 140px para mantener proporción en móvil */
+        max-width: 140px;
         margin-bottom: 0.75rem;
       }
     }
@@ -945,11 +948,10 @@
 </head>
 <body>
 
-  <!-- Página de acceso -->
   <div id="access-page" class="page active" role="main" aria-label="Página de acceso al sistema">
     <div class="access-wrapper">
       <header class="access-header">
-        <img src="https://github.com/sistemadigital/ingreso-sistema/blob/main/log.jpg?raw=true" alt="Logo del Sistema Digital de Causas" class="access-logo">
+        <img src="https://github.com/sistemadigital/iconos/blob/main/MP.png?raw=true" alt="Logo del Sistema Digital de Causas" class="access-logo">
         <h1>Sistema Digital de Causas</h1>
         <h2>Defensoría Civil y Comercial 6</h2>
         <p>MINISTERIO PÚBLICO DE MISIONES</p>
@@ -964,12 +966,10 @@
     </div>
   </div>
 
-  <!-- Página de carga -->
   <div id="loading-page" class="page" role="main" aria-label="Página de carga del sistema" aria-live="polite">
     <div class="loading-wrapper">
       <h2 class="loading-title">Inicializando Sistema Digital</h2>
       
-      <!-- Barra de progreso circular minimalista y futurista -->
       <div class="progress-circle-container">
         <div class="progress-glow"></div>
         <svg class="progress-circle" viewBox="0 0 100 100">
@@ -994,7 +994,6 @@
     </div>
   </div>
 
-  <!-- Página principal (Información) -->
   <div id="main-page" class="page" role="main" aria-label="Página de información del sistema">
     <div class="main-wrapper">
       <div class="card">
@@ -1028,7 +1027,6 @@
     </div>
   </div>
 
-  <!-- Página de Login/Registro -->
   <div id="index-page" class="page" role="main" aria-label="Página de inicio de sesión">
     <div class="login-container">
       <section class="image-panel" aria-label="Panel informativo del sistema">
