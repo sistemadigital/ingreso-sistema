@@ -151,10 +151,14 @@
                 const response = await fetch(url);
                 const data = await response.json();
                 if (data && data.length > 0 && data[0].geojson) {
-                    L.geoJSON(data[0].geojson, {
+                    // Guardamos la capa en una variable para obtener sus límites
+                    const capaMisiones = L.geoJSON(data[0].geojson, {
                         style: { color: "#00008B", weight: 4, opacity: 0.8, fillOpacity: 0 },
                         interactive: false
                     }).addTo(map);
+                    
+                    // Ajustamos el mapa para que encuadre perfectamente el polígono de Misiones
+                    map.fitBounds(capaMisiones.getBounds()); 
                 }
             } catch (e) {}
         }
