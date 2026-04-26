@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Panel Federal de Diligenciadores</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        :root {
+            --dark-blue: #0d1b3e; 
+            --celeste-argentina: #74ACDF;
+            --gm-blue: #1a73e8;
+            --province-panel-width: 220px;
+            --search-panel-width: 320px;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Roboto', sans-serif; background: #f1f3f4; }
+        
+        .main-container {
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 5px solid var(--dark-blue);
+            border-radius: 12px;
+            display: flex;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .province-sidebar {
+            width: var(--province-panel-width);
+            background: #f8f9fa;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            z-index: 1001;
+        }
+        .province-sidebar h3 {
+            padding: 20px 15px; font-size: 13px; color: var(--dark-blue);
+            margin: 0; text-transform: uppercase; border-bottom: 2px solid var(--dark-blue);
+            letter-spacing: 1px; font-weight: 700;
+        }
+        .province-list { overflow-y: auto; flex: 1; }
+        .province-item {
+            padding: 12px 18px; cursor: pointer; font-size: 14px; color: #333;
+            transition: all 0.2s; border-bottom: 1px solid #eee;
+        }
+        .province-item:hover { background: #e8f0fe; }
+        .province-item.active { background: var(--dark-blue); color: white; font-weight: 700; }
+
+        .search-sidebar {
+            width: var(--search-panel-width);
+            background: white;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+        .search-box { padding: 15px; }
+        .search-box input {
+            width: 100%; padding: 12px; border: 1px solid #ddd;
+            border-radius: 8px; outline: none; box-sizing: border-box;
+        }
+
+        #map { flex: 1; position: relative; z-index: 1; background: #aad3df; }
+
+        .btn-reset {
+            position: absolute; bottom: 20px; left: 20px;
+            z-index: 1000; background: white; border: 2px solid var(--dark-blue);
+            border-radius: 50px; padding: 10px 20px; cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            font-weight: bold; color: var(--dark-blue); box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+        .btn-reset:hover { background: var(--dark-blue); color: white; }
+
+        .details-sidebar {
+            position: absolute; top: 0; right: 0;
+            width: 340px; height: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            border-left: 2px solid var(--dark-blue);
+            box-shadow: -5px 0 20px rgba(0,0,0,0.15);
+            z-index: 1100; overflow-y: auto; display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        .data-row { padding: 15px 25px; border-bottom: 1px solid #f0f0f0; }
+        .label { font-size: 10px; color: var(--gm-blue); font-weight: bold; text-transform: uppercase; }
+        .value { font-size: 14px; color: #222; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="province-sidebar">
+        <h3>Jurisdicciones</h3>
+        <div class="province-list" id="province-list"></div>
+    </div>
+
+    <div class="search-sidebar">
+        <div class="search-box">
+            <input type="text" id="input-search" placeholder="🔍 Buscar diligenciador..." oninput="buscar(this.value)">
+        </div>
+        <div id="results-list"></div>
+    </div>
+
+    <div id="map">
+        <button class="btn-reset" onclick="resetMapa()">
+            <span class="material-icons">refresh</span> Reiniciar Mapa
+        </button>
+    </div>
+
+    <div class="details-sidebar" id="details-panel"></div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD8nUKvZMx6HzVKFzMbV68aGWXABZ4lNR4",
+        authDomain: "diligenciadores.firebaseapp.com",
+        projectId: "diligenciadores",
+        storageBucket: "diligenciadores.firebasestorage.app",
+        messagingSenderId: "962737479020",
+        appId: "1:962737479020:web:1edcb50718c2cda907e749"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let diligenciadores = [];
+    let provinciaActual = "";
+    let capaArgentina = null;
+    let capaProvincia = null;
+    
+    const boundsArgentina = [[-56.5, -74], [-21, -53]];
+    const map = L.map('map', { zoomControl: false }).fitBounds(boundsArgentina);
+    const markerGroup = L.layerGroup().addTo(map);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+
+    const provinciasList = [
+        "AMBA", "CABA", "Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes", 
+        "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja", "Mendoza", 
+        "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan", "San Luis", 
+        "Santa Cruz", "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"
+    ];
+
+    // Lista exacta de la imagen proporcionada (41 entradas)
+    const listaAMBA_Imagen = [
+        "ALMIRANTE BROWN", "AVELLANEDA", "BERAZATEGUI", "BERISSO", "BRANDSEN", "CABA",
+        "CAMPANA", "CAÑUELAS", "ENSENADA", "ESCOBAR", "ESTEBAN ECHEVERRIA", "EXALTACION DE LA CRUZ",
+        "EZEIZA", "FLORENCIO VARELA", "GENERAL LAS HERAS", "GENERAL RODRIGUEZ", "GENERAL SAN MARTIN",
+        "HURLINGHAM", "ITUZAINGO", "JOSE C. PAZ", "LA MATANZA", "LANUS", "LA PLATA",
+        "LOMAS DE ZAMORA", "LUJAN", "MARCOS PAZ", "MALVINAS ARGENTINAS", "MORENO", "MERLO",
+        "MORON", "PILAR", "PRESIDENTE PERON", "QUILMES", "SAN FERNANDO", "SAN ISIDRO",
+        "SAN MIGUEL", "SAN VICENTE", "TIGRE", "TRES DE FEBRERO", "VICENTE LOPEZ", "ZARATE"
+    ];
+
+    const normalizar = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim() : "";
+
+    async function init() {
+        const argBorde = fetch('https://nominatim.openstreetmap.org/search?country=argentina&format=json&polygon_geojson=1&limit=1').then(r => r.json());
+        const malBorde = fetch('https://nominatim.openstreetmap.org/search?q=Islas+Malvinas&format=json&polygon_geojson=1&limit=1').then(r => r.json());
+
+        Promise.all([argBorde, malBorde]).then(results => {
+            const geojsons = results.filter(r => r[0]).map(r => r[0].geojson);
+            capaArgentina = L.geoJSON(geojsons, {
+                style: { color: '#0d1b3e', weight: 3, fillOpacity: 0, interactive: false }
+            }).addTo(map);
+        });
+
+        const snap = await getDocs(collection(db, 'diligenciadores'));
+        diligenciadores = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderProvincias();
+        // Inicia con el mapa completo sin filtrar
+        renderLista(diligenciadores);
+    }
+
+    function renderProvincias() {
+        const container = document.getElementById('province-list');
+        provinciasList.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'province-item';
+            div.innerText = p;
+            div.id = `item-${p.replace(/ /g, '')}`;
+            div.onclick = () => filtrarProvincia(p);
+            container.appendChild(div);
+        });
+    }
+
+    window.filtrarProvincia = (prov) => {
+        provinciaActual = prov;
+        document.getElementById('details-panel').style.display = 'none';
+        document.querySelectorAll('.province-item').forEach(i => i.classList.remove('active'));
+        document.getElementById(`item-${prov.replace(/ /g, '')}`)?.classList.add('active');
+        
+        let filtrados;
+        if (prov === "AMBA") {
+            filtrados = diligenciadores.filter(d => {
+                const p = normalizar(d.provincia);
+                const l = normalizar(d.localidad);
+                // Valida contra la lista de la imagen
+                return listaAMBA_Imagen.includes(p) || listaAMBA_Imagen.includes(l);
+            });
+        } else {
+            filtrados = diligenciadores.filter(d => normalizar(d.provincia) === normalizar(prov));
+        }
+        renderLista(filtrados);
+
+        if (capaProvincia) map.removeLayer(capaProvincia);
+
+        let queries = [];
+        if (prov === "Tierra del Fuego") {
+            queries = ["Provincia de Tierra del Fuego, Argentina", "Islas Malvinas"];
+        } else if (prov === "AMBA") {
+            // Consulta específica para obtener el área metropolitana
+            queries = ["Área Metropolitana de Buenos Aires, Argentina"];
+        } else if (prov === "CABA") {
+            queries = ["Ciudad Autonoma de Buenos Aires, Argentina"];
+        } else {
+            queries = [`Provincia de ${prov}, Argentina`];
+        }
+
+        Promise.all(queries.map(q => fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&polygon_geojson=1&limit=1`).then(r => r.json())))
+        .then(results => {
+            const geojsons = results.filter(r => r[0]).map(r => r[0].geojson);
+            if (geojsons.length > 0) {
+                capaProvincia = L.geoJSON(geojsons, {
+                    style: { color: '#74ACDF', weight: 4, fillOpacity: 0.15 }
+                }).addTo(map);
+
+                if (prov === "Tierra del Fuego") {
+                    map.flyToBounds([[-56.0, -72.0], [-51.0, -57.0]], { duration: 1.5 });
+                } else {
+                    map.flyToBounds(capaProvincia.getBounds(), { padding: [30, 30], duration: 1.5 });
+                }
+            }
+        });
+    };
+
+    window.resetMapa = () => {
+        if (capaProvincia) map.removeLayer(capaProvincia);
+        markerGroup.clearLayers();
+        provinciaActual = "";
+        document.getElementById('details-panel').style.display = 'none';
+        document.querySelectorAll('.province-item').forEach(i => i.classList.remove('active'));
+        document.getElementById('input-search').value = "";
+        renderLista(diligenciadores);
+        map.flyToBounds(boundsArgentina, { duration: 1.5 });
+    };
+
+    window.buscar = (term) => {
+        const query = normalizar(term);
+        const filtrados = diligenciadores.filter(d => {
+            const p = normalizar(d.provincia);
+            const l = normalizar(d.localidad);
+            const matchProv = (!provinciaActual) ? true : (provinciaActual === "AMBA" ? (listaAMBA_Imagen.includes(p) || listaAMBA_Imagen.includes(l)) : p === normalizar(provinciaActual));
+            return matchProv && (normalizar(d.diligenciador).includes(query) || l.includes(query));
+        });
+        renderLista(filtrados);
+    };
+
+    function renderLista(data) {
+        const list = document.getElementById('results-list');
+        if (data.length === 0) {
+            list.innerHTML = `<div style="padding:25px; color:#888; font-size:13px; text-align:center;">No se encontraron registros.</div>`;
+            return;
+        }
+        list.innerHTML = data.map(d => `
+            <div class="data-row" style="cursor:pointer" onclick="verDetalle('${d.id}')">
+                <div class="value" style="font-weight:500; color:var(--dark-blue)">${d.diligenciador}</div>
+                <div class="label">${d.localidad || ''}, ${d.provincia || ''}</div>
+            </div>
+        `).join('');
+    }
+
+    window.verDetalle = (id) => {
+        const d = diligenciadores.find(x => x.id === id);
+        const panel = document.getElementById('details-panel');
+        panel.style.display = 'block';
+        panel.innerHTML = `
+            <div style="padding:25px; background:var(--dark-blue); color:white;">
+                <h2 style="margin:0; font-size:18px">${d.diligenciador}</h2>
+                <span style="font-size:11px; opacity:0.8">${d.tipoLey || 'Ley 22.172'}</span>
+            </div>
+            <div class="data-row"><div class="label">Ubicación</div><div class="value">${d.domicilio}, ${d.localidad}</div></div>
+            <div class="data-row"><div class="label">Contacto</div><div class="value">${d.telefono || 'Sin datos'}<br>${d.email || ''}</div></div>
+            <div style="padding:20px; background:#fff9e6; margin:15px; border-radius:8px; font-size:13px; color:#555; border-left: 4px solid #ff9800;">
+                <div class="label" style="color:#ff9800; margin-bottom:5px">Información Relevante</div>
+                ${d.expteDondeFigura || 'Registrado en el Panel Federal.'}
+            </div>
+        `;
+        geocode(d);
+    };
+
+    async function geocode(d) {
+        const q = `${d.domicilio}, ${d.localidad}, ${d.provincia}, Argentina`;
+        try {
+            const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);
+            const data = await r.json();
+            if (data[0]) {
+                const pos = [data[0].lat, data[0].lon];
+                markerGroup.clearLayers();
+                L.marker(pos, {
+                    icon: L.divIcon({
+                        html: '<span class="material-icons" style="color:#d32f2f; font-size:36px">place</span>',
+                        className: '', iconSize: [36, 36], iconAnchor: [18, 36]
+                    })
+                }).addTo(markerGroup);
+                map.flyTo(pos, 15);
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    init();
+</script>
+
+</body>
+</html>
