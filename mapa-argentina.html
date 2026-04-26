@@ -141,6 +141,7 @@
     let provinciaActual = "";
     let capaArgentina = null;
     let capaProvincia = null;
+    let argentinaGeojsons = []; // Guardar los geojsons para regenerar en reset
     
     const boundsArgentina = [[-56.5, -74], [-21, -53]];
     const map = L.map('map', { zoomControl: false }).fitBounds(boundsArgentina);
@@ -172,17 +173,15 @@
         const argBorde = fetch('https://nominatim.openstreetmap.org/search?country=argentina&format=json&polygon_geojson=1&limit=1').then(r => r.json());
         const malBorde = fetch('https://nominatim.openstreetmap.org/search?q=Islas+Malvinas&format=json&polygon_geojson=1&limit=1').then(r => r.json());
 
-        Promise.all([argBorde, malBorde]).then(results => {
-            const geojsons = results.filter(r => r[0]).map(r => r[0].geojson);
-            capaArgentina = L.geoJSON(geojsons, {
-                style: { color: '#0d1b3e', weight: 3, fillOpacity: 0, interactive: false }
-            }).addTo(map);
-        });
+        const results = await Promise.all([argBorde, malBorde]);
+        argentinaGeojsons = results.filter(r => r[0]).map(r => r[0].geojson);
+        capaArgentina = L.geoJSON(argentinaGeojsons, {
+            style: { color: '#0d1b3e', weight: 3, fillOpacity: 0, interactive: false }
+        }).addTo(map);
 
         const snap = await getDocs(collection(db, 'diligenciadores'));
         diligenciadores = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderProvincias();
-        // Inicia con el mapa completo sin filtrar
         renderLista(diligenciadores);
     }
 
@@ -209,7 +208,6 @@
             filtrados = diligenciadores.filter(d => {
                 const p = normalizar(d.provincia);
                 const l = normalizar(d.localidad);
-                // Valida contra la lista de la imagen
                 return listaAMBA_Imagen.includes(p) || listaAMBA_Imagen.includes(l);
             });
         } else {
@@ -223,10 +221,13 @@
         if (prov === "Tierra del Fuego") {
             queries = ["Provincia de Tierra del Fuego, Argentina", "Islas Malvinas"];
         } else if (prov === "AMBA") {
-            // Consulta específica para obtener el área metropolitana
             queries = ["Área Metropolitana de Buenos Aires, Argentina"];
         } else if (prov === "CABA") {
             queries = ["Ciudad Autonoma de Buenos Aires, Argentina"];
+        } else if (prov === "Chaco") {
+            queries = ["Provincia del Chaco, Argentina"];
+        } else if (prov === "Chubut") {
+            queries = ["Provincia del Chubut, Argentina"];
         } else {
             queries = [`Provincia de ${prov}, Argentina`];
         }
@@ -249,7 +250,22 @@
     };
 
     window.resetMapa = () => {
-        if (capaProvincia) map.removeLayer(capaProvincia);
+        // Eliminar capa provincial si existe
+        if (capaProvincia) {
+            map.removeLayer(capaProvincia);
+            capaProvincia = null;
+        }
+        // Eliminar capa nacional actual y volverla a crear limpia
+        if (capaArgentina) {
+            map.removeLayer(capaArgentina);
+        }
+        // Regenerar la capa nacional con los geojsons guardados
+        if (argentinaGeojsons.length > 0) {
+            capaArgentina = L.geoJSON(argentinaGeojsons, {
+                style: { color: '#0d1b3e', weight: 3, fillOpacity: 0, interactive: false }
+            }).addTo(map);
+        }
+        
         markerGroup.clearLayers();
         provinciaActual = "";
         document.getElementById('details-panel').style.display = 'none';
