@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Registro NNYA Institucionalizados · Defensoría CC 6 Misiones</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  
+  <style>
+    /* ==========================================================================
+       VARIABLES Y RESET
+       ========================================================================== */
+    :root {
+      --primary: #4f46e5;       /* Indigo 600 */
+      --primary-hover: #4338ca; /* Indigo 700 */
+      --primary-light: #e0e7ff; /* Indigo 100 */
+      --text-main: #0f172a;     /* Slate 900 */
+      --text-muted: #64748b;    /* Slate 500 */
+      --bg-body: #f8fafc;       /* Slate 50 */
+      --bg-surface: #ffffff;
+      --border: #e2e8f0;        /* Slate 200 */
+      --radius-md: 0.75rem;
+      --radius-lg: 1rem;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif; 
+      background: var(--bg-body); 
+      color: var(--text-main); 
+      line-height: 1.6; 
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ==========================================================================
+       LAYOUT PRINCIPAL
+       ========================================================================== */
+    header {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand h1 { 
+      font-size: 1.25rem; 
+      font-weight: 700; 
+      color: var(--primary); 
+      letter-spacing: -0.025em;
+    }
+
+    .user-bar { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+    
+    .auth-status { 
+      font-weight: 600; 
+      padding: 0.35rem 1rem; 
+      border-radius: var(--radius-full); 
+      font-size: 0.85rem; 
+      letter-spacing: 0.025em;
+    }
+    .auth-status.invitado { background: #f1f5f9; color: var(--text-muted); }
+    .auth-status.autorizado { background: #dcfce7; color: #15803d; }
+
+    main { max-width: 1440px; margin: 2rem auto; padding: 0 2rem; }
+
+    /* ==========================================================================
+       COMPONENTES ESTADÍSTICAS Y TABS
+       ========================================================================== */
+    .stats-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 1.25rem; 
+      margin-bottom: 2rem; 
+    }
+    
+    .stat-card { 
+      background: var(--bg-surface); 
+      border-radius: var(--radius-lg); 
+      padding: 1.5rem; 
+      box-shadow: var(--shadow-sm); 
+      border: 1px solid var(--border); 
+      transition: var(--transition);
+    }
+    .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .stat-card h3 { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .stat-number { font-size: 2.25rem; font-weight: 800; color: var(--primary); line-height: 1; }
+
+    .tabs { 
+      display: flex; 
+      gap: 0.5rem; 
+      margin-bottom: 1.5rem; 
+      flex-wrap: wrap; 
+      background: #e2e8f0;
+      padding: 0.35rem;
+      border-radius: var(--radius-full);
+      width: fit-content;
+    }
+    
+    .tab { 
+      padding: 0.65rem 1.5rem; 
+      background: transparent; 
+      border: none; 
+      font-weight: 600; 
+      font-size: 0.9rem; 
+      color: var(--text-muted);
+      cursor: pointer; 
+      border-radius: var(--radius-full); 
+      transition: var(--transition);
+      font-family: inherit;
+    }
+    .tab:hover { color: var(--text-main); }
+    .tab[aria-selected="true"] { background: var(--bg-surface); color: var(--primary); box-shadow: var(--shadow-sm); }
+
+    .panel { display: none; animation: fadeIn 0.3s ease-out; }
+    .panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ==========================================================================
+       HERRAMIENTAS Y FORMULARIOS
+       ========================================================================== */
+    .toolbar { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 1rem; 
+      align-items: center; 
+      margin-bottom: 1.5rem; 
+      background: var(--bg-surface); 
+      padding: 1rem; 
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .search-box { flex: 2; min-width: 250px; position: relative; }
+    .search-box input { 
+      width: 100%; 
+      padding: 0.75rem 1rem 0.75rem 2.5rem; 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius-full); 
+      font-size: 0.9rem; 
+      font-family: inherit;
+      transition: var(--transition);
+    }
+    .search-box input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    .search-box::before { content: "🔍"; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 1rem; }
+
+    .filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .filter-btn { 
+      background: var(--bg-surface); 
+      border: 1px solid var(--border); 
+      padding: 0.5rem 1.2rem; 
+      border-radius: var(--radius-full); 
+      font-weight: 600; 
+      font-size: 0.85rem;
+      cursor: pointer; 
+      color: var(--text-muted);
+      transition: var(--transition);
+      font-family: inherit;
+    }
+    .filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* BOTONES */
+    .btn { 
+      padding: 0.65rem 1.25rem; 
+      border-radius: var(--radius-md); 
+      font-weight: 600; 
+      border: 1px solid var(--border); 
+      cursor: pointer; 
+      font-size: 0.9rem; 
+      background: var(--bg-surface); 
+      color: var(--text-main);
+      transition: var(--transition);
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn:hover { background: #f1f5f9; }
+    
+    .btn-primary { background: var(--primary); color: white; border: none; }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    
+    .btn-outline { border-color: var(--border); color: var(--text-muted); }
+    .btn-outline:hover { background: #f8fafc; color: var(--text-main); }
+    
+    .btn-sm { padding: 0.45rem 1rem; font-size: 0.8rem; border-radius: var(--radius-md); }
+    .btn-icon { background: none; border: none; cursor: pointer; color: #94a3b8; padding: 0.4rem; border-radius: 50%; transition: var(--transition); }
+    .btn-icon:hover { background: #fee2e2; color: #ef4444; }
+
+    .btn-print {
+      background: linear-gradient(135deg, var(--text-main), #334155);
+      border: none; color: white; padding: 0.6rem 1.25rem; border-radius: var(--radius-md);
+      font-weight: 600; font-size: 0.85rem; transition: var(--transition); cursor: pointer; box-shadow: var(--shadow-sm); font-family: inherit;
+    }
+    .btn-print:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); background: #334155; }
+
+    /* ==========================================================================
+       TABLAS
+       ========================================================================== */
+    .table-wrap { 
+      overflow-x: auto; 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius-lg); 
+      background: var(--bg-surface); 
+      box-shadow: var(--shadow-sm);
+    }
+    
+    table { width: 100%; border-collapse: collapse; min-width: 800px; text-align: left; }
+    
+    th { 
+      background: #f8fafc; 
+      padding: 1.25rem 1rem; 
+      font-size: 0.75rem; 
+      font-weight: 700; 
+      text-transform: uppercase; 
+      color: var(--text-muted); 
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid var(--border);
+    }
+    
+    td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; color: var(--text-main); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    .badge { display: inline-flex; padding: 0.35rem 0.85rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.025em; text-transform: uppercase; }
+    .badge.active { background: #dbeafe; color: #1e40af; }
+    .badge.pending { background: #fef3c7; color: #92400e; }
+    .badge.closed { background: #fee2e2; color: #b91c1c; }
+
+    .pagination { padding: 1.25rem 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; background: var(--bg-surface); border-top: 1px solid var(--border); }
+    .pagination.pagination-top { border-top: none; border-bottom: 1px solid var(--border); }
+    .page-btn { background: var(--bg-surface); border: 1px solid var(--border); padding: 0.4rem 0.85rem; border-radius: 0.5rem; cursor: pointer; font-family: inherit; font-weight: 600; color: var(--text-muted); transition: var(--transition); }
+    .page-btn:hover:not(:disabled) { background: #f1f5f9; color: var(--text-main); }
+    .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ==========================================================================
+       MODALES Y FORMULARIOS (DIALOG)
+       ========================================================================== */
+    dialog {
+      border: none;
+      border-radius: 1.5rem 0 0 1.5rem;
+      padding: 0;
+      background: var(--bg-surface);
+      box-shadow: var(--shadow-lg);
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: auto;
+      width: 90%; max-width: 1000px; margin: 0;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    dialog[open] { transform: translateX(0); }
+    dialog::backdrop { background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); cursor: pointer; }
+    
+    .modal-header { 
+      background: var(--bg-surface); 
+      border-bottom: 1px solid var(--border); 
+      padding: 1.5rem 2rem; 
+      font-weight: 700; 
+      font-size: 1.25rem;
+      color: var(--text-main);
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      position: sticky; top: 0; z-index: 10;
+    }
+    
+    .modal-body { padding: 2rem; }
+    .modal-footer { padding: 1.5rem 2rem; display: flex; gap: 1rem; justify-content: flex-end; border-top: 1px solid var(--border); background: #f8fafc; position: sticky; bottom: 0; z-index: 10; }
+
+    /* Formularios dentro del Modal */
+    .form-section { margin-bottom: 2.5rem; }
+    .form-section h3 { font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.25rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border); }
+    
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .full-width { grid-column: 1 / -1; }
+    
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-group label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    .form-group input, .form-group select, .form-group textarea { 
+      padding: 0.75rem 1rem; 
+      border: 1px solid #cbd5e1; 
+      border-radius: var(--radius-md); 
+      font-size: 0.95rem; 
+      font-family: inherit;
+      color: var(--text-main);
+      transition: var(--transition);
+      background: #f8fafc;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--bg-surface);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .dynamic-list { margin-top: 1rem; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; background: #f8fafc; max-height: 300px; overflow-y: auto; }
+    .dynamic-item { display: flex; gap: 1rem; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; background: var(--bg-surface); padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+    .dynamic-item input { flex: 1; min-width: 150px; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 0.375rem; font-family: inherit;}
+
+    /* Inner Tabs (Runnai) */
+    .inner-tabs { display: flex; gap: 0.5rem; border-bottom: 2px solid var(--border); margin-bottom: 2rem; flex-wrap: wrap; padding-bottom: 0.5rem; }
+    .inner-tab { padding: 0.5rem 1rem; background: transparent; border: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; border-radius: var(--radius-md); color: var(--text-muted); transition: var(--transition); font-family: inherit; }
+    .inner-tab:hover { background: #f1f5f9; color: var(--text-main); }
+    .inner-tab.active { background: var(--primary-light); color: var(--primary); }
+    
+    .inner-panel { display: none; animation: fadeIn 0.3s; }
+    .inner-panel.active-panel { display: block; }
+
+    /* ==========================================================================
+       LOGIN MODAL ESPECIAL
+       ========================================================================== */
+    .login-modal {
+      position: fixed; top: 50%; left: 50%; right: auto; bottom: auto;
+      transform: translate(-50%, -50%) scale(0.95);
+      width: auto; min-width: 300px; max-width: 350px;
+      border-radius: 1.5rem;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 1.5rem;
+    }
+    .login-modal[open] { transform: translate(-50%, -50%) scale(1); }
+    
+    .login-modal .modal-body { display: flex; align-items: center; gap: 1rem; padding: 0; }
+    .login-input {
+      flex: 1; background: #f1f5f9; border: 2px solid transparent; border-radius: var(--radius-full);
+      padding: 0.75rem 1.25rem; font-size: 0.95rem; color: var(--text-main); outline: none; font-weight: 500; font-family: inherit; transition: var(--transition);
+    }
+    .login-input::placeholder { color: #94a3b8; font-weight: 500; }
+    .login-input:focus { background: white; border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+    
+    .glass-circle {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: #f1f5f9; display: flex; align-items: center; justify-content: center;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); flex-shrink: 0; transition: var(--transition);
+    }
+    .glass-circle::after { content: "🔒"; font-size: 1.2rem; }
+    .glass-circle.correct { background: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+    .glass-circle.correct::after { content: "🔓"; color: white; }
+
+    /* ==========================================================================
+       DETALLES (VIEW) Y UTILIDADES
+       ========================================================================== */
+    .detail-container { display: flex; flex-direction: column; gap: 1.5rem; }
+    .detail-card { background: var(--bg-surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .detail-card-header { background: #f8fafc; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.9rem; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.05em; }
+    .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; padding: 1.5rem; }
+    .detail-item { display: flex; flex-direction: column; gap: 0.35rem; }
+    .detail-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
+    .detail-value { font-size: 0.95rem; font-weight: 500; color: var(--text-main); word-break: break-word; }
+
+    .loader { text-align: center; padding: 3rem; color: var(--text-muted); font-weight: 500; font-size: 1rem; }
+    .tel-link { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .tel-link:hover { text-decoration: underline; }
+    .footer-info { text-align: center; padding: 2rem; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 3rem; }
+
+    @media (max-width: 768px) {
+      dialog { width: 100%; border-radius: 1rem 1rem 0 0; top: auto; bottom: 0; transform: translateY(100%); max-height: 90vh; }
+      dialog[open] { transform: translateY(0); }
+      .login-modal { max-width: 90%; top: 50%; bottom: auto; transform: translate(-50%, -50%) scale(0.95); border-radius: 1.5rem; }
+      .login-modal[open] { transform: translate(-50%, -50%) scale(1); }
+      main { padding: 0 1rem; margin: 1rem auto; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      .print-only, .print-only * { visibility: visible; }
+      .print-only { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 1.2cm; background: white; font-size: 11pt; }
+      .detail-card { break-inside: avoid; page-break-inside: avoid; margin-bottom: 1.2rem; }
+      .detail-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>Registro Único NNYA Institucionalizados Defensoría Civil y Comercial 6</h1></div>
+  <div class="user-bar">
+    <span id="authStatus" class="auth-status invitado">Invitado</span>
+    <button id="loginBtn" class="btn btn-sm">Acceder</button>
+    <button id="logoutBtn" class="btn btn-sm" style="display:none;">Salir</button>
+    <button class="btn-print" onclick="App.imprimirVistaActual()">Imprimir vista</button>
+  </div>
+</header>
+
+<main>
+  <div class="stats-grid" id="statsContainer"></div>
+  
+  <div class="tabs">
+    <button class="tab" aria-selected="true" data-target="panel-hogares">Hogares</button>
+    <button class="tab" data-target="panel-runnai">RUNNAI</button>
+    <button class="tab" data-target="panel-apoyo">Apoyo Psicosocial</button>
+    <button class="tab" data-target="panel-busqueda">Búsqueda Especial</button>
+    <button class="tab" data-target="panel-organismos">Organismos</button>
+  </div>
+
+  <section id="panel-hogares" class="panel active">
+    <div class="toolbar">
+      <div class="search-box"><input type="search" id="searchHogar" placeholder="Buscar hogar..."></div>
+      <button class="btn btn-primary" id="newHogarBtn" disabled>+ Nuevo Hogar</button>
+    </div>
+    <div class="table-wrap">
+      <div class="pagination pagination-top" id="pag-top-hogares"></div>
+      <table id="tbl-hogares">
+        <thead><tr><th>Nombre</th><th>Dirección</th><th>Municipio</th><th>Teléfono</th><th>Ocupación</th><th>Responsable</th><th>Acciones</th></tr></thead>
+        <tbody><tr><td colspan="7" class="loader">Cargando datos...</td></tr></tbody>
+      </table>
+      <div class="pagination" id="pag-bottom-hogares"></div>
+    </div>
+  </section>
+
+  <section id="panel-runnai" class="panel">
+    <div class="toolbar">
+      <div class="search-box"><input type="search" id="searchRunnai" placeholder="Buscar NNyA..."></div>
+      <div class="filters" id="runnaiFilters"></div>
+      <button class="btn btn-primary" id="newRunnaiBtn" disabled>+ Nuevo RUNNAI</button>
+    </div>
+    <div class="table-wrap">
+      <div class="pagination pagination-top" id="pag-top-runnai"></div>
+      <table id="tbl-runnai">
+        <thead><tr><th>Estado</th><th>Nombre</th><th>DNI</th><th>Edad</th><th>Hogar Actual</th><th>Días Acum.</th><th>Expte.</th><th>Acciones</th></tr></thead>
+        <tbody><tr><td colspan="8" class="loader">Cargando datos...</td></tr></tbody>
+      </table>
+      <div class="pagination" id="pag-bottom-runnai"></div>
+    </div>
+  </section>
+
+  <section id="panel-apoyo" class="panel">
+    <div class="toolbar">
+      <div class="search-box"><input type="search" id="searchApoyo" placeholder="Buscar apoyo..."></div>
+      <button class="btn btn-primary" id="newApoyoBtn" disabled>+ Nuevo Apoyo</button>
+    </div>
+    <div class="table-wrap">
+      <div class="pagination pagination-top" id="pag-top-apoyo"></div>
+      <table id="tbl-apoyo">
+        <thead><tr><th>NNyA</th><th>DNI</th><th>Tipo</th><th>Profesional</th><th>Inicio</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody><tr><td colspan="7" class="loader">Cargando datos...</td></tr></tbody>
+      </table>
+      <div class="pagination" id="pag-bottom-apoyo"></div>
+    </div>
+  </section>
+
+  <section id="panel-busqueda" class="panel">
+    <div class="toolbar">
+      <div class="search-box"><input type="text" id="advSearchInput" placeholder="Buscar por DNI, nombre, expediente..."></div>
+      <button class="btn btn-primary" onclick="App.advancedSearch()">Buscar</button>
+    </div>
+    <div class="table-wrap">
+      <div class="pagination pagination-top" id="pag-top-busqueda"></div>
+      <table id="tbl-busqueda">
+        <thead><tr><th>Estado</th><th>Nombre</th><th>DNI</th><th>Edad</th><th>Hogar</th><th>Días</th><th>Expte</th><th>Acciones</th></tr></thead>
+        <tbody><tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">Ingrese criterio de búsqueda</td></tr></tbody>
+      </table>
+      <div class="pagination" id="pag-bottom-busqueda"></div>
+    </div>
+  </section>
+
+  <section id="panel-organismos" class="panel">
+    <div class="toolbar">
+      <div class="search-box"><input type="search" id="searchOrganismo" placeholder="Buscar organismo..."></div>
+      <button class="btn btn-primary" id="newOrganismoBtn" disabled>+ Nuevo Organismo</button>
+    </div>
+    <div class="table-wrap">
+      <div class="pagination pagination-top" id="pag-top-organismos"></div>
+      <table id="tbl-organismos">
+        <thead><tr><th>Nombre</th><th>Tipo</th><th>Domicilio</th><th>Teléfono</th><th>Responsable</th><th>Acciones</th></tr></thead>
+        <tbody><tr><td colspan="6" class="loader">Cargando datos...</td></tr></tbody>
+      </table>
+      <div class="pagination" id="pag-bottom-organismos"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer-info">Defensoría Oficial Civil y Comercial 6 · Registro NNYA · Datos protegidos institucionalmente</footer>
+
+<dialog id="modal-login" class="login-modal">
+  <div class="modal-body">
+    <input type="password" id="loginPassword" class="login-input" placeholder="Ingrese Contraseña" autocomplete="off">
+    <div class="glass-circle" id="loginCircle"></div>
+  </div>
+</dialog>
+
+<dialog id="modal-hogares">
+  <div class="modal-header"><span>Registro de Hogar</span><button class="btn-print" onclick="App.imprimirModalActual('hogares')">Imprimir</button></div>
+  <form id="form-hogar">
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Nombre del Hogar*</label><input name="nombre" required></div>
+        <div class="form-group full-width"><label>Dirección</label><input name="direccion"></div>
+        <div class="form-group"><label>Municipio</label><input name="municipio"></div>
+        <div class="form-group"><label>Teléfono</label>
+          <div style="display: flex; gap: 0.5rem;">
+            <select name="prefijo_tel" style="width: auto;">
+              <option value="+54" selected>🇦🇷 +54</option>
+              <option value="+55">🇧🇷 +55</option>
+              <option value="+56">🇨🇱 +56</option>
+              <option value="+595">🇵🇾 +595</option>
+              <option value="+598">🇺🇾 +598</option>
+              <option value="+591">🇧🇴 +591</option>
+            </select>
+            <input name="telefono" type="tel" style="flex: 1;" placeholder="Ej: 1123456789" pattern="\d{10}" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" title="10 dígitos (código de área y número sin 0 ni 15)">
+          </div>
+        </div>
+        <div class="form-group"><label>Capacidad*</label><input name="capacidad" type="number" required></div>
+        <div class="form-group"><label>Ocupados (Auto)</label><input name="ocupados" type="number" readonly value="0" style="background:#e2e8f0;"></div>
+        <div class="form-group"><label>Responsable del Hogar</label><input name="responsable"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="this.closest('dialog').close()">Cancelar</button>
+      <button type="submit" class="btn btn-primary">Guardar Hogar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="modal-apoyo">
+  <div class="modal-header"><span>Apoyo Psicosocial</span><button class="btn-print" onclick="App.imprimirModalActual('apoyo')">Imprimir</button></div>
+  <form id="form-apoyo">
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>NNyA*</label><input name="ninio" list="list-runnaiNames" required></div>
+        <div class="form-group"><label>DNI*</label><input name="dni" maxlength="8" oninput="this.value=this.value.replace(/[^0-9]/g,'')" pattern="\d{7,8}" title="DNI argentino (7 u 8 dígitos sin puntos)" required></div>
+        <div class="form-group"><label>Tipo*</label><select name="tipo"><option>PSICOLÓGICO</option><option>ESCOLAR</option><option>SOCIAL</option><option>JURÍDICO</option></select></div>
+        <div class="form-group"><label>Profesional*</label><input name="profesional" required></div>
+        <div class="form-group"><label>Fecha Inicio*</label><input name="inicio" type="date" required></div>
+        <div class="form-group"><label>Estado*</label><select name="estado"><option>En curso</option><option>Finalizado</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="this.closest('dialog').close()">Cancelar</button>
+      <button type="submit" class="btn btn-primary">Guardar Apoyo</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="modal-organismo">
+  <div class="modal-header"><span>Registro de Organismo</span><button class="btn-print" onclick="App.imprimirModalActual('organismos')">Imprimir</button></div>
+  <form id="form-organismo">
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Nombre del Organismo*</label><input name="nombre" required></div>
+        <div class="form-group"><label>Tipo*</label><select name="tipo"><option>Juzgado</option><option>Defensoría</option><option>Municipalidad</option></select></div>
+        <div class="form-group full-width"><label>Domicilio</label><input name="domicilio"></div>
+        <div class="form-group"><label>Teléfono</label>
+          <div style="display: flex; gap: 0.5rem;">
+            <select name="prefijo_tel" style="width: auto;">
+              <option value="+54" selected>🇦🇷 +54</option>
+              <option value="+55">🇧🇷 +55</option>
+              <option value="+56">🇨🇱 +56</option>
+              <option value="+595">🇵🇾 +595</option>
+              <option value="+598">🇺🇾 +598</option>
+              <option value="+591">🇧🇴 +591</option>
+            </select>
+            <input name="telefono" type="tel" style="flex: 1;" placeholder="Ej: 1123456789" pattern="\d{10}" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" title="10 dígitos (código de área y número sin 0 ni 15)">
+          </div>
+        </div>
+        <div class="form-group"><label>Responsable</label><input name="responsable"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="this.closest('dialog').close()">Cancelar</button>
+      <button type="submit" class="btn btn-primary">Guardar Organismo</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="modal-runnai">
+  <div class="modal-header"><span>RUNNAI - Ficha Integral</span><button class="btn-print" onclick="App.imprimirModalActual('runnai')">Imprimir</button></div>
+  <form id="form-runnai">
+    <div class="modal-body">
+      <div class="inner-tabs" id="runnaiInnerTabs">
+        <button type="button" class="inner-tab active" data-inner="info">1. Información</button>
+        <button type="button" class="inner-tab" data-inner="permanencia">2. Permanencia</button>
+        <button type="button" class="inner-tab" data-inner="medidas">3. Medidas</button>
+        <button type="button" class="inner-tab" data-inner="salud">4. Salud</button>
+        <button type="button" class="inner-tab" data-inner="educacion">5. Educación</button>
+        <button type="button" class="inner-tab" data-inner="psicosocial">6. Psico-social</button>
+        <button type="button" class="inner-tab" data-inner="familiares">7. Familiares</button>
+        <button type="button" class="inner-tab" data-inner="baja">8. Baja</button>
+        <button type="button" class="inner-tab" data-inner="observaciones">9. Observaciones</button>
+      </div>
+
+      <div class="inner-panel active-panel" id="inner-info"><div class="form-grid"><div class="form-group"><label>Apellido y Nombre*</label><input name="nombre" required></div><div class="form-group"><label>DNI*</label><input name="dni" maxlength="8" oninput="this.value=this.value.replace(/[^0-9]/g,'')" pattern="\d{7,8}" title="DNI argentino (7 u 8 dígitos sin puntos)" required></div><div class="form-group"><label>Fecha Nacimiento</label><input name="nacimiento" type="date" onchange="App.calcAge(this)"></div><div class="form-group"><label>Edad</label><input name="edad" readonly style="background:#e2e8f0;"></div><div class="form-group"><label>Lugar Nacimiento</label><input name="lugar_nacimiento"></div><div class="form-group"><label>Nacionalidad</label><input name="nacionalidad"></div><div class="form-group full-width"><label>Último domicilio registrado</label><input name="ultimo_domicilio"></div><div class="form-group"><label>Sexo</label><select name="sexo"><option>MASCULINO</option><option>FEMENINO</option></select></div><div class="form-group"><label>Estado RUNNAI</label><select name="estado"><option value="activo">Activo</option><option value="pendiente">Pendiente</option><option value="baja">Baja</option></select></div><div class="form-group"><label>Expte. Judicial</label><input name="expte_judicial"></div></div></div>
+      
+      <div class="inner-panel" id="inner-permanencia"><div class="form-section"><h3>Hogar Actual</h3><div class="form-grid"><div class="form-group"><label>Hogar</label><input name="hogarActual" list="list-hogares"></div><div class="form-group"><label>Fecha Ingreso</label><input name="hogar_fecha_ingreso" type="date"></div><div class="form-group"><label>Días (Auto)</label><input name="dias_permanencia_actual" readonly style="background:#e2e8f0;"></div></div></div><div class="form-section"><h3>Historial de Hogares</h3><div class="dynamic-list" id="historialHogaresContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('historialHogares')">+ Agregar ingreso</button></div></div>
+      
+      <div class="inner-panel" id="inner-medidas"><div class="form-grid"><div class="form-group"><label>Fecha de medida</label><input name="medida_fecha" type="date"></div><div class="form-group"><label>Expediente Judicial</label><input name="medida_exp_judicial"></div><div class="form-group"><label>Juzgado</label><input name="medida_juzgado"></div><div class="form-group"><label>Expediente Admin</label><input name="medida_exp_administrativo"></div><div class="form-group"><label>Tipo de Instrumento</label><input name="medida_tipo_instrumento"></div><div class="form-group"><label>Medida tomada</label><input name="medida_tomada"></div><div class="form-group full-width"><label>Motivo</label><textarea name="medida_obs_motivo" rows="2"></textarea></div><div class="form-group"><label>Organismo</label><input name="medida_organismo" list="list-organismos"></div><div class="form-group"><label>Juzgado interviniente</label><input name="medida_juzgado_interviniente"></div><div class="form-group"><label>Defensoría interviniente</label><input name="medida_defensoria"></div><div class="form-group"><label>Derechos vulnerados</label><input name="medida_derechos_vulnerados"></div><div class="form-group"><label>Edad al momento</label><input name="medida_edad_momento" type="number"></div><div class="form-group"><label>Estado adoptabilidad</label><select name="medida_adoptabilidad"><option>No</option><option>En proceso</option><option>Declarado</option></select></div><div class="form-group full-width"><label>Observaciones generales</label><textarea name="medida_obs_generales" rows="2"></textarea></div></div><div class="form-section"><h3>Historial de Medidas</h3><div class="dynamic-list" id="medidasProteccionContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('medidasProteccion')">+ Agregar medida</button></div></div>
+      
+      <div class="inner-panel" id="inner-salud"><div class="form-grid"><div class="form-group"><label>Atención preventiva</label><input name="salud_atencion_preventiva"></div><div class="form-group"><label>Peso (kg)</label><input name="salud_peso" type="number" step="0.1"></div><div class="form-group"><label>Talla (cm)</label><input name="salud_talla" type="number" step="0.1"></div><div class="form-group"><label>Estado nutricional</label><input name="salud_estado_nutricional"></div><div class="form-group"><label>Vacunación</label><select name="salud_vacunacion"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Obs. Vacunación</label><input name="salud_obs_vacunacion"></div><div class="form-group"><label>Control oftalmológico</label><select name="salud_oftalmologico"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Obs. Oftalmológico</label><input name="salud_obs_oftalmologico"></div><div class="form-group"><label>Control odontológico</label><select name="salud_odontologico"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Obs. Odontológico</label><input name="salud_obs_odontologico"></div><div class="form-group"><label>Patología NNyA</label><input name="salud_patologia"></div><div class="form-group"><label>Tratamiento prolongado</label><select name="salud_tratamiento_prolongado"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Tipo tratamiento</label><input name="salud_tipo_tratamiento"></div><div class="form-group"><label>Atención psiquiátrica</label><select name="salud_atencion_psiquiatrica"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Diagnóstico</label><input name="salud_diagnostico"></div><div class="form-group"><label>Medicacion</label><select name="salud_medicacion"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Enf. crónica</label><select name="salud_cronica"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Tipo crónica</label><input name="salud_tipo_cronica"></div><div class="form-group"><label>Nro Historia Clínica</label><input name="salud_historia_clinica"></div></div><div class="form-section"><h3>Historial Salud</h3><div class="dynamic-list" id="historialSaludContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('historialSalud')">+ Agregar registro</button></div></div>
+      
+      <div class="inner-panel" id="inner-educacion"><div class="form-grid"><div class="form-group"><label>Nivel Educativo</label><input name="educacion_nivel"></div><div class="form-group"><label>Detalle Nivel</label><input name="educacion_detalle"></div><div class="form-group"><label>Nivel correspondiente edad</label><input name="educacion_nivel_correspondiente"></div><div class="form-group"><label>Repitencias</label><input name="educacion_repitencias" type="number"></div><div class="form-group"><label>Apoyo escolar</label><select name="educacion_apoyo_escolar"><option>NO</option><option>SI</option></select></div><div class="form-group"><label>Legajo Nro.</label><input name="educacion_legajo"></div><div class="form-group"><label>CUISE</label><input name="educacion_cuise"></div><div class="form-group"><label>Anexo</label><input name="educacion_anexo"></div><div class="form-group"><label>Curso</label><input name="educacion_curso"></div><div class="form-group"><label>Turno</label><input name="educacion_turno"></div><div class="form-group"><label>Nivel (Inicial/Pri/Sec)</label><input name="educacion_nivel_educativo"></div><div class="form-group"><label>Jornada</label><input name="educacion_jornada"></div></div><div class="form-section"><h3>Historial Educación</h3><div class="dynamic-list" id="historialEducacionContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('historialEducacion')">+ Agregar registro</button></div></div>
+      
+      <div class="inner-panel" id="inner-psicosocial"><div class="form-grid"><div class="form-group"><label>Desarrollo madurativo</label><input name="psico_desarrollo_madurativo"></div><div class="form-group"><label>Desc. desarrollo</label><textarea name="psico_desc_desarrollo" rows="2"></textarea></div><div class="form-group"><label>Atención psico-social</label><select name="psico_atencion"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Tipo Apoyo</label><input name="psico_tipo_apoyo"></div><div class="form-group"><label>Descripción apoyo</label><textarea name="psico_desc_apoyo" rows="2"></textarea></div></div><div class="form-section"><h3>Historial Psicosocial</h3><div class="dynamic-list" id="historialPsicoContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('historialPsico')">+ Agregar registro</button></div></div>
+      
+      <div class="inner-panel" id="inner-familiares"><div class="form-section"><div class="table-wrap" style="margin-bottom:1.5rem;"><table><thead><tr><th>Nombre</th><th>DNI</th><th>Vínculo</th><th>Ref. Adulto</th><th>Domicilio</th><th>Municipio</th><th>Tel</th><th>Email</th><th></th></tr></thead><tbody id="familiaresTableBody"></tbody></table></div><div class="form-grid"><div class="form-group"><label>Nombre</label><input id="familiar_nombre"></div><div class="form-group"><label>DNI</label><input id="familiar_dni" maxlength="8" oninput="this.value=this.value.replace(/[^0-9]/g,'')" pattern="\d{7,8}" title="DNI argentino (7 u 8 dígitos sin puntos)"></div><div class="form-group"><label>Tipo</label><select id="familiar_tipo"><option>PADRE</option><option>MADRE</option><option>HERMANO</option><option>ABUELO</option><option>OTRO</option></select></div><div class="form-group"><label>Referente adulto</label><select id="familiar_referente"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Domicilio</label><input id="familiar_domicilio"></div><div class="form-group"><label>Municipio</label><input id="familiar_municipio"></div><div class="form-group"><label>Teléfono</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <select id="familiar_prefijo" style="width: auto;">
+            <option value="+54" selected>🇦🇷 +54</option>
+            <option value="+55">🇧🇷 +55</option>
+            <option value="+56">🇨🇱 +56</option>
+            <option value="+595">🇵🇾 +595</option>
+            <option value="+598">🇺🇾 +598</option>
+            <option value="+591">🇧🇴 +591</option>
+          </select>
+          <input id="familiar_telefono" type="tel" style="flex: 1;" placeholder="Ej: 1123456789" pattern="\d{10}" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" title="10 dígitos (código de área y número sin 0 ni 15)">
+        </div>
+      </div><div class="form-group"><label>Email</label><input id="familiar_email" type="email"></div></div><br><button type="button" class="btn btn-primary" onclick="App.agregarFamiliar()">+ Agregar Familiar a Lista</button></div></div>
+      
+      <div class="inner-panel" id="inner-baja"><div class="form-grid"><div class="form-group"><label>Tipo Baja</label><select name="baja_tipo"><option>Egreso</option><option>Reintegro familiar</option><option>Adopción</option><option>Traslado</option></select></div><div class="form-group"><label>Fecha Baja</label><input name="baja_fecha" type="date"></div><div class="form-group"><label>Motivo</label><input name="baja_motivo"></div><div class="form-group"><label>Organismo interv.</label><input name="baja_organismo" list="list-organismos"></div><div class="form-group"><label>Nueva Residencia</label><input name="baja_nueva_residencia"></div><div class="form-group"><label>Inst. Legal</label><input name="baja_instrumento"></div><div class="form-group full-width"><label>Observación</label><textarea name="baja_observacion" rows="2"></textarea></div></div><div class="form-section"><h3>Historial Bajas/Altas</h3><div class="dynamic-list" id="historialBajasContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('historialBajas')">+ Agregar evento</button></div></div>
+      
+      <div class="inner-panel" id="inner-observaciones"><div class="form-section"><div class="dynamic-list" id="observacionesGeneralesContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('observacionesGenerales')">+ Agregar nota general</button></div></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="this.closest('dialog').close()">Cancelar</button>
+      <button type="submit" class="btn btn-primary">Guardar Ficha Integral RUNNAI</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="modal-view-detail">
+  <div class="modal-header"><span>Detalle del Registro</span><button class="btn-print" onclick="App.printViewDetail()">Imprimir</button></div>
+  <div class="modal-body" id="viewDetailContent"></div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="this.closest('dialog').close()">Cerrar</button></div>
+</dialog>
+
+<datalist id="list-hogares"></datalist>
+<datalist id="list-organismos"></datalist>
+<datalist id="list-runnaiNames"></datalist>
+
+<script>
+  /* ==========================================================================
+     CONFIGURACIÓN FIREBASE (Intacta)
+     ========================================================================== */
+  const firebaseConfig = { 
+    apiKey: "AIzaSyAbf8Lwg5p5GbErCcXpYXFQCdnYoTRbDpo", 
+    authDomain: "rnnya-def6.firebaseapp.com", 
+    projectId: "rnnya-def6", 
+    storageBucket: "rnnya-def6.firebasestorage.app", 
+    messagingSenderId: "549011187025", 
+    appId: "1:549011187025:web:504029871ed0f27a7e5f70" 
+  };
+  firebase.initializeApp(firebaseConfig);
+  const dbFirestore = firebase.firestore();
+  
+  const colHogares = dbFirestore.collection('hogares');
+  const colRunnai = dbFirestore.collection('runnai');
+  const colApoyo = dbFirestore.collection('apoyo');
+  const colOrganismos = dbFirestore.collection('organismos');
+  
+  let db = { hogares: [], runnai: [], apoyo: [], organismos: [] };
+  let isAuthenticated = false;
+  const AUTH_PASSWORD = "admin123";
+  let currentViewData = null;
+  
+  /* ==========================================================================
+     FUNCIONES UTILIDAD
+     ========================================================================== */
+  function formatDate(dateStr) { 
+    if (!dateStr) return ''; 
+    const d = new Date(dateStr); 
+    if(isNaN(d.getTime())) return dateStr; 
+    return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; 
+  }
+  
+  /* ==========================================================================
+     LÓGICA DE BASE DE DATOS
+     ========================================================================== */
+  async function loadAllData() {
+    try {
+      const [hogaresSnap, runnaiSnap, apoyoSnap, organismosSnap] = await Promise.all([
+        colHogares.get(), colRunnai.get(), colApoyo.get(), colOrganismos.get()
+      ]);
+      db.hogares = hogaresSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      db.runnai = runnaiSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      db.apoyo = apoyoSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      db.organismos = organismosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      await actualizarOcupacionHogares();
+      const hogaresActualizados = await colHogares.get();
+      db.hogares = hogaresActualizados.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      App.populateDatalists();
+      App.renderAll();
+      App.renderStats();
+    } catch (error) { 
+      console.error(error); 
+      App.toast("Error al conectar con la base de datos", 4000); 
+    }
+  }
+
+  async function actualizarOcupacionHogares() { 
+    const runnaiActivos = db.runnai.filter(r => r.estado === 'activo' && r.hogarActual); 
+    const conteo = {}; 
+    runnaiActivos.forEach(r => { conteo[r.hogarActual] = (conteo[r.hogarActual] || 0) + 1; }); 
+    const updates = []; 
+    for (const hogar of db.hogares) { 
+      const nuevoOcupados = conteo[hogar.nombre] || 0; 
+      if (hogar.ocupados !== nuevoOcupados) {
+        updates.push(colHogares.doc(hogar.id).update({ ocupados: nuevoOcupados })); 
+      }
+    } 
+    await Promise.all(updates); 
+  }
+
+  async function addEntity(collectionRef, data, entityKey) { 
+    try { 
+      if (entityKey === 'hogares' && db.hogares.some(h => h.nombre.toLowerCase() === data.nombre.toLowerCase())) { App.toast('Ya existe un hogar con ese nombre', 3000); return null; } 
+      if (entityKey === 'runnai' && db.runnai.some(r => r.dni === data.dni)) { App.toast('Ya existe un registro con ese DNI', 3000); return null; } 
+      if (entityKey === 'organismos' && db.organismos.some(o => o.nombre.toLowerCase() === data.nombre.toLowerCase())) { App.toast('Ya existe un organismo con ese nombre', 3000); return null; } 
+      
+      await collectionRef.add(data); 
+      await loadAllData(); 
+      return true; 
+    } catch (error) { 
+      console.error(error); App.toast("Error al guardar", 3000); return null; 
+    } 
+  }
+
+  async function updateEntity(collectionRef, id, data, entityKey) { 
+    try { 
+      if (entityKey === 'hogares' && db.hogares.some(h => h.id !== id && h.nombre.toLowerCase() === data.nombre.toLowerCase())) { App.toast('Ya existe otro hogar con ese nombre', 3000); return false; } 
+      if (entityKey === 'runnai' && db.runnai.some(r => r.id !== id && r.dni === data.dni)) { App.toast('Ya existe otro registro con ese DNI', 3000); return false; } 
+      if (entityKey === 'organismos' && db.organismos.some(o => o.id !== id && o.nombre.toLowerCase() === data.nombre.toLowerCase())) { App.toast('Ya existe otro organismo con ese nombre', 3000); return false; } 
+      
+      await collectionRef.doc(id).update(data); 
+      await loadAllData(); 
+      return true; 
+    } catch (error) { 
+      console.error(error); App.toast("Error al actualizar", 3000); return false; 
+    } 
+  }
+
+  async function deleteEntityFirestore(collectionRef, id) { 
+    if (!confirm('¿Eliminar permanentemente este registro?')) return false; 
+    try { 
+      await collectionRef.doc(id).delete(); 
+      await loadAllData(); 
+      App.toast('Registro Eliminado'); 
+      return true; 
+    } catch (error) { 
+      console.error(error); App.toast("Error al eliminar", 3000); return false; 
+    } 
+  }
+
+  /* ==========================================================================
+     LÓGICA DE AUTENTICACIÓN
+     ========================================================================== */
+  let loginTimer = null;
+  function resetLoginTimer() { if(loginTimer) clearTimeout(loginTimer); loginTimer = null; }
+  
+  function performLogin() { 
+    if(isAuthenticated) return; 
+    resetLoginTimer(); 
+    isAuthenticated = true; 
+    App.updateAuthUI(); 
+    document.getElementById('modal-login').close(); 
+    App.toast("Sesión iniciada correctamente"); 
+    document.getElementById('loginPassword').value = ''; 
+  }
+  
+  function startAutoLogin() { 
+    resetLoginTimer(); 
+    const circle = document.getElementById('loginCircle'); 
+    circle.classList.add('correct'); 
+    loginTimer = setTimeout(() => { performLogin(); }, 1000); 
+  }
+  
+  /* ==========================================================================
+     CONTROLADOR PRINCIPAL (APP)
+     ========================================================================== */
+  const App = {
+    state: { page: 1, limit: 10, filter: 'todos', search: '' },
+    
+    init() { 
+      this.bindEvents(); 
+      this.updateAuthUI(); 
+      this.setupCloseOnBackdrop(); 
+      this.setupEnterKey(); 
+      loadAllData(); 
+    },
+
+    getFormattedPrintDate() {
+      const now = new Date();
+      const pad = n => n.toString().padStart(2, '0');
+      return `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    },
+    
+    setupCloseOnBackdrop() { 
+      document.querySelectorAll('dialog').forEach(dialog => { 
+        dialog.addEventListener('click', (e) => { 
+          const rect = dialog.getBoundingClientRect(); 
+          const isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height && rect.left <= e.clientX && e.clientX <= rect.left + rect.width); 
+          if (!isInDialog) dialog.close(); 
+        }); 
+      }); 
+    },
+    
+    setupEnterKey() { 
+      const dialogs = ['modal-hogares', 'modal-apoyo', 'modal-organismo', 'modal-runnai']; 
+      dialogs.forEach(id => { 
+        const dialog = document.getElementById(id); 
+        if(dialog) dialog.addEventListener('keydown', (e) => { 
+          if(e.key === 'Enter' && !e.shiftKey && e.target.tagName !== 'TEXTAREA') { 
+            e.preventDefault(); 
+            const btn = dialog.querySelector('.modal-footer .btn-primary'); 
+            if(btn) btn.click(); 
+          } 
+        }); 
+      }); 
+    },
+    
+    bindEvents() {
+      // Navegación principal (Tabs)
+      document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => { 
+        document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', 'false')); 
+        btn.setAttribute('aria-selected', 'true'); 
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
+        document.getElementById(btn.dataset.target).classList.add('active'); 
+        this.state.page = 1; 
+        this.renderTable(btn.dataset.target.replace('panel-', '')); 
+      }));
+      
+      // Buscadores
+      ['searchHogar', 'searchRunnai', 'searchApoyo', 'searchOrganismo'].forEach(id => { 
+        const el = document.getElementById(id); 
+        if(el) el.addEventListener('input', e => { 
+          this.state.search = e.target.value; 
+          this.state.page = 1; 
+          this.renderTable(id.replace('search', '').toLowerCase()); 
+        }); 
+      });
+      
+      this.renderFilterButtons();
+      
+      // Botones "Nuevo"
+      document.getElementById('newHogarBtn').onclick = () => this.checkAuthAndOpen('hogares');
+      document.getElementById('newRunnaiBtn').onclick = () => this.checkAuthAndOpen('runnai');
+      document.getElementById('newApoyoBtn').onclick = () => this.checkAuthAndOpen('apoyo');
+      document.getElementById('newOrganismoBtn').onclick = () => this.checkAuthAndOpen('organismo');
+      
+      // Auth
+      document.getElementById('loginBtn').onclick = () => { 
+        resetLoginTimer(); 
+        document.getElementById('loginCircle').classList.remove('correct'); 
+        document.getElementById('modal-login').showModal(); 
+      };
+      
+      document.getElementById('logoutBtn').onclick = () => { 
+        isAuthenticated = false; 
+        this.updateAuthUI(); 
+        this.toast("Sesión finalizada"); 
+      };
+      
+      const pwdInput = document.getElementById('loginPassword');
+      pwdInput.addEventListener('input', (e) => { 
+        resetLoginTimer(); 
+        const circle = document.getElementById('loginCircle'); 
+        circle.classList.remove('correct'); 
+        if(e.target.value === AUTH_PASSWORD) startAutoLogin(); 
+      });
+      
+      pwdInput.addEventListener('keypress', (e) => { 
+        if(e.key === 'Enter' && pwdInput.value === AUTH_PASSWORD) { e.preventDefault(); resetLoginTimer(); performLogin(); } 
+      });
+      
+      // Sub-Tabs RUNNAI
+      const innerTabs = document.getElementById('runnaiInnerTabs');
+      if (innerTabs) {
+        innerTabs.addEventListener('click', (e) => { 
+          const tab = e.target.closest('.inner-tab'); 
+          if(tab) { 
+            document.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active')); 
+            tab.classList.add('active'); 
+            document.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active-panel')); 
+            document.getElementById(`inner-${tab.dataset.inner}`).classList.add('active-panel'); 
+          } 
+        });
+      }
+      
+      // Formularios Submit
+      document.getElementById('form-hogar').addEventListener('submit', (e) => this.handleForm(e, 'hogares'));
+      document.getElementById('form-apoyo').addEventListener('submit', (e) => this.handleForm(e, 'apoyo'));
+      document.getElementById('form-organismo').addEventListener('submit', (e) => this.handleForm(e, 'organismos'));
+      document.getElementById('form-runnai').addEventListener('submit', (e) => this.handleFormRunnai(e));
+    },
+    
+    checkAuthAndOpen(entity) { 
+      if(isAuthenticated) this.openModal(entity, 'new'); 
+      else this.toast("Requiere permisos de administrador", 4000); 
+    },
+    
+    updateAuthUI() {
+      const statusSpan = document.getElementById('authStatus'); 
+      const loginBtn = document.getElementById('loginBtn'); 
+      const logoutBtn = document.getElementById('logoutBtn');
+      
+      if(isAuthenticated) { 
+        statusSpan.textContent = "Acceso Autorizado"; 
+        statusSpan.className = "auth-status autorizado"; 
+        loginBtn.style.display = "none"; 
+        logoutBtn.style.display = "inline-block"; 
+      } else { 
+        statusSpan.textContent = "Modo Lectura"; 
+        statusSpan.className = "auth-status invitado"; 
+        loginBtn.style.display = "inline-block"; 
+        logoutBtn.style.display = "none"; 
+      }
+      
+      ['newHogarBtn', 'newRunnaiBtn', 'newApoyoBtn', 'newOrganismoBtn'].forEach(id => { 
+        const btn = document.getElementById(id); 
+        if(btn) btn.disabled = !isAuthenticated; 
+      });
+      this.renderAll();
+    },
+    
+    renderStats() { 
+      const html = `
+        <div class="stat-card"><h3>Total NNYA Fichados</h3><div class="stat-number">${db.runnai.length}</div></div>
+        <div class="stat-card"><h3>NNYA Activos</h3><div class="stat-number" style="color:#10b981;">${db.runnai.filter(r=>r.estado==='activo').length}</div></div>
+        <div class="stat-card"><h3>Hogares Registrados</h3><div class="stat-number">${db.hogares.length}</div></div>
+        <div class="stat-card"><h3>Organismos Red</h3><div class="stat-number" style="color:#8b5cf6;">${db.organismos.length}</div></div>
+      `;
+      document.getElementById('statsContainer').innerHTML = html; 
+    },
+    
+    renderFilterButtons() { 
+      const container = document.getElementById('runnaiFilters'); 
+      if(!container) return; 
+      const filters = ['todos', 'activo', 'pendiente', 'baja']; 
+      container.innerHTML = filters.map(f => `<button class="filter-btn ${this.state.filter===f?'active':''}" data-filter="${f}">${f.toUpperCase()}</button>`).join(''); 
+      container.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => { 
+        this.state.filter = btn.dataset.filter; 
+        this.state.page = 1; 
+        this.renderTable('runnai'); 
+      })); 
+    },
+    
+    renderAll() { 
+      ['hogares', 'runnai', 'apoyo', 'organismos'].forEach(e => this.renderTable(e)); 
+      this.renderStats(); 
+    },
+    
+    renderTable(entity) { 
+      let data = [...db[entity]]; 
+      
+      if (entity === 'runnai' && this.state.filter !== 'todos') {
+        data = data.filter(r => r.estado === this.state.filter); 
+      }
+      
+      if (this.state.search) { 
+        const s = this.state.search.toLowerCase(); 
+        data = data.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(s))); 
+      } 
+      
+      const total = data.length; 
+      const start = (this.state.page - 1) * this.state.limit; 
+      const paginated = data.slice(start, start + this.state.limit); 
+      const tbody = document.querySelector(`#tbl-${entity} tbody`); 
+      
+      if (tbody) {
+        if(paginated.length > 0) {
+          tbody.innerHTML = paginated.map(r => this.buildRow(entity, r)).join(''); 
+        } else {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">No hay registros disponibles</td></tr>`;
+        }
+      }
+      
+      let html = '';
+      if (total > 0) {
+        const totalPages = Math.ceil(total / this.state.limit); 
+        html = `<span style="font-size:0.85rem; color:var(--text-muted);">Mostrando <strong>${paginated.length}</strong> de <strong>${total}</strong> registros</span>
+                <div style="display:flex; gap:0.25rem;">
+                  <button class="page-btn" onclick="App.changePage('${entity}',-1)" ${this.state.page===1?'disabled':''}>◀</button>`; 
+        
+        for(let i = Math.max(1, this.state.page - 2); i <= Math.min(totalPages, this.state.page + 2); i++) {
+          html += `<button class="page-btn ${i===this.state.page?'active':''}" onclick="App.goToPage('${entity}',${i})">${i}</button>`; 
+        }
+        
+        html += `<button class="page-btn" onclick="App.changePage('${entity}',1)" ${this.state.page>=totalPages?'disabled':''}>▶</button></div>`; 
+      }
+
+      const pagTop = document.getElementById(`pag-top-${entity}`);
+      const pagBot = document.getElementById(`pag-bottom-${entity}`);
+      if (pagTop) pagTop.innerHTML = html;
+      if (pagBot) pagBot.innerHTML = html;
+    },
+    
+    buildRow(entity, r) { 
+      const canEdit = isAuthenticated; 
+      const editBtn = canEdit 
+        ? `<button class="btn btn-sm btn-outline" onclick='App.openModal("${entity}","edit","${r.id}")'>✎ Editar</button>` 
+        : ``; 
+      const delBtn = canEdit 
+        ? `<button class="btn btn-sm" style="color:#ef4444; border-color:#fee2e2;" onclick='App.deleteEntityHandler("${entity}","${r.id}")'>🗑</button>` 
+        : ``; 
+      const viewBtn = `<button class="btn btn-sm" onclick='App.viewDetail("${entity}","${r.id}")'>👁 Ver Ficha</button>`; 
+      const acciones = `<div style="display:flex; gap:0.4rem;">${viewBtn} ${editBtn} ${delBtn}</div>`;
+
+      if(entity === 'hogares') {
+        const porc = r.capacidad > 0 ? (r.ocupados / r.capacidad) * 100 : 0;
+        const colorOc = porc >= 100 ? '#ef4444' : porc > 80 ? '#f59e0b' : '#10b981';
+        return `<tr>
+          <td><strong>${this.escapeHtml(r.nombre||'')}</strong></td>
+          <td>${this.escapeHtml(r.direccion||'-')}</td>
+          <td>${this.escapeHtml(r.municipio||'-')}</td>
+          <td>${r.telefono?`<a href="tel:${(r.prefijo_tel||'+54').replace(/\s/g,'')}${r.telefono.replace(/\s/g,'')}" class="tel-link">${r.prefijo_tel||'+54'} ${this.escapeHtml(r.telefono)}</a>`:'-'}</td>
+          <td><span style="font-weight:700; color:${colorOc}">${r.ocupados||0} / ${r.capacidad}</span></td>
+          <td>${this.escapeHtml(r.responsable||'-')}</td>
+          <td>${acciones}</td>
+        </tr>`;
+      } 
+      if(entity === 'runnai') { 
+        const edad = this.calcEdadFromFecha(r.nacimiento); 
+        const badgeClass = r.estado === 'activo' ? 'active' : r.estado === 'pendiente' ? 'pending' : 'closed'; 
+        return `<tr>
+          <td><span class="badge ${badgeClass}">${this.escapeHtml(r.estado||'')}</span></td>
+          <td><strong>${this.escapeHtml(r.nombre||'')}</strong></td>
+          <td>${this.escapeHtml(r.dni||'')}</td>
+          <td>${edad}</td>
+          <td>${this.escapeHtml(r.hogarActual||'-')}</td>
+          <td><strong>${r.sumaDiasTotales||0}</strong></td>
+          <td>${this.escapeHtml(r.expte_judicial||'-')}</td>
+          <td>${acciones}</td>
+        </tr>`; 
+      } 
+      if(entity === 'apoyo') {
+        return `<tr>
+          <td><strong>${this.escapeHtml(r.ninio||'')}</strong></td>
+          <td>${this.escapeHtml(r.dni||'')}</td>
+          <td><span class="badge" style="background:#e0e7ff; color:#3730a3;">${this.escapeHtml(r.tipo||'')}</span></td>
+          <td>${this.escapeHtml(r.profesional||'')}</td>
+          <td>${formatDate(r.inicio)}</td>
+          <td>${this.escapeHtml(r.estado||'')}</td>
+          <td>${acciones}</td>
+        </tr>`; 
+      } 
+      if(entity === 'organismos') {
+        return `<tr>
+          <td><strong>${this.escapeHtml(r.nombre||'')}</strong></td>
+          <td>${this.escapeHtml(r.tipo||'')}</td>
+          <td>${this.escapeHtml(r.domicilio||'-')}</td>
+          <td>${r.telefono?`<a href="tel:${(r.prefijo_tel||'+54').replace(/\s/g,'')}${r.telefono.replace(/\s/g,'')}" class="tel-link">${r.prefijo_tel||'+54'} ${this.escapeHtml(r.telefono)}</a>`:'-'}</td>
+          <td>${this.escapeHtml(r.responsable||'-')}</td>
+          <td>${acciones}</td>
+        </tr>`; 
+      } 
+      return ''; 
+    },
+    
+    escapeHtml(str) { 
+      if(!str) return ''; 
+      return str.replace(/[&<>]/g, m => m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); 
+    },
+    
+    goToPage(entity, page) { this.state.page = page; this.renderTable(entity); }, 
+    changePage(entity, delta) { this.state.page += delta; this.renderTable(entity); },
+    
+    viewDetail(entity, id) { 
+      const record = db[entity].find(i => i.id == id); 
+      if (!record) return; 
+      currentViewData = { entity, data: record }; 
+      
+      let html = `<div class="detail-container"><div class="detail-card"><div class="detail-card-header">Ficha: ${entity.toUpperCase()}</div><div class="detail-grid">`; 
+      
+      let keysToRender = Object.keys(record).filter(k => k !== 'id' && typeof record[k] !== 'object');
+      
+      if (entity === 'hogares') {
+        const order = ['nombre', 'direccion', 'municipio', 'prefijo_tel', 'telefono', 'capacidad', 'ocupados', 'responsable'];
+        keysToRender.sort((a, b) => {
+          let iA = order.indexOf(a); let iB = order.indexOf(b);
+          if (iA === -1) iA = 999; if (iB === -1) iB = 999;
+          return iA - iB;
+        });
+      } else if (entity === 'runnai') {
+        const order = [
+          'nombre', 'dni', 'nacimiento', 'edad', 'lugar_nacimiento', 'nacionalidad', 'ultimo_domicilio', 'sexo', 'estado', 'expte_judicial',
+          'hogarActual', 'hogar_fecha_ingreso', 'dias_permanencia_actual', 'sumaDiasTotales',
+          'medida_fecha', 'medida_exp_judicial', 'medida_juzgado', 'medida_exp_administrativo', 'medida_tipo_instrumento', 'medida_tomada', 'medida_obs_motivo', 'medida_organismo', 'medida_juzgado_interviniente', 'medida_defensoria', 'medida_derechos_vulnerados', 'medida_edad_momento', 'medida_adoptabilidad', 'medida_obs_generales',
+          'salud_atencion_preventiva', 'salud_peso', 'salud_talla', 'salud_estado_nutricional', 'salud_vacunacion', 'salud_obs_vacunacion', 'salud_oftalmologico', 'salud_obs_oftalmologico', 'salud_odontologico', 'salud_obs_odontologico', 'salud_patologia', 'salud_tratamiento_prolongado', 'salud_tipo_tratamiento', 'salud_atencion_psiquiatrica', 'salud_diagnostico', 'salud_medicacion', 'salud_cronica', 'salud_tipo_cronica', 'salud_historia_clinica',
+          'educacion_nivel', 'educacion_detalle', 'educacion_nivel_correspondiente', 'educacion_repitencias', 'educacion_apoyo_escolar', 'educacion_legajo', 'educacion_cuise', 'educacion_anexo', 'educacion_curso', 'educacion_turno', 'educacion_nivel_educativo', 'educacion_jornada',
+          'psico_desarrollo_madurativo', 'psico_desc_desarrollo', 'psico_atencion', 'psico_tipo_apoyo', 'psico_desc_apoyo',
+          'baja_tipo', 'baja_fecha', 'baja_motivo', 'baja_organismo', 'baja_nueva_residencia', 'baja_instrumento', 'baja_observacion'
+        ];
+        keysToRender.sort((a, b) => {
+          let iA = order.indexOf(a); let iB = order.indexOf(b);
+          if (iA === -1) iA = 999; if (iB === -1) iB = 999;
+          return iA - iB;
+        });
+      } else if (entity === 'organismos') {
+        const order = ['nombre', 'tipo', 'domicilio', 'prefijo_tel', 'telefono', 'responsable'];
+        keysToRender.sort((a, b) => {
+          let iA = order.indexOf(a); let iB = order.indexOf(b);
+          if (iA === -1) iA = 999; if (iB === -1) iB = 999;
+          return iA - iB;
+        });
+      }
+
+      for(let k of keysToRender) {
+        let v = record[k];
+        html += `<div class="detail-item"><div class="detail-label">${k.replace(/_/g,' ').toUpperCase()}</div><div class="detail-value">${this.escapeHtml(String(v??'-'))}</div></div>`; 
+      }
+      
+      html += `</div></div></div>`; 
+      
+      document.getElementById('viewDetailContent').innerHTML = html; 
+      document.getElementById('modal-view-detail').showModal(); 
+    },
+    
+    printViewDetail() { 
+      if(currentViewData) this.generarImpresionProfesional(currentViewData.data, currentViewData.entity); 
+    },
+    
+    imprimirVistaActual() { 
+      const activePanel = document.querySelector('.panel.active'); 
+      let entity = ''; 
+      if(activePanel.id === 'panel-hogares') entity = 'hogares'; 
+      else if(activePanel.id === 'panel-runnai') entity = 'runnai'; 
+      else if(activePanel.id === 'panel-apoyo') entity = 'apoyo'; 
+      else if(activePanel.id === 'panel-organismos') entity = 'organismos'; 
+      else { this.toast('No hay vista para imprimir'); return; } 
+      
+      let data = [...db[entity]]; 
+      if(entity === 'runnai' && this.state.filter !== 'todos') data = data.filter(r => r.estado === this.state.filter); 
+      if(this.state.search){ 
+        const s = this.state.search.toLowerCase(); 
+        data = data.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(s))); 
+      } 
+      
+      let columnas = [], filas = []; 
+      if(entity === 'hogares'){ 
+        columnas = ['Nombre','Dirección','Municipio','Teléfono','Ocupación','Responsable']; 
+        filas = data.map(h => [h.nombre||'-',h.direccion||'-',h.municipio||'-',h.telefono ? `${h.prefijo_tel||'+54'} ${h.telefono}` : '-',`${h.ocupados||0}/${h.capacidad}`,h.responsable||'-']); 
+      } else if(entity === 'runnai'){ 
+        columnas = ['Estado','Nombre','DNI','Edad','Hogar','Días Acumulados','Expte.']; 
+        filas = data.map(r => [r.estado||'-',r.nombre||'-',r.dni||'-',this.calcEdadFromFecha(r.nacimiento),r.hogarActual||'-',r.sumaDiasTotales||0,r.expte_judicial||'-']); 
+      } else if(entity === 'apoyo'){ 
+        columnas = ['NNyA','DNI','Tipo','Profesional','Inicio','Estado']; 
+        filas = data.map(a => [a.ninio||'-',a.dni||'-',a.tipo||'-',a.profesional||'-',formatDate(a.inicio),a.estado||'-']); 
+      } else{ 
+        columnas = ['Nombre','Tipo','Domicilio','Teléfono','Responsable']; 
+        filas = data.map(o => [o.nombre||'-',o.tipo||'-',o.domicilio||'-',o.telefono ? `${o.prefijo_tel||'+54'} ${o.telefono}` : '-',o.responsable||'-']); 
+      } 
+      
+      let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte - ${entity.toUpperCase()}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:'Plus Jakarta Sans',sans-serif;padding:2cm;color:#0f172a;} table{border-collapse:collapse;width:100%;margin-top:20px;} th,td{border:1px solid #cbd5e1;padding:12px;text-align:left;font-size:12px;} th{background:#f8fafc;font-weight:700;text-transform:uppercase;font-size:10px;color:#64748b;} h2{margin:0;color:#4f46e5;} p{color:#64748b;font-size:12px;}</style></head><body><h2>Registro Unico NNyA Institucionalizados Defensoría Civil y Comercial 6 Ministerio Público de Misiones</h2><p>Fecha / Hora de Impresión: ${this.getFormattedPrintDate()}</p><table><thead><tr>${columnas.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${filas.map(f=>`<tr>${f.map(cell=>`<td>${this.escapeHtml(String(cell))}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`; 
+      const win = window.open('','_blank'); 
+      win.document.write(html); 
+      win.document.close(); 
+      setTimeout(() => { win.print(); }, 500);
+    },
+    
+    imprimirModalActual(tipo) { 
+      let form, datos = null; 
+      if(tipo === 'hogares'){ 
+        form = document.getElementById('form-hogar'); 
+        if(form) datos = Object.fromEntries(new FormData(form)); 
+      } else if(tipo === 'apoyo'){ 
+        form = document.getElementById('form-apoyo'); 
+        if(form) datos = Object.fromEntries(new FormData(form)); 
+      } else if(tipo === 'organismos'){ 
+        form = document.getElementById('form-organismo'); 
+        if(form) datos = Object.fromEntries(new FormData(form)); 
+      } else if(tipo === 'runnai'){ 
+        datos = this.obtenerDatosCompletosRunnai(); 
+      } 
+      if(datos) this.generarImpresionProfesional(datos, tipo); 
+    },
+    
+    obtenerDatosCompletosRunnai() { 
+      const form = document.getElementById('form-runnai'); 
+      if(!form) return {}; 
+      const data = Object.fromEntries(new FormData(form)); 
+      
+      data.historialHogares = this.collectDynamicItems('historialHogares'); 
+      data.medidasProteccion = this.collectDynamicItems('medidasProteccion'); 
+      data.historialSalud = this.collectDynamicItems('historialSalud'); 
+      data.historialEducacion = this.collectDynamicItems('historialEducacion'); 
+      data.historialPsico = this.collectDynamicItems('historialPsico'); 
+      data.historialBajas = this.collectDynamicItems('historialBajas'); 
+      data.observacionesGenerales = this.collectDynamicItems('observacionesGenerales'); 
+      
+      const familiaresRows = document.querySelectorAll('#familiaresTableBody tr'); 
+      data.familiares = []; 
+      familiaresRows.forEach(row => { 
+        const cells = row.cells; 
+        if(cells.length >= 8) {
+          data.familiares.push({ 
+            nombre: cells[0].innerText, dni: cells[1].innerText, tipo: cells[2].innerText, 
+            referente: cells[3].innerText, domicilio: cells[4].innerText, municipio: cells[5].innerText, 
+            telefono: cells[6].innerText, email: cells[7].innerText 
+          }); 
+        }
+      }); 
+      
+      if(data.hogar_fecha_ingreso && data.hogarActual) { 
+        const ingreso = new Date(data.hogar_fecha_ingreso); 
+        const hoy = new Date(); 
+        const diffTime = Math.abs(hoy - ingreso); 
+        data.dias_permanencia_actual = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+      } 
+      return data; 
+    },
+    
+    generarImpresionProfesional(data, entityType) { 
+      let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Impresión - ${entityType.toUpperCase()}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+      <style>
+        @page { size: A4; margin: 1.5cm; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; font-size: 10pt; line-height: 1.5; background: #fff; margin: 0; }
+        .header { text-align: center; border-bottom: 3px solid #4f46e5; padding-bottom: 15px; margin-bottom: 25px; }
+        .header h1 { margin: 0; color: #4f46e5; font-size: 15pt; text-transform: uppercase; letter-spacing: 1px; }
+        .header p { margin: 5px 0 0; color: #64748b; font-size: 9pt; }
+        .section { margin-bottom: 25px; break-inside: avoid; }
+        .section-title { font-size: 11pt; font-weight: 700; color: #1e293b; border-left: 4px solid #4f46e5; padding-left: 10px; margin-bottom: 15px; background: #f8fafc; padding: 6px 10px; text-transform: uppercase; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .field { display: flex; flex-direction: column; }
+        .field.full { grid-column: 1 / -1; }
+        .label { font-size: 8pt; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+        .value { font-size: 10pt; font-weight: 500; color: #0f172a; padding-top: 2px; border-bottom: 1px solid #e2e8f0; min-height: 1.5em; word-break: break-word; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 9pt; }
+        th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; }
+        th { background: #f1f5f9; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 8pt; }
+      </style></head><body>
+      <div class="header">
+        <h1>Registro Unico NNyA Institucionalizados Defensoría Civil y Comercial 6 Ministerio Público de Misiones</h1>
+        <p>Fecha / Hora de Impresión: ${this.getFormattedPrintDate()}</p>
+      </div>`;
+
+      const renderField = (key, value) => {
+        const labelName = key.replace(/_/g, ' ').toUpperCase();
+        const valStr = (value === '' || value === null || value === undefined) ? '-' : value;
+        const isFull = String(valStr).length > 60;
+        return `<div class="field ${isFull ? 'full' : ''}"><div class="label">${labelName}</div><div class="value">${valStr}</div></div>`;
+      };
+
+      const renderTableList = (title, listData, isInner = false) => {
+        if (!listData || listData.length === 0) return '';
+        let tHtml = isInner ? '' : `<div class="section">`;
+        if (title) tHtml += `<div class="section-title" style="font-size:9pt; background:#e2e8f0;">${title}</div>`;
+        tHtml += `<table><thead><tr>`;
+        const headers = Object.keys(listData[0]);
+        headers.forEach(h => tHtml += `<th>${h.replace(/_/g, ' ').toUpperCase()}</th>`);
+        tHtml += `</tr></thead><tbody>`;
+        listData.forEach(row => {
+          tHtml += `<tr>`;
+          headers.forEach(h => {
+            const cellVal = (row[h] === null || row[h] === undefined || row[h] === '') ? '-' : row[h];
+            tHtml += `<td>${cellVal}</td>`;
+          });
+          tHtml += `</tr>`;
+        });
+        tHtml += `</tbody></table>`;
+        if (!isInner) tHtml += `</div>`;
+        return tHtml;
+      };
+
+      if (entityType === 'runnai') {
+        const runnaiLayout = [
+          { title: "1. Información", fields: ['nombre', 'dni', 'nacimiento', 'edad', 'lugar_nacimiento', 'nacionalidad', 'ultimo_domicilio', 'sexo', 'estado', 'expte_judicial'] },
+          { title: "2. Permanencia", fields: ['hogarActual', 'hogar_fecha_ingreso', 'dias_permanencia_actual', 'sumaDiasTotales'], lists: [{ key: 'historialHogares', title: 'Historial de Hogares' }] },
+          { title: "3. Medidas", fields: ['medida_fecha', 'medida_exp_judicial', 'medida_juzgado', 'medida_exp_administrativo', 'medida_tipo_instrumento', 'medida_tomada', 'medida_obs_motivo', 'medida_organismo', 'medida_juzgado_interviniente', 'medida_defensoria', 'medida_derechos_vulnerados', 'medida_edad_momento', 'medida_adoptabilidad', 'medida_obs_generales'], lists: [{ key: 'medidasProteccion', title: 'Historial de Medidas' }] },
+          { title: "4. Salud", fields: ['salud_atencion_preventiva', 'salud_peso', 'salud_talla', 'salud_estado_nutricional', 'salud_vacunacion', 'salud_obs_vacunacion', 'salud_oftalmologico', 'salud_obs_oftalmologico', 'salud_odontologico', 'salud_obs_odontologico', 'salud_patologia', 'salud_tratamiento_prolongado', 'salud_tipo_tratamiento', 'salud_atencion_psiquiatrica', 'salud_diagnostico', 'salud_medicacion', 'salud_cronica', 'salud_tipo_cronica', 'salud_historia_clinica'], lists: [{ key: 'historialSalud', title: 'Historial Salud' }] },
+          { title: "5. Educación", fields: ['educacion_nivel', 'educacion_detalle', 'educacion_nivel_correspondiente', 'educacion_repitencias', 'educacion_apoyo_escolar', 'educacion_legajo', 'educacion_cuise', 'educacion_anexo', 'educacion_curso', 'educacion_turno', 'educacion_nivel_educativo', 'educacion_jornada'], lists: [{ key: 'historialEducacion', title: 'Historial Educación' }] },
+          { title: "6. Psico-social", fields: ['psico_desarrollo_madurativo', 'psico_desc_desarrollo', 'psico_atencion', 'psico_tipo_apoyo', 'psico_desc_apoyo'], lists: [{ key: 'historialPsico', title: 'Historial Psicosocial' }] },
+          { title: "7. Familiares", fields: [], lists: [{ key: 'familiares', title: 'Grupo Familiar' }] },
+          { title: "8. Baja", fields: ['baja_tipo', 'baja_fecha', 'baja_motivo', 'baja_organismo', 'baja_nueva_residencia', 'baja_instrumento', 'baja_observacion'], lists: [{ key: 'historialBajas', title: 'Historial Bajas/Altas' }] },
+          { title: "9. Observaciones", fields: [], lists: [{ key: 'observacionesGenerales', title: 'Observaciones Generales' }] }
+        ];
+
+        runnaiLayout.forEach(tab => {
+          let fieldsHtml = '';
+          tab.fields.forEach(f => {
+            if (data[f] !== undefined) fieldsHtml += renderField(f, data[f]);
+          });
+          
+          let listsHtml = '';
+          if (tab.lists) {
+            tab.lists.forEach(l => {
+              if (data[l.key] && data[l.key].length > 0) {
+                listsHtml += renderTableList(l.title, data[l.key], true);
+              }
+            });
+          }
+
+          if (fieldsHtml || listsHtml) {
+            html += `<div class="section"><div class="section-title">${tab.title}</div>`;
+            if (fieldsHtml) html += `<div class="grid" style="margin-bottom:15px;">${fieldsHtml}</div>`;
+            html += listsHtml;
+            html += `</div>`;
+          }
+        });
+
+      } else {
+        let datosGenerales = '';
+        let seccionesExtra = '';
+
+        let keysToRender = Object.keys(data);
+        if (entityType === 'hogares') {
+          const order = ['nombre', 'direccion', 'municipio', 'prefijo_tel', 'telefono', 'capacidad', 'ocupados', 'responsable'];
+          keysToRender.sort((a, b) => {
+            let iA = order.indexOf(a);
+            let iB = order.indexOf(b);
+            if (iA === -1) iA = 999;
+            if (iB === -1) iB = 999;
+            return iA - iB;
+          });
+        } else if (entityType === 'organismos') {
+          const order = ['nombre', 'tipo', 'domicilio', 'prefijo_tel', 'telefono', 'responsable'];
+          keysToRender.sort((a, b) => {
+            let iA = order.indexOf(a);
+            let iB = order.indexOf(b);
+            if (iA === -1) iA = 999;
+            if (iB === -1) iB = 999;
+            return iA - iB;
+          });
+        }
+
+        for (const key of keysToRender) {
+          const value = data[key];
+          if (Array.isArray(value)) {
+            seccionesExtra += renderTableList(key.replace(/([A-Z])/g, ' $1').toUpperCase(), value);
+          } else if (typeof value !== 'object' && key !== 'id') {
+            datosGenerales += renderField(key, value);
+          }
+        }
+
+        if (datosGenerales) {
+          html += `<div class="section"><div class="section-title">Datos Principales</div><div class="grid">${datosGenerales}</div></div>`;
+        }
+        html += seccionesExtra;
+      }
+      
+      html += `<script>setTimeout(() => { window.print(); }, 800);<\/script></body></html>`;
+
+      const win = window.open('','_blank');
+      win.document.write(html);
+      win.document.close();
+    },
+    
+    openModal(entity, mode, id=null) { 
+      if(!isAuthenticated && mode !== 'view') { this.toast("Modo lectura. Requiere iniciar sesión.", 4000); return; } 
+      
+      if(entity === 'runnai') { 
+        const modal = document.getElementById('modal-runnai'); 
+        modal.showModal(); 
+        const form = document.getElementById('form-runnai'); 
+        form.reset(); 
+        delete form.dataset.id; 
+        
+        ['historialHogaresContainer', 'medidasProteccionContainer', 'historialSaludContainer', 'historialEducacionContainer', 'historialPsicoContainer', 'historialBajasContainer', 'observacionesGeneralesContainer', 'familiaresTableBody'].forEach(c => { 
+          const el = document.getElementById(c); 
+          if(el) el.innerHTML = ''; 
+        }); 
+        
+        // Regresar al tab 1 siempre
+        document.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector('.inner-tab[data-inner="info"]').classList.add('active');
+        document.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active-panel'));
+        document.getElementById('inner-info').classList.add('active-panel');
+
+        if(mode === 'edit' && id) { 
+          const record = db.runnai.find(i => i.id == id); 
+          if(record) { 
+            form.dataset.id = id; 
+            for(let [k,v] of Object.entries(record)) {
+              if(form.elements[k]) form.elements[k].value = v ?? ''; 
+            }
+            if(record.historialHogares) record.historialHogares.forEach(i => App.addDynamicItem('historialHogares', i)); 
+            if(record.medidasProteccion) record.medidasProteccion.forEach(i => App.addDynamicItem('medidasProteccion', i)); 
+            if(record.historialSalud) record.historialSalud.forEach(i => App.addDynamicItem('historialSalud', i)); 
+            if(record.historialEducacion) record.historialEducacion.forEach(i => App.addDynamicItem('historialEducacion', i)); 
+            if(record.historialPsico) record.historialPsico.forEach(i => App.addDynamicItem('historialPsico', i)); 
+            if(record.historialBajas) record.historialBajas.forEach(i => App.addDynamicItem('historialBajas', i)); 
+            if(record.observacionesGenerales) record.observacionesGenerales.forEach(i => App.addDynamicItem('observacionesGenerales', i)); 
+            if(record.familiares) record.familiares.forEach(f => App.agregarFamiliar(f)); 
+          } 
+        } 
+      } else { 
+        const modalId = entity === 'hogares' ? 'modal-hogares' : `modal-${entity}`; 
+        const modal = document.getElementById(modalId); 
+        const form = modal.querySelector('form'); 
+        form.reset(); 
+        delete form.dataset.id; 
+        
+        if(mode === 'edit' && id) { 
+          const record = db[entity].find(i => i.id == id); 
+          if(record) Object.entries(record).forEach(([k,v]) => { 
+            if(form.elements[k]) form.elements[k].value = v ?? ''; 
+          }); 
+          form.dataset.id = id; 
+        } 
+        modal.showModal(); 
+      } 
+    },
+    
+    async handleForm(e, entity) { 
+      e.preventDefault(); 
+      const form = e.target; 
+      if(!form.checkValidity()) return; 
+      
+      const data = Object.fromEntries(new FormData(form)); 
+      let collectionRef, entityKey; 
+      
+      if(entity === 'hogares') { collectionRef = colHogares; entityKey = 'hogares'; } 
+      else if(entity === 'apoyo') { collectionRef = colApoyo; entityKey = 'apoyo'; } 
+      else { collectionRef = colOrganismos; entityKey = 'organismos'; } 
+      
+      if(form.dataset.id) { await updateEntity(collectionRef, form.dataset.id, data, entityKey); } 
+      else { await addEntity(collectionRef, data, entityKey); } 
+      
+      form.closest('dialog').close(); 
+      this.toast('Datos guardados correctamente'); 
+    },
+    
+    async handleFormRunnai(e) { 
+      e.preventDefault(); 
+      const form = e.target; 
+      if(!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const data = this.obtenerDatosCompletosRunnai(); 
+      
+      data.sumaDiasTotales = (data.historialHogares || []).reduce((a,h) => a + (Number(h.dias)||0), 0) + (Number(data.dias_permanencia_actual)||0); 
+      
+      if(data.hogarActual && data.estado === 'activo') { 
+        const hogar = db.hogares.find(h => h.nombre === data.hogarActual); 
+        if(hogar && hogar.ocupados >= hogar.capacidad && (!form.dataset.id || db.runnai.find(r => r.id == form.dataset.id)?.hogarActual !== data.hogarActual)) { 
+          this.toast(`El hogar ${hogar.nombre} ya está en su máxima capacidad`, 5000); 
+          return; 
+        } 
+      } 
+      
+      if(form.dataset.id) { await updateEntity(colRunnai, form.dataset.id, data, 'runnai'); } 
+      else { await addEntity(colRunnai, data, 'runnai'); } 
+      
+      form.closest('dialog').close(); 
+      this.toast('Ficha RUNNAI guardada exitosamente'); 
+    },
+    
+    deleteEntityHandler(entity, id) { 
+      if (!isAuthenticated) { this.toast("Acción denegada"); return; } 
+      let collectionRef; 
+      if(entity === 'hogares') collectionRef = colHogares; 
+      else if(entity === 'runnai') collectionRef = colRunnai; 
+      else if(entity === 'apoyo') collectionRef = colApoyo; 
+      else collectionRef = colOrganismos; 
+      deleteEntityFirestore(collectionRef, id); 
+    },
+    
+    collectDynamicItems(containerId) { 
+      const container = document.getElementById(containerId); 
+      if(!container) return []; 
+      const items = []; 
+      container.querySelectorAll('.dynamic-item').forEach(div => { 
+        const obj = {}; 
+        div.querySelectorAll('input,select,textarea').forEach(inp => { obj[inp.name] = inp.value; }); 
+        if(Object.keys(obj).length > 0 && Object.values(obj).some(v => v.trim() !== '')) items.push(obj); 
+      }); 
+      return items; 
+    },
+    
+    addDynamicItem(containerId, defaultData = null) { 
+      const container = document.getElementById(containerId); 
+      if(!container) return; 
+      let html = ''; 
+      
+      if(containerId === 'historialHogares') html = `<div class="dynamic-item"><input type="date" name="fechaIngreso" placeholder="Fecha" value="${defaultData?.fechaIngreso||''}"><input placeholder="Hogar (Seleccionar...)" name="hogar" list="list-hogares" value="${defaultData?.hogar||''}"><input placeholder="Días en lugar" name="dias" type="number" value="${defaultData?.dias||''}"><button type="button" class="btn-icon" onclick="this.parentElement.remove()">🗑</button></div>`; 
+      else if(containerId === 'medidasProteccion') html = `<div class="dynamic-item"><input type="date" name="fechaMedida" value="${defaultData?.fechaMedida||''}"><input placeholder="Expediente / Detalle de la medida" name="detalle" style="flex:2;" value="${defaultData?.detalle||''}"><button type="button" class="btn-icon" onclick="this.parentElement.remove()">🗑</button></div>`; 
+      else if(containerId === 'historialSalud') html = `<div class="dynamic-item"><input type="date" name="fecha" value="${defaultData?.fecha||''}"><input placeholder="Registro o novedad de salud" name="registro" style="flex:2;" value="${defaultData?.registro||''}"><button type="button" class="btn-icon" onclick="this.parentElement.remove()">🗑</button></div>`; 
+      else if(containerId === 'historialEducacion') html = `<div class="dynamic-item"><input type="date" name="fecha" value="${defaultData?.fecha||''}"><input placeholder="Institución / Nivel cursado" name="info" style="flex:2;" value="${defaultData?.info||''}"><button type="button" class="btn-icon" onclick="this.parentElement.remove()">🗑</button></div>`; 
+      else if(containerId === 'historialPsico') html = `<div class="dynamic-item"><input type="date" name="fecha" value="${defaultData?.fecha||''}"><input placeholder="Registro de novedad psicosocial" name="registro" style="flex:2;" value="${defaultData?.registro||''}"><button type="button" class="btn-icon" onclick="this.parentElement.remove()">🗑</button></div>`; 
+      else if(containerId === 'historialBajas') html = `<div class="dynamic-item"><input type="date" name="fecha" value="${defaultData?.fecha||''}"><input placeholder="Descripción del evento/baja" name="evento" style="flex:2;" value="${defaultData?.evento||''}"><button type="button" class="btn-icon" onclick="this.parentElement.remove()">🗑</button></div>`; 
+      else if(containerId === 'observacionesGenerales') html = `<div class="dynamic-item"><input type="date" name="fecha" value="${defaultData?.fecha||''}"><input placeholder="Nota general..." name="texto" style="flex:2;" value="${defaultData?.texto||''}"><button type="button" class="btn-icon" onclick="this.parentElement.remove()">🗑</button></div>`; 
+      
+      container.insertAdjacentHTML('beforeend', html); 
+    },
+    
+    agregarFamiliar(data = null) { 
+      const nombre = document.getElementById('familiar_nombre')?.value || data?.nombre || ''; 
+      const dni = document.getElementById('familiar_dni')?.value || data?.dni || ''; 
+      const tipo = document.getElementById('familiar_tipo')?.value || data?.tipo || 'PADRE'; 
+      const referente = document.getElementById('familiar_referente')?.value || data?.referente || 'NO'; 
+      const domicilio = document.getElementById('familiar_domicilio')?.value || data?.domicilio || ''; 
+      const municipio = document.getElementById('familiar_municipio')?.value || data?.municipio || ''; 
+      
+      const prefijo = document.getElementById('familiar_prefijo')?.value || '+54';
+      const telefonoRaw = document.getElementById('familiar_telefono')?.value || '';
+      const telefono = data?.telefono || (telefonoRaw ? `${prefijo} ${telefonoRaw}` : '');
+      
+      const email = document.getElementById('familiar_email')?.value || data?.email || ''; 
+      
+      if(!nombre) return this.toast("El nombre del familiar es obligatorio"); 
+      
+      const tbody = document.getElementById('familiaresTableBody'); 
+      const row = tbody.insertRow(); 
+      row.insertCell(0).innerText = nombre; 
+      row.insertCell(1).innerText = dni; 
+      row.insertCell(2).innerHTML = `<span class="badge" style="background:#f1f5f9; color:#475569;">${tipo}</span>`; 
+      row.insertCell(3).innerText = referente; 
+      row.insertCell(4).innerText = domicilio; 
+      row.insertCell(5).innerText = municipio; 
+      row.insertCell(6).innerText = telefono; 
+      row.insertCell(7).innerText = email; 
+      
+      const btnCell = row.insertCell(8); 
+      const del = document.createElement('button'); 
+      del.innerText = '🗑'; 
+      del.className = 'btn-icon'; 
+      del.type = 'button';
+      del.onclick = () => row.remove(); 
+      btnCell.appendChild(del); 
+      
+      // Limpiar form temporal
+      document.getElementById('familiar_nombre').value = ''; 
+      document.getElementById('familiar_dni').value = ''; 
+      document.getElementById('familiar_domicilio').value = ''; 
+      document.getElementById('familiar_municipio').value = ''; 
+      document.getElementById('familiar_telefono').value = ''; 
+      document.getElementById('familiar_email').value = ''; 
+    },
+    
+    calcEdadFromFecha(fecha) { 
+      if(!fecha) return '-'; 
+      const ageDifMs = Date.now() - new Date(fecha).getTime(); 
+      return Math.abs(new Date(ageDifMs).getUTCFullYear() - 1970); 
+    },
+    
+    calcAge(input) { 
+      const form = input.closest('form'); 
+      let hidden = form.querySelector('[name="edad"]'); 
+      if(!hidden) { 
+        hidden = document.createElement('input'); 
+        hidden.type = 'hidden'; 
+        hidden.name = 'edad'; 
+        form.appendChild(hidden); 
+      } 
+      hidden.value = this.calcEdadFromFecha(input.value); 
+      const edadField = form.querySelector('[name="edad"]'); 
+      if(edadField && edadField.type !== 'hidden') edadField.value = hidden.value; 
+    },
+    
+    populateDatalists() { 
+      document.getElementById('list-hogares').innerHTML = db.hogares.map(h => `<option value="${h.nombre.replace(/"/g,'&quot;')}">`).join(''); 
+      document.getElementById('list-organismos').innerHTML = db.organismos.map(o => `<option value="${o.nombre.replace(/"/g,'&quot;')}">`).join(''); 
+      document.getElementById('list-runnaiNames').innerHTML = db.runnai.map(r => `<option value="${r.nombre.replace(/"/g,'&quot;')}">`).join(''); 
+    },
+    
+    advancedSearch() { 
+      const q = document.getElementById('advSearchInput').value.toLowerCase(); 
+      if(!q) return; 
+      
+      const res = db.runnai.filter(r => r.nombre?.toLowerCase().includes(q) || r.dni?.includes(q) || (r.expte_judicial||'').toLowerCase().includes(q)); 
+      const tbody = document.querySelector('#tbl-busqueda tbody'); 
+      
+      if(!res.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">No se encontraron resultados</td></tr>'; 
+      } else {
+        tbody.innerHTML = res.map(r => `<tr>
+          <td><span class="badge ${r.estado === 'activo' ? 'active' : 'closed'}">${r.estado}</span></td>
+          <td><strong>${r.nombre}</strong></td>
+          <td>${r.dni}</td>
+          <td>${this.calcEdadFromFecha(r.nacimiento)}</td>
+          <td>${r.hogarActual||'-'}</td>
+          <td>${r.sumaDiasTotales||0}</td>
+          <td>${r.expte_judicial||'-'}</td>
+          <td><button class="btn btn-sm btn-outline" onclick='App.viewDetail("runnai","${r.id}")'>👁 Ver Ficha</button></td>
+        </tr>`).join(''); 
+      }
+    },
+    
+    toast(msg, duration = 3000) { 
+      let t = document.createElement('div'); 
+      t.innerText = msg; 
+      t.style.position = 'fixed'; 
+      t.style.bottom = '24px'; 
+      t.style.right = '24px'; 
+      t.style.background = 'var(--text-main)'; 
+      t.style.color = 'white'; 
+      t.style.padding = '0.8rem 1.5rem'; 
+      t.style.borderRadius = 'var(--radius-full)'; 
+      t.style.zIndex = '9999'; 
+      t.style.fontSize = '0.9rem'; 
+      t.style.fontWeight = '500';
+      t.style.boxShadow = 'var(--shadow-lg)'; 
+      t.style.animation = 'fadeIn 0.3s ease-out';
+      document.body.appendChild(t); 
+      
+      setTimeout(() => { 
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(10px)';
+        t.style.transition = 'all 0.3s ease-out';
+        setTimeout(() => t.remove(), 300);
+      }, duration); 
+    }
+  };
+  
+  document.addEventListener('DOMContentLoaded', () => App.init());
+</script>
+</body>
+</html>
