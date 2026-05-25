@@ -534,7 +534,8 @@
       <div class="pagination pagination-top" id="pag-top-hogares"></div>
       <table id="tbl-hogares">
         <thead><tr><th>Nombre</th><th>Dirección</th><th>Municipio</th><th>Teléfono</th><th>Ocupación</th><th>Responsable</th><th>Acciones</th></tr></thead>
-        <tbody><tr><td colspan="7" class="loader">Cargando datos...</td></tr>
+        <tbody><tr><td colspan="7" class="loader">Cargando datos......</td></tr>
+       </tbody>
       </table>
       <div class="pagination" id="pag-bottom-hogares"></div>
     </div>
@@ -551,6 +552,7 @@
       <table id="tbl-runnai">
         <thead><tr><th>Estado</th><th>Nombre</th><th>DNI</th><th>Edad</th><th>Hogar Actual</th><th>Días Acum.</th><th>Expte.</th><th>Acciones</th></tr></thead>
         <tbody><tr><td colspan="8" class="loader">Cargando datos...</td></tr>
+       </tbody>
       </table>
       <div class="pagination" id="pag-bottom-runnai"></div>
     </div>
@@ -566,6 +568,7 @@
       <table id="tbl-apoyo">
         <thead><tr><th>NNyA</th><th>DNI</th><th>Tipo</th><th>Profesional</th><th>Inicio</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody><tr><td colspan="7" class="loader">Cargando datos...</td></tr>
+       </tbody>
       </table>
       <div class="pagination" id="pag-bottom-apoyo"></div>
     </div>
@@ -581,6 +584,7 @@
       <table id="tbl-busqueda">
         <thead><tr><th>Estado</th><th>Nombre</th><th>DNI</th><th>Edad</th><th>Hogar</th><th>Días</th><th>Expte</th><th>Acciones</th></tr></thead>
         <tbody><tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">Ingrese criterio de búsqueda</td></tr>
+       </tbody>
       </table>
       <div class="pagination" id="pag-bottom-busqueda"></div>
     </div>
@@ -596,7 +600,8 @@
       <table id="tbl-organismos">
         <thead><tr><th>Nombre</th><th>Tipo</th><th>Domicilio</th><th>Teléfono</th><th>Responsable</th><th>Acciones</th></tr></thead>
         <tbody><tr><td colspan="6" class="loader">Cargando datos...</td></tr>
-       </table>
+        </tbody>
+      </table>
       <div class="pagination" id="pag-bottom-organismos"></div>
     </div>
   </section>
@@ -618,7 +623,7 @@
       <div class="form-grid">
         <div class="form-group"><label>Nombre del Hogar*</label><input name="nombre" required></div>
         <div class="form-group full-width"><label>Dirección</label><input name="direccion"></div>
-        <div class="form-group"><label>Municipio</label><input name="municipio"></div>
+        <div class="form-group"><label>Municipio</label><input name="municipio" list="list-municipios"></div>
         <div class="form-group"><label>Teléfono</label>
           <div style="display: flex; gap: 0.5rem;">
             <select name="prefijo_tel" style="width: auto;">
@@ -715,7 +720,7 @@
       
       <div class="inner-panel" id="inner-permanencia"><div class="form-section"><h3>Hogar Actual</h3><div class="form-grid"><div class="form-group"><label>Hogar</label><input name="hogarActual" list="list-hogares"></div><div class="form-group"><label>Fecha Ingreso</label><input name="hogar_fecha_ingreso" type="date"></div><div class="form-group"><label>Días (Auto)</label><input name="dias_permanencia_actual" readonly style="background:#e2e8f0;"></div></div></div><div class="form-section"><h3>Historial de Hogares</h3><div class="dynamic-list" id="historialHogaresContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('historialHogares')">+ Agregar ingreso</button></div></div>
       
-      <div class="inner-panel" id="inner-medidas"><div class="form-grid"><div class="form-group"><label>Fecha de medida</label><input name="medida_fecha" type="date"></div><div class="form-group"><label>Expediente Judicial</label><input name="medida_exp_judicial"></div><div class="form-group"><label>Juzgado</label><input name="medida_juzgado"></div><div class="form-group"><label>Expediente Admin</label><input name="medida_exp_administrativo"></div><div class="form-group"><label>Tipo de Instrumento</label><input name="medida_tipo_instrumento"></div><div class="form-group"><label>Medida tomada</label><input name="medida_tomada"></div><div class="form-group full-width"><label>Motivo</label><textarea name="medida_obs_motivo" rows="2"></textarea></div><div class="form-group"><label>Organismo</label><input name="medida_organismo" list="list-organismos"></div><div class="form-group"><label>Juzgado interviniente</label><input name="medida_juzgado_interviniente"></div><div class="form-group"><label>Defensoría interviniente</label><input name="medida_defensoria"></div><div class="form-group"><label>Derechos vulnerados</label><input name="medida_derechos_vulnerados"></div><div class="form-group"><label>Edad al momento</label><input name="medida_edad_momento" type="number"></div><div class="form-group"><label>Estado adoptabilidad</label><select name="medida_adoptabilidad"><option>No</option><option>En proceso</option><option>Declarado</option></select></div><div class="form-group full-width"><label>Observaciones generales</label><textarea name="medida_obs_generales" rows="2"></textarea></div></div><div class="form-section"><h3>Historial de Medidas</h3><div class="dynamic-list" id="medidasProteccionContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('medidasProteccion')">+ Agregar medida</button></div></div>
+      <div class="inner-panel" id="inner-medidas"><div class="form-grid"><div class="form-group"><label>Fecha de medida</label><input name="medida_fecha" type="date"></div><div class="form-group"><label>Expediente Judicial</label><input name="medida_exp_judicial"></div><div class="form-group"><label>Juzgado</label><input name="medida_juzgado" list="list-juzgados"></div><div class="form-group"><label>Expediente Admin</label><input name="medida_exp_administrativo"></div><div class="form-group"><label>Tipo de Instrumento</label><input name="medida_tipo_instrumento"></div><div class="form-group"><label>Medida tomada</label><input name="medida_tomada"></div><div class="form-group full-width"><label>Motivo</label><textarea name="medida_obs_motivo" rows="2"></textarea></div><div class="form-group"><label>Organismo</label><input name="medida_organismo" list="list-organismos"></div><div class="form-group"><label>Juzgado interviniente</label><input name="medida_juzgado_interviniente" list="list-juzgados"></div><div class="form-group"><label>Defensoría interviniente</label><input name="medida_defensoria" list="list-defensorias"></div><div class="form-group"><label>Derechos vulnerados</label><input name="medida_derechos_vulnerados"></div><div class="form-group"><label>Edad al momento</label><input name="medida_edad_momento" type="number"></div><div class="form-group"><label>Estado adoptabilidad</label><select name="medida_adoptabilidad"><option>No</option><option>En proceso</option><option>Declarado</option></select></div><div class="form-group full-width"><label>Observaciones generales</label><textarea name="medida_obs_generales" rows="2"></textarea></div></div><div class="form-section"><h3>Historial de Medidas</h3><div class="dynamic-list" id="medidasProteccionContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('medidasProteccion')">+ Agregar medida</button></div></div>
       
       <div class="inner-panel" id="inner-salud"><div class="form-grid"><div class="form-group"><label>Atención preventiva</label><input name="salud_atencion_preventiva"></div><div class="form-group"><label>Peso (kg)</label><input name="salud_peso" type="number" step="0.1"></div><div class="form-group"><label>Talla (cm)</label><input name="salud_talla" type="number" step="0.1"></div><div class="form-group"><label>Estado nutricional</label><input name="salud_estado_nutricional"></div><div class="form-group"><label>Vacunación</label><select name="salud_vacunacion"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Obs. Vacunación</label><input name="salud_obs_vacunacion"></div><div class="form-group"><label>Control oftalmológico</label><select name="salud_oftalmologico"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Obs. Oftalmológico</label><input name="salud_obs_oftalmologico"></div><div class="form-group"><label>Control odontológico</label><select name="salud_odontologico"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Obs. Odontológico</label><input name="salud_obs_odontologico"></div><div class="form-group"><label>Patología NNyA</label><input name="salud_patologia"></div><div class="form-group"><label>Tratamiento prolongado</label><select name="salud_tratamiento_prolongado"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Tipo tratamiento</label><input name="salud_tipo_tratamiento"></div><div class="form-group"><label>Atención psiquiátrica</label><select name="salud_atencion_psiquiatrica"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Diagnóstico</label><input name="salud_diagnostico"></div><div class="form-group"><label>Medicacion</label><select name="salud_medicacion"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Enf. crónica</label><select name="salud_cronica"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Tipo crónica</label><input name="salud_tipo_cronica"></div><div class="form-group"><label>Nro Historia Clínica</label><input name="salud_historia_clinica"></div></div><div class="form-section"><h3>Historial Salud</h3><div class="dynamic-list" id="historialSaludContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('historialSalud')">+ Agregar registro</button></div></div>
       
@@ -723,7 +728,7 @@
       
       <div class="inner-panel" id="inner-psicosocial"><div class="form-grid"><div class="form-group"><label>Desarrollo madurativo</label><input name="psico_desarrollo_madurativo"></div><div class="form-group"><label>Desc. desarrollo</label><textarea name="psico_desc_desarrollo" rows="2"></textarea></div><div class="form-group"><label>Atención psico-social</label><select name="psico_atencion"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Tipo Apoyo</label><input name="psico_tipo_apoyo"></div><div class="form-group"><label>Descripción apoyo</label><textarea name="psico_desc_apoyo" rows="2"></textarea></div></div><div class="form-section"><h3>Historial Psicosocial</h3><div class="dynamic-list" id="historialPsicoContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('historialPsico')">+ Agregar registro</button></div></div>
       
-      <div class="inner-panel" id="inner-familiares"><div class="form-section"><div class="table-wrap" style="margin-bottom:1.5rem;"></table><thead><tr><th>Nombre</th><th>DNI</th><th>Vínculo</th><th>Ref. Adulto</th><th>Domicilio</th><th>Municipio</th><th>Tel</th><th>Email</th><th></th></tr></thead><tbody id="familiaresTableBody"></tbody></table></div><div class="form-grid"><div class="form-group"><label>Nombre</label><input id="familiar_nombre"></div><div class="form-group"><label>DNI</label><input id="familiar_dni" maxlength="8" oninput="this.value=this.value.replace(/[^0-9]/g,'')" pattern="\d{7,8}" title="DNI argentino (7 u 8 dígitos sin puntos)"></div><div class="form-group"><label>Tipo</label><select id="familiar_tipo"><option>PADRE</option><option>MADRE</option><option>HERMANO</option><option>ABUELO</option><option>OTRO</option></select></div><div class="form-group"><label>Referente adulto</label><select id="familiar_referente"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Domicilio</label><input id="familiar_domicilio"></div><div class="form-group"><label>Municipio</label><input id="familiar_municipio"></div><div class="form-group"><label>Teléfono</label>
+      <div class="inner-panel" id="inner-familiares"><div class="form-section"><div class="table-wrap" style="margin-bottom:1.5rem;"><table><thead><tr><th>Nombre</th><th>DNI</th><th>Vínculo</th><th>Ref. Adulto</th><th>Domicilio</th><th>Municipio</th><th>Tel</th><th>Email</th><th></th></tr></thead><tbody id="familiaresTableBody"></tbody></table></div><div class="form-grid"><div class="form-group"><label>Nombre</label><input id="familiar_nombre"></div><div class="form-group"><label>DNI</label><input id="familiar_dni" maxlength="8" oninput="this.value=this.value.replace(/[^0-9]/g,'')" pattern="\d{7,8}" title="DNI argentino (7 u 8 dígitos sin puntos)"></div><div class="form-group"><label>Tipo</label><select id="familiar_tipo"><option>PADRE</option><option>MADRE</option><option>HERMANO</option><option>ABUELO</option><option>OTRO</option></select></div><div class="form-group"><label>Referente adulto</label><select id="familiar_referente"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Domicilio</label><input id="familiar_domicilio"></div><div class="form-group"><label>Municipio</label><input id="familiar_municipio" list="list-municipios"></div><div class="form-group"><label>Teléfono</label>
         <div style="display: flex; gap: 0.5rem;">
           <select id="familiar_prefijo" style="width: auto;">
             <option value="+54" selected>🇦🇷 +54</option>
@@ -774,6 +779,9 @@
 <datalist id="list-hogares"></datalist>
 <datalist id="list-organismos"></datalist>
 <datalist id="list-runnaiNames"></datalist>
+<datalist id="list-juzgados"></datalist>
+<datalist id="list-defensorias"></datalist>
+<datalist id="list-municipios"></datalist>
 
 <script>
   /* ==========================================================================
@@ -813,7 +821,6 @@
     return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; 
   }
   
-  // Función para formatear cualquier valor que parezca fecha ISO a DD/MM/AAAA
   function formatDisplayDate(value) {
     if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
       return formatDate(value);
@@ -1238,7 +1245,7 @@
           <td>${r.telefono?`<a href="tel:${(r.prefijo_tel||'+54').replace(/\s/g,'')}${r.telefono.replace(/\s/g,'')}" class="tel-link">${r.prefijo_tel||'+54'} ${this.escapeHtml(r.telefono)}</a>`:'-'}</td>
           <td>${this.escapeHtml(r.responsable||'-')}</td>
           <td>${acciones}</td>
-        </table>`; 
+        </tr>`; 
       } 
       return ''; 
     },
@@ -1293,7 +1300,6 @@
 
       for(let k of keysToRender) {
         let v = record[k];
-        // Aplicar formato de fecha si es string ISO
         const displayValue = formatDisplayDate(v);
         html += `<div class="detail-item"><div class="detail-label">${k.replace(/_/g,' ').toUpperCase()}</div><div class="detail-value">${this.escapeHtml(String(displayValue??'-'))}</div></div>`; 
       }
@@ -1339,7 +1345,7 @@
         filas = data.map(o => [o.nombre||'-',o.tipo||'-',o.domicilio||'-',o.telefono ? `${o.prefijo_tel||'+54'} ${o.telefono}` : '-',o.responsable||'-']); 
       } 
       
-      let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte - ${entity.toUpperCase()}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:'Plus Jakarta Sans',sans-serif;padding:2cm;color:#0f172a;} table{border-collapse:collapse;width:100%;margin-top:20px;} th,td{border:1px solid #cbd5e1;padding:12px;text-align:left;font-size:12px;} th{background:#f8fafc;font-weight:700;text-transform:uppercase;font-size:10px;color:#64748b;} h2{margin:0;color:#4f46e5;} p{color:#64748b;font-size:12px;}</style></head><body><h2>Registro Unico NNyA Institucionalizados Defensoría Civil y Comercial 6 Ministerio Público de Misiones</h2><p>Fecha / Hora de Impresión: ${this.getFormattedPrintDate()}</p><table><thead><tr>${columnas.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${filas.map(f=>`<tr>${f.map(cell=>`<td>${this.escapeHtml(String(cell))}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`; 
+      let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte - ${entity.toUpperCase()}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:'Plus Jakarta Sans',sans-serif;padding:2cm;color:#0f172a;} table{border-collapse:collapse;width:100%;margin-top:20px;} th,td{border:1px solid #cbd5e1;padding:12px;text-align:left;font-size:12px;} th{background:#f8fafc;font-weight:700;text-transform:uppercase;font-size:10px;color:#64748b;} h2{margin:0;color:#4f46e5;} p{color:#64748b;font-size:12px;}</style></head><body><h2>Registro Unico NNyA Institucionalizados Defensoría Civil y Comercial 6 Ministerio Público de Misiones</h2><p>Fecha / Hora de Impresión: ${this.getFormattedPrintDate()}</p></table><thead><tr>${columnas.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${filas.map(f=>`<tr>${f.map(cell=>`<td>${this.escapeHtml(String(cell))}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`; 
       const win = window.open('','_blank'); 
       win.document.write(html); 
       win.document.close(); 
@@ -1426,7 +1432,6 @@
       const renderField = (key, value) => {
         const labelName = key.replace(/_/g, ' ').toUpperCase();
         let valStr = (value === '' || value === null || value === undefined) ? '-' : value;
-        // Formatear fecha si es ISO
         valStr = formatDisplayDate(valStr);
         const isFull = String(valStr).length > 60;
         return `<div class="field ${isFull ? 'full' : ''}"><div class="label">${labelName}</div><div class="value">${valStr}</div></div>`;
@@ -1444,7 +1449,7 @@
           tHtml += `<tr>`;
           headers.forEach(h => {
             let cellVal = (row[h] === null || row[h] === undefined || row[h] === '') ? '-' : row[h];
-            cellVal = formatDisplayDate(cellVal); // formatear fechas en tablas
+            cellVal = formatDisplayDate(cellVal);
             tHtml += `<td>${cellVal}</td>`;
           });
           tHtml += `</tr>`;
@@ -1750,7 +1755,16 @@
     populateDatalists() { 
       document.getElementById('list-hogares').innerHTML = db.hogares.map(h => `<option value="${h.nombre.replace(/"/g,'&quot;')}">`).join(''); 
       document.getElementById('list-organismos').innerHTML = db.organismos.map(o => `<option value="${o.nombre.replace(/"/g,'&quot;')}">`).join(''); 
-      document.getElementById('list-runnaiNames').innerHTML = db.runnai.map(r => `<option value="${r.nombre.replace(/"/g,'&quot;')}">`).join(''); 
+      document.getElementById('list-runnaiNames').innerHTML = db.runnai.map(r => `<option value="${r.nombre.replace(/"/g,'&quot;')}">`).join('');
+      
+      // Filtrar organismos por tipo
+      const juzgados = db.organismos.filter(o => o.tipo === 'Juzgado').map(o => o.nombre);
+      const defensorias = db.organismos.filter(o => o.tipo === 'Defensoría').map(o => o.nombre);
+      const municipios = db.organismos.filter(o => o.tipo === 'Municipalidad').map(o => o.nombre);
+      
+      document.getElementById('list-juzgados').innerHTML = juzgados.map(j => `<option value="${j.replace(/"/g,'&quot;')}">`).join('');
+      document.getElementById('list-defensorias').innerHTML = defensorias.map(d => `<option value="${d.replace(/"/g,'&quot;')}">`).join('');
+      document.getElementById('list-municipios').innerHTML = municipios.map(m => `<option value="${m.replace(/"/g,'&quot;')}">`).join('');
     },
     
     advancedSearch() { 
@@ -1772,7 +1786,7 @@
           <td>${r.sumaDiasTotales||0}</td>
           <td>${r.expte_judicial||'-'}</td>
           <td><button class="btn btn-sm btn-outline" onclick='App.viewDetail("runnai","${r.id}")'>👁 Ver Ficha</button></td>
-         </tr>`).join(''); 
+        </tr>`).join(''); 
       }
     },
     
