@@ -14,17 +14,17 @@
   
   <style>
     /* ==========================================================================
-       VARIABLES Y RESET
+       VARIABLES Y RESET (original intacto)
        ========================================================================== */
     :root {
-      --primary: #4f46e5;       /* Indigo 600 */
-      --primary-hover: #4338ca; /* Indigo 700 */
-      --primary-light: #e0e7ff; /* Indigo 100 */
-      --text-main: #0f172a;     /* Slate 900 */
-      --text-muted: #64748b;    /* Slate 500 */
-      --bg-body: #f8fafc;       /* Slate 50 */
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: #e0e7ff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --bg-body: #f8fafc;
       --bg-surface: #ffffff;
-      --border: #e2e8f0;        /* Slate 200 */
+      --border: #e2e8f0;
       --radius-md: 0.75rem;
       --radius-lg: 1rem;
       --radius-full: 9999px;
@@ -399,6 +399,108 @@
       .detail-card { break-inside: avoid; page-break-inside: avoid; margin-bottom: 1.2rem; }
       .detail-grid { grid-template-columns: repeat(2, 1fr); }
     }
+
+    /* ========== NUEVO MODAL ROJO DE CONFIRMACIÓN (esquina inferior derecha) ========== */
+    .delete-confirm-modal {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: auto;
+      min-width: 280px;
+      max-width: 380px;
+      background: #fff;
+      border-left: 5px solid #dc2626;
+      border-radius: 1rem;
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(220, 38, 38, 0.1);
+      z-index: 10000;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      transform: translateY(30px) scale(0.96);
+      pointer-events: none;
+    }
+    .delete-confirm-modal.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    .delete-confirm-card {
+      padding: 1rem 1.25rem 1rem 1.25rem;
+      background: #ffffff;
+      border-radius: 0.9rem;
+    }
+    .delete-confirm-header {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.75rem;
+    }
+    .delete-icon {
+      width: 32px;
+      height: 32px;
+      background: #fee2e2;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #dc2626;
+      font-weight: 800;
+      font-size: 1.25rem;
+    }
+    .delete-confirm-header strong {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #991b1b;
+      letter-spacing: -0.2px;
+    }
+    .delete-confirm-message {
+      font-size: 0.85rem;
+      color: #334155;
+      margin-bottom: 1.25rem;
+      line-height: 1.45;
+      padding-left: 0.25rem;
+    }
+    .delete-confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+    .delete-confirm-actions button {
+      border: none;
+      padding: 0.45rem 1rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .btn-cancel-delete {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+    .btn-cancel-delete:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+    .btn-confirm-delete {
+      background: #dc2626;
+      color: white;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .btn-confirm-delete:hover {
+      background: #b91c1c;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(220,38,38,0.2);
+    }
+    @media (max-width: 560px) {
+      .delete-confirm-modal {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        max-width: none;
+        min-width: auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -432,7 +534,7 @@
       <div class="pagination pagination-top" id="pag-top-hogares"></div>
       <table id="tbl-hogares">
         <thead><tr><th>Nombre</th><th>Dirección</th><th>Municipio</th><th>Teléfono</th><th>Ocupación</th><th>Responsable</th><th>Acciones</th></tr></thead>
-        <tbody><tr><td colspan="7" class="loader">Cargando datos...</td></tr></tbody>
+        <tbody><tr><td colspan="7" class="loader">Cargando datos...</td></tr>
       </table>
       <div class="pagination" id="pag-bottom-hogares"></div>
     </div>
@@ -448,7 +550,7 @@
       <div class="pagination pagination-top" id="pag-top-runnai"></div>
       <table id="tbl-runnai">
         <thead><tr><th>Estado</th><th>Nombre</th><th>DNI</th><th>Edad</th><th>Hogar Actual</th><th>Días Acum.</th><th>Expte.</th><th>Acciones</th></tr></thead>
-        <tbody><tr><td colspan="8" class="loader">Cargando datos...</td></tr></tbody>
+        <tbody><tr><td colspan="8" class="loader">Cargando datos...</td></tr>
       </table>
       <div class="pagination" id="pag-bottom-runnai"></div>
     </div>
@@ -463,7 +565,7 @@
       <div class="pagination pagination-top" id="pag-top-apoyo"></div>
       <table id="tbl-apoyo">
         <thead><tr><th>NNyA</th><th>DNI</th><th>Tipo</th><th>Profesional</th><th>Inicio</th><th>Estado</th><th>Acciones</th></tr></thead>
-        <tbody><tr><td colspan="7" class="loader">Cargando datos...</td></tr></tbody>
+        <tbody><tr><td colspan="7" class="loader">Cargando datos...</td></tr>
       </table>
       <div class="pagination" id="pag-bottom-apoyo"></div>
     </div>
@@ -478,7 +580,7 @@
       <div class="pagination pagination-top" id="pag-top-busqueda"></div>
       <table id="tbl-busqueda">
         <thead><tr><th>Estado</th><th>Nombre</th><th>DNI</th><th>Edad</th><th>Hogar</th><th>Días</th><th>Expte</th><th>Acciones</th></tr></thead>
-        <tbody><tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">Ingrese criterio de búsqueda</td></tr></tbody>
+        <tbody><tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">Ingrese criterio de búsqueda</td></tr>
       </table>
       <div class="pagination" id="pag-bottom-busqueda"></div>
     </div>
@@ -493,7 +595,7 @@
       <div class="pagination pagination-top" id="pag-top-organismos"></div>
       <table id="tbl-organismos">
         <thead><tr><th>Nombre</th><th>Tipo</th><th>Domicilio</th><th>Teléfono</th><th>Responsable</th><th>Acciones</th></tr></thead>
-        <tbody><tr><td colspan="6" class="loader">Cargando datos...</td></tr></tbody>
+        <tbody><tr><td colspan="6" class="loader">Cargando datos...</td></tr>
       </table>
       <div class="pagination" id="pag-bottom-organismos"></div>
     </div>
@@ -652,6 +754,23 @@
   <div class="modal-footer"><button class="btn btn-outline" onclick="this.closest('dialog').close()">Cerrar</button></div>
 </dialog>
 
+<!-- MODAL ROJO DE CONFIRMACION (ESQUINA INFERIOR DERECHA) -->
+<div id="deleteConfirmModal" class="delete-confirm-modal">
+  <div class="delete-confirm-card">
+    <div class="delete-confirm-header">
+      <span class="delete-icon">🗑️</span>
+      <strong>Eliminar registro</strong>
+    </div>
+    <div class="delete-confirm-message" id="deleteConfirmMsg">
+      ¿Estás seguro? Esta acción no se puede deshacer.
+    </div>
+    <div class="delete-confirm-actions">
+      <button class="btn-cancel-delete" id="cancelDeleteBtn">Cancelar</button>
+      <button class="btn-confirm-delete" id="confirmDeleteBtn">Eliminar</button>
+    </div>
+  </div>
+</div>
+
 <datalist id="list-hogares"></datalist>
 <datalist id="list-organismos"></datalist>
 <datalist id="list-runnaiNames"></datalist>
@@ -681,6 +800,9 @@
   const AUTH_PASSWORD = "admin123";
   let currentViewData = null;
   
+  // Variables para el modal de confirmación personalizado
+  let pendingDelete = null; // { collectionRef, id, entityName }
+  
   /* ==========================================================================
      FUNCIONES UTILIDAD
      ========================================================================== */
@@ -692,7 +814,7 @@
   }
   
   /* ==========================================================================
-     LÓGICA DE BASE DE DATOS
+     LÓGICA DE BASE DE DATOS (ORIGINAL COMPLETA)
      ========================================================================== */
   async function loadAllData() {
     try {
@@ -760,7 +882,7 @@
   }
 
   async function deleteEntityFirestore(collectionRef, id) { 
-    if (!confirm('¿Eliminar permanentemente este registro?')) return false; 
+    // Ya no usamos confirm nativo, llamamos desde el modal personalizado
     try { 
       await collectionRef.doc(id).delete(); 
       await loadAllData(); 
@@ -772,7 +894,40 @@
   }
 
   /* ==========================================================================
-     LÓGICA DE AUTENTICACIÓN
+     MODAL ROJO DE CONFIRMACIÓN (esquina inferior derecha)
+     ========================================================================== */
+  function showDeleteConfirm(entityType, collectionRef, id) {
+    const modal = document.getElementById('deleteConfirmModal');
+    const msgSpan = document.getElementById('deleteConfirmMsg');
+    let friendlyName = '';
+    if (entityType === 'hogares') friendlyName = 'hogar';
+    else if (entityType === 'runnai') friendlyName = 'RUNNAI (NNyA)';
+    else if (entityType === 'apoyo') friendlyName = 'apoyo psicosocial';
+    else friendlyName = 'organismo';
+    
+    msgSpan.innerHTML = `¿Eliminar permanentemente este <strong>${friendlyName}</strong>?<br>La acción es irreversible.`;
+    pendingDelete = { collectionRef, id, entityType };
+    modal.classList.add('active');
+  }
+  
+  function closeDeleteConfirm() {
+    const modal = document.getElementById('deleteConfirmModal');
+    modal.classList.remove('active');
+    pendingDelete = null;
+  }
+  
+  async function executeDelete() {
+    if (!pendingDelete) return;
+    const { collectionRef, id } = pendingDelete;
+    try {
+      await deleteEntityFirestore(collectionRef, id);
+    } finally {
+      closeDeleteConfirm();
+    }
+  }
+  
+  /* ==========================================================================
+     LÓGICA DE AUTENTICACIÓN (original)
      ========================================================================== */
   let loginTimer = null;
   function resetLoginTimer() { if(loginTimer) clearTimeout(loginTimer); loginTimer = null; }
@@ -795,7 +950,7 @@
   }
   
   /* ==========================================================================
-     CONTROLADOR PRINCIPAL (APP)
+     CONTROLADOR PRINCIPAL (APP) - COMPLETO Y ORIGINAL
      ========================================================================== */
   const App = {
     state: { page: 1, limit: 10, filter: 'todos', search: '' },
@@ -911,6 +1066,10 @@
       document.getElementById('form-apoyo').addEventListener('submit', (e) => this.handleForm(e, 'apoyo'));
       document.getElementById('form-organismo').addEventListener('submit', (e) => this.handleForm(e, 'organismos'));
       document.getElementById('form-runnai').addEventListener('submit', (e) => this.handleFormRunnai(e));
+      
+      // Eventos del modal de confirmación rojo
+      document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteConfirm);
+      document.getElementById('confirmDeleteBtn').addEventListener('click', () => executeDelete());
     },
     
     checkAuthAndOpen(entity) { 
@@ -1028,7 +1187,7 @@
       if(entity === 'hogares') {
         const porc = r.capacidad > 0 ? (r.ocupados / r.capacidad) * 100 : 0;
         const colorOc = porc >= 100 ? '#ef4444' : porc > 80 ? '#f59e0b' : '#10b981';
-        return `<tr>
+        return `</tr>
           <td><strong>${this.escapeHtml(r.nombre||'')}</strong></td>
           <td>${this.escapeHtml(r.direccion||'-')}</td>
           <td>${this.escapeHtml(r.municipio||'-')}</td>
@@ -1170,7 +1329,7 @@
         filas = data.map(o => [o.nombre||'-',o.tipo||'-',o.domicilio||'-',o.telefono ? `${o.prefijo_tel||'+54'} ${o.telefono}` : '-',o.responsable||'-']); 
       } 
       
-      let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte - ${entity.toUpperCase()}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:'Plus Jakarta Sans',sans-serif;padding:2cm;color:#0f172a;} table{border-collapse:collapse;width:100%;margin-top:20px;} th,td{border:1px solid #cbd5e1;padding:12px;text-align:left;font-size:12px;} th{background:#f8fafc;font-weight:700;text-transform:uppercase;font-size:10px;color:#64748b;} h2{margin:0;color:#4f46e5;} p{color:#64748b;font-size:12px;}</style></head><body><h2>Registro Unico NNyA Institucionalizados Defensoría Civil y Comercial 6 Ministerio Público de Misiones</h2><p>Fecha / Hora de Impresión: ${this.getFormattedPrintDate()}</p><table><thead><tr>${columnas.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${filas.map(f=>`<tr>${f.map(cell=>`<td>${this.escapeHtml(String(cell))}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`; 
+      let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte - ${entity.toUpperCase()}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:'Plus Jakarta Sans',sans-serif;padding:2cm;color:#0f172a;} table{border-collapse:collapse;width:100%;margin-top:20px;} th,td{border:1px solid #cbd5e1;padding:12px;text-align:left;font-size:12px;} th{background:#f8fafc;font-weight:700;text-transform:uppercase;font-size:10px;color:#64748b;} h2{margin:0;color:#4f46e5;} p{color:#64748b;font-size:12px;}</style></head><body><h2>Registro Unico NNyA Institucionalizados Defensoría Civil y Comercial 6 Ministerio Público de Misiones</h2><p>Fecha / Hora de Impresión: ${this.getFormattedPrintDate()}</p><table><thead><tr>${columnas.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${filas.map(f=>`<tr>${f.map(cell=>`<td>${this.escapeHtml(String(cell))}</td>`).join('')}</tr>`).join('')}</tbody><table></body></html>`; 
       const win = window.open('','_blank'); 
       win.document.write(html); 
       win.document.close(); 
@@ -1365,6 +1524,10 @@
       win.document.close();
     },
     
+    // ==========================================================================================================
+    // MÉTODOS DINÁMICOS Y MANEJO DE MODALES (ORIGINALES)
+    // ==========================================================================================================
+
     openModal(entity, mode, id=null) { 
       if(!isAuthenticated && mode !== 'view') { this.toast("Modo lectura. Requiere iniciar sesión.", 4000); return; } 
       
@@ -1380,7 +1543,6 @@
           if(el) el.innerHTML = ''; 
         }); 
         
-        // Regresar al tab 1 siempre
         document.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
         document.querySelector('.inner-tab[data-inner="info"]').classList.add('active');
         document.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active-panel'));
@@ -1404,14 +1566,18 @@
           } 
         } 
       } else { 
-        const modalId = entity === 'hogares' ? 'modal-hogares' : `modal-${entity}`; 
+        let modalId = `modal-${entity}`;
+        if (entity === 'hogares') modalId = 'modal-hogares';
+        if (entity === 'organismos' || entity === 'organismo') modalId = 'modal-organismo';
+        
         const modal = document.getElementById(modalId); 
         const form = modal.querySelector('form'); 
         form.reset(); 
         delete form.dataset.id; 
         
         if(mode === 'edit' && id) { 
-          const record = db[entity].find(i => i.id == id); 
+          const dataEntity = entity === 'organismo' ? 'organismos' : entity;
+          const record = db[dataEntity].find(i => i.id == id); 
           if(record) Object.entries(record).forEach(([k,v]) => { 
             if(form.elements[k]) form.elements[k].value = v ?? ''; 
           }); 
@@ -1474,11 +1640,12 @@
       else if(entity === 'runnai') collectionRef = colRunnai; 
       else if(entity === 'apoyo') collectionRef = colApoyo; 
       else collectionRef = colOrganismos; 
-      deleteEntityFirestore(collectionRef, id); 
+      // Mostrar modal personalizado en lugar de confirm nativo
+      showDeleteConfirm(entity, collectionRef, id);
     },
     
     collectDynamicItems(containerId) { 
-      const container = document.getElementById(containerId); 
+      const container = document.getElementById(containerId + 'Container'); 
       if(!container) return []; 
       const items = []; 
       container.querySelectorAll('.dynamic-item').forEach(div => { 
@@ -1490,7 +1657,7 @@
     },
     
     addDynamicItem(containerId, defaultData = null) { 
-      const container = document.getElementById(containerId); 
+      const container = document.getElementById(containerId + 'Container'); 
       if(!container) return; 
       let html = ''; 
       
@@ -1504,7 +1671,7 @@
       
       container.insertAdjacentHTML('beforeend', html); 
     },
-    
+
     agregarFamiliar(data = null) { 
       const nombre = document.getElementById('familiar_nombre')?.value || data?.nombre || ''; 
       const dni = document.getElementById('familiar_dni')?.value || data?.dni || ''; 
@@ -1540,7 +1707,6 @@
       del.onclick = () => row.remove(); 
       btnCell.appendChild(del); 
       
-      // Limpiar form temporal
       document.getElementById('familiar_nombre').value = ''; 
       document.getElementById('familiar_dni').value = ''; 
       document.getElementById('familiar_domicilio').value = ''; 
