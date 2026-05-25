@@ -812,18 +812,73 @@
   let pendingDelete = null; // { collectionRef, id, entityName }
   
   /* ==========================================================================
-     FUNCIONES UTILIDAD
+     FUNCIONES DE FECHA CORREGIDAS (RESPETAN EXACTAMENTE LO QUE EL USUARIO INGRESA)
+     ========================================================================== */
+  // Convierte una fecha en formato YYYY-MM-DD a un objeto Date local (sin ajuste UTC)
+  function parseLocalDate(dateStr) {
+    if (!dateStr) return null;
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return null;
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    return new Date(year, month, day);
+  }
+
+  // Formatea una fecha (string YYYY-MM-DD o Date) a DD/MM/YYYY usando la fecha local exacta
+  function formatDateLocal(dateInput) {
+    if (!dateInput) return '';
+    let date;
+    if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+      date = parseLocalDate(dateInput);
+    } else if (dateInput instanceof Date) {
+      date = dateInput;
+    } else {
+      return dateInput; // si no es reconocible, devolvemos el valor original
+    }
+    if (!date || isNaN(date.getTime())) return '';
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  // Calcula la edad a partir de fecha de nacimiento (en formato YYYY-MM-DD) usando fechas locales
+  function calcEdadFromFechaLocal(fechaNacimiento) {
+    if (!fechaNacimiento) return '-';
+    const hoy = new Date();
+    const nac = parseLocalDate(fechaNacimiento);
+    if (!nac) return '-';
+    let edad = hoy.getFullYear() - nac.getFullYear();
+    const m = hoy.getMonth() - nac.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) {
+      edad--;
+    }
+    return edad;
+  }
+
+  // Calcula días entre dos fechas (formato YYYY-MM-DD) de forma local, sin conversión UTC
+  function daysBetweenLocal(startStr, endStr) {
+    if (!startStr || !endStr) return 0;
+    const start = parseLocalDate(startStr);
+    const end = parseLocalDate(endStr);
+    if (!start || !end) return 0;
+    const diffTime = end - start;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  }
+
+  /* ==========================================================================
+     FUNCIONES UTILIDAD (adaptadas)
      ========================================================================== */
   function formatDate(dateStr) { 
-    if (!dateStr) return ''; 
-    const d = new Date(dateStr); 
-    if(isNaN(d.getTime())) return dateStr; 
-    return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; 
+    // mantiene compatibilidad con el resto del código, ahora usa la versión local
+    return formatDateLocal(dateStr);
   }
   
   function formatDisplayDate(value) {
     if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-      return formatDate(value);
+      return formatDateLocal(value);
     }
     return value;
   }
@@ -897,7 +952,6 @@
   }
 
   async function deleteEntityFirestore(collectionRef, id) { 
-    // Ya no usamos confirm nativo, llamamos desde el modal personalizado
     try { 
       await collectionRef.doc(id).delete(); 
       await loadAllData(); 
@@ -965,7 +1019,7 @@
   }
   
   /* ==========================================================================
-     CONTROLADOR PRINCIPAL (APP) - COMPLETO Y ORIGINAL
+     CONTROLADOR PRINCIPAL (APP) - COMPLETO Y ORIGINAL CON FUNCIONES DE FECHA CORREGIDAS
      ========================================================================== */
   const App = {
     state: { page: 1, limit: 10, filter: 'todos', search: '' },
@@ -1213,7 +1267,7 @@
         </tr>`;
       } 
       if(entity === 'runnai') { 
-        const edad = this.calcEdadFromFecha(r.nacimiento); 
+        const edad = calcEdadFromFechaLocal(r.nacimiento); 
         const badgeClass = r.estado === 'activo' ? 'active' : r.estado === 'pendiente' ? 'pending' : 'closed'; 
         return `<tr>
           <td><span class="badge ${badgeClass}">${this.escapeHtml(r.estado||'')}</span></td>
@@ -1232,7 +1286,7 @@
           <td>${this.escapeHtml(r.dni||'')}</td>
           <td><span class="badge" style="background:#e0e7ff; color:#3730a3;">${this.escapeHtml(r.tipo||'')}</span></td>
           <td>${this.escapeHtml(r.profesional||'')}</td>
-          <td>${formatDate(r.inicio)}</td>
+          <td>${formatDateLocal(r.inicio)}</td>
           <td>${this.escapeHtml(r.estado||'')}</td>
           <td>${acciones}</td>
         </tr>`; 
@@ -1336,16 +1390,16 @@
         filas = data.map(h => [h.nombre||'-',h.direccion||'-',h.municipio||'-',h.telefono ? `${h.prefijo_tel||'+54'} ${h.telefono}` : '-',`${h.ocupados||0}/${h.capacidad}`,h.responsable||'-']); 
       } else if(entity === 'runnai'){ 
         columnas = ['Estado','Nombre','DNI','Edad','Hogar','Días Acumulados','Expte.']; 
-        filas = data.map(r => [r.estado||'-',r.nombre||'-',r.dni||'-',this.calcEdadFromFecha(r.nacimiento),r.hogarActual||'-',r.sumaDiasTotales||0,r.expte_judicial||'-']); 
+        filas = data.map(r => [r.estado||'-',r.nombre||'-',r.dni||'-',calcEdadFromFechaLocal(r.nacimiento),r.hogarActual||'-',r.sumaDiasTotales||0,r.expte_judicial||'-']); 
       } else if(entity === 'apoyo'){ 
         columnas = ['NNyA','DNI','Tipo','Profesional','Inicio','Estado']; 
-        filas = data.map(a => [a.ninio||'-',a.dni||'-',a.tipo||'-',a.profesional||'-',formatDate(a.inicio),a.estado||'-']); 
+        filas = data.map(a => [a.ninio||'-',a.dni||'-',a.tipo||'-',a.profesional||'-',formatDateLocal(a.inicio),a.estado||'-']); 
       } else{ 
         columnas = ['Nombre','Tipo','Domicilio','Teléfono','Responsable']; 
         filas = data.map(o => [o.nombre||'-',o.tipo||'-',o.domicilio||'-',o.telefono ? `${o.prefijo_tel||'+54'} ${o.telefono}` : '-',o.responsable||'-']); 
       } 
       
-      let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte - ${entity.toUpperCase()}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:'Plus Jakarta Sans',sans-serif;padding:2cm;color:#0f172a;} table{border-collapse:collapse;width:100%;margin-top:20px;} th,td{border:1px solid #cbd5e1;padding:12px;text-align:left;font-size:12px;} th{background:#f8fafc;font-weight:700;text-transform:uppercase;font-size:10px;color:#64748b;} h2{margin:0;color:#4f46e5;} p{color:#64748b;font-size:12px;}</style></head><body><h2>Registro Unico NNyA Institucionalizados Defensoría Civil y Comercial 6 Ministerio Público de Misiones</h2><p>Fecha / Hora de Impresión: ${this.getFormattedPrintDate()}</p></table><thead><tr>${columnas.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${filas.map(f=>`<tr>${f.map(cell=>`<td>${this.escapeHtml(String(cell))}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`; 
+      let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte - ${entity.toUpperCase()}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:'Plus Jakarta Sans',sans-serif;padding:2cm;color:#0f172a;} table{border-collapse:collapse;width:100%;margin-top:20px;} th,td{border:1px solid #cbd5e1;padding:12px;text-align:left;font-size:12px;} th{background:#f8fafc;font-weight:700;text-transform:uppercase;font-size:10px;color:#64748b;} h2{margin:0;color:#4f46e5;} p{color:#64748b;font-size:12px;}</style></head><body><h2>Registro Unico NNyA Institucionalizados Defensoría Civil y Comercial 6 Ministerio Público de Misiones</h2><p>Fecha / Hora de Impresión: ${this.getFormattedPrintDate()}</p><table><thead><tr>${columnas.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${filas.map(f=>`<tr>${f.map(cell=>`<td>${this.escapeHtml(String(cell))}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`; 
       const win = window.open('','_blank'); 
       win.document.write(html); 
       win.document.close(); 
@@ -1395,11 +1449,11 @@
         }
       }); 
       
+      // Cálculo de días de permanencia actual usando fechas locales
       if(data.hogar_fecha_ingreso && data.hogarActual) { 
-        const ingreso = new Date(data.hogar_fecha_ingreso); 
-        const hoy = new Date(); 
-        const diffTime = Math.abs(hoy - ingreso); 
-        data.dias_permanencia_actual = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+        const hoy = new Date();
+        const hoyStr = `${hoy.getFullYear()}-${(hoy.getMonth()+1).toString().padStart(2,'0')}-${hoy.getDate().toString().padStart(2,'0')}`;
+        data.dias_permanencia_actual = daysBetweenLocal(data.hogar_fecha_ingreso, hoyStr);
       } 
       return data; 
     },
@@ -1732,12 +1786,6 @@
       document.getElementById('familiar_email').value = ''; 
     },
     
-    calcEdadFromFecha(fecha) { 
-      if(!fecha) return '-'; 
-      const ageDifMs = Date.now() - new Date(fecha).getTime(); 
-      return Math.abs(new Date(ageDifMs).getUTCFullYear() - 1970); 
-    },
-    
     calcAge(input) { 
       const form = input.closest('form'); 
       let hidden = form.querySelector('[name="edad"]'); 
@@ -1747,9 +1795,10 @@
         hidden.name = 'edad'; 
         form.appendChild(hidden); 
       } 
-      hidden.value = this.calcEdadFromFecha(input.value); 
+      const edad = calcEdadFromFechaLocal(input.value);
+      hidden.value = edad; 
       const edadField = form.querySelector('[name="edad"]'); 
-      if(edadField && edadField.type !== 'hidden') edadField.value = hidden.value; 
+      if(edadField && edadField.type !== 'hidden') edadField.value = edad; 
     },
     
     populateDatalists() { 
@@ -1757,7 +1806,6 @@
       document.getElementById('list-organismos').innerHTML = db.organismos.map(o => `<option value="${o.nombre.replace(/"/g,'&quot;')}">`).join(''); 
       document.getElementById('list-runnaiNames').innerHTML = db.runnai.map(r => `<option value="${r.nombre.replace(/"/g,'&quot;')}">`).join('');
       
-      // Filtrar organismos por tipo
       const juzgados = db.organismos.filter(o => o.tipo === 'Juzgado').map(o => o.nombre);
       const defensorias = db.organismos.filter(o => o.tipo === 'Defensoría').map(o => o.nombre);
       const municipios = db.organismos.filter(o => o.tipo === 'Municipalidad').map(o => o.nombre);
@@ -1781,7 +1829,7 @@
           <td><span class="badge ${r.estado === 'activo' ? 'active' : 'closed'}">${r.estado}</span></td>
           <td><strong>${r.nombre}</strong></td>
           <td>${r.dni}</td>
-          <td>${this.calcEdadFromFecha(r.nacimiento)}</td>
+          <td>${calcEdadFromFechaLocal(r.nacimiento)}</td>
           <td>${r.hogarActual||'-'}</td>
           <td>${r.sumaDiasTotales||0}</td>
           <td>${r.expte_judicial||'-'}</td>
