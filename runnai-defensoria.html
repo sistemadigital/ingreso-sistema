@@ -596,7 +596,7 @@
       <table id="tbl-organismos">
         <thead><tr><th>Nombre</th><th>Tipo</th><th>Domicilio</th><th>Teléfono</th><th>Responsable</th><th>Acciones</th></tr></thead>
         <tbody><tr><td colspan="6" class="loader">Cargando datos...</td></tr>
-      </table>
+       </table>
       <div class="pagination" id="pag-bottom-organismos"></div>
     </div>
   </section>
@@ -723,7 +723,7 @@
       
       <div class="inner-panel" id="inner-psicosocial"><div class="form-grid"><div class="form-group"><label>Desarrollo madurativo</label><input name="psico_desarrollo_madurativo"></div><div class="form-group"><label>Desc. desarrollo</label><textarea name="psico_desc_desarrollo" rows="2"></textarea></div><div class="form-group"><label>Atención psico-social</label><select name="psico_atencion"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Tipo Apoyo</label><input name="psico_tipo_apoyo"></div><div class="form-group"><label>Descripción apoyo</label><textarea name="psico_desc_apoyo" rows="2"></textarea></div></div><div class="form-section"><h3>Historial Psicosocial</h3><div class="dynamic-list" id="historialPsicoContainer"></div><br><button type="button" class="btn btn-outline btn-sm" onclick="App.addDynamicItem('historialPsico')">+ Agregar registro</button></div></div>
       
-      <div class="inner-panel" id="inner-familiares"><div class="form-section"><div class="table-wrap" style="margin-bottom:1.5rem;"><table><thead><tr><th>Nombre</th><th>DNI</th><th>Vínculo</th><th>Ref. Adulto</th><th>Domicilio</th><th>Municipio</th><th>Tel</th><th>Email</th><th></th></tr></thead><tbody id="familiaresTableBody"></tbody></table></div><div class="form-grid"><div class="form-group"><label>Nombre</label><input id="familiar_nombre"></div><div class="form-group"><label>DNI</label><input id="familiar_dni" maxlength="8" oninput="this.value=this.value.replace(/[^0-9]/g,'')" pattern="\d{7,8}" title="DNI argentino (7 u 8 dígitos sin puntos)"></div><div class="form-group"><label>Tipo</label><select id="familiar_tipo"><option>PADRE</option><option>MADRE</option><option>HERMANO</option><option>ABUELO</option><option>OTRO</option></select></div><div class="form-group"><label>Referente adulto</label><select id="familiar_referente"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Domicilio</label><input id="familiar_domicilio"></div><div class="form-group"><label>Municipio</label><input id="familiar_municipio"></div><div class="form-group"><label>Teléfono</label>
+      <div class="inner-panel" id="inner-familiares"><div class="form-section"><div class="table-wrap" style="margin-bottom:1.5rem;"></table><thead><tr><th>Nombre</th><th>DNI</th><th>Vínculo</th><th>Ref. Adulto</th><th>Domicilio</th><th>Municipio</th><th>Tel</th><th>Email</th><th></th></tr></thead><tbody id="familiaresTableBody"></tbody></table></div><div class="form-grid"><div class="form-group"><label>Nombre</label><input id="familiar_nombre"></div><div class="form-group"><label>DNI</label><input id="familiar_dni" maxlength="8" oninput="this.value=this.value.replace(/[^0-9]/g,'')" pattern="\d{7,8}" title="DNI argentino (7 u 8 dígitos sin puntos)"></div><div class="form-group"><label>Tipo</label><select id="familiar_tipo"><option>PADRE</option><option>MADRE</option><option>HERMANO</option><option>ABUELO</option><option>OTRO</option></select></div><div class="form-group"><label>Referente adulto</label><select id="familiar_referente"><option>SI</option><option>NO</option></select></div><div class="form-group"><label>Domicilio</label><input id="familiar_domicilio"></div><div class="form-group"><label>Municipio</label><input id="familiar_municipio"></div><div class="form-group"><label>Teléfono</label>
         <div style="display: flex; gap: 0.5rem;">
           <select id="familiar_prefijo" style="width: auto;">
             <option value="+54" selected>🇦🇷 +54</option>
@@ -811,6 +811,14 @@
     const d = new Date(dateStr); 
     if(isNaN(d.getTime())) return dateStr; 
     return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; 
+  }
+  
+  // Función para formatear cualquier valor que parezca fecha ISO a DD/MM/AAAA
+  function formatDisplayDate(value) {
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return formatDate(value);
+    }
+    return value;
   }
   
   /* ==========================================================================
@@ -1187,7 +1195,7 @@
       if(entity === 'hogares') {
         const porc = r.capacidad > 0 ? (r.ocupados / r.capacidad) * 100 : 0;
         const colorOc = porc >= 100 ? '#ef4444' : porc > 80 ? '#f59e0b' : '#10b981';
-        return `</tr>
+        return `<tr>
           <td><strong>${this.escapeHtml(r.nombre||'')}</strong></td>
           <td>${this.escapeHtml(r.direccion||'-')}</td>
           <td>${this.escapeHtml(r.municipio||'-')}</td>
@@ -1230,7 +1238,7 @@
           <td>${r.telefono?`<a href="tel:${(r.prefijo_tel||'+54').replace(/\s/g,'')}${r.telefono.replace(/\s/g,'')}" class="tel-link">${r.prefijo_tel||'+54'} ${this.escapeHtml(r.telefono)}</a>`:'-'}</td>
           <td>${this.escapeHtml(r.responsable||'-')}</td>
           <td>${acciones}</td>
-        </tr>`; 
+        </table>`; 
       } 
       return ''; 
     },
@@ -1285,7 +1293,9 @@
 
       for(let k of keysToRender) {
         let v = record[k];
-        html += `<div class="detail-item"><div class="detail-label">${k.replace(/_/g,' ').toUpperCase()}</div><div class="detail-value">${this.escapeHtml(String(v??'-'))}</div></div>`; 
+        // Aplicar formato de fecha si es string ISO
+        const displayValue = formatDisplayDate(v);
+        html += `<div class="detail-item"><div class="detail-label">${k.replace(/_/g,' ').toUpperCase()}</div><div class="detail-value">${this.escapeHtml(String(displayValue??'-'))}</div></div>`; 
       }
       
       html += `</div></div></div>`; 
@@ -1329,7 +1339,7 @@
         filas = data.map(o => [o.nombre||'-',o.tipo||'-',o.domicilio||'-',o.telefono ? `${o.prefijo_tel||'+54'} ${o.telefono}` : '-',o.responsable||'-']); 
       } 
       
-      let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte - ${entity.toUpperCase()}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:'Plus Jakarta Sans',sans-serif;padding:2cm;color:#0f172a;} table{border-collapse:collapse;width:100%;margin-top:20px;} th,td{border:1px solid #cbd5e1;padding:12px;text-align:left;font-size:12px;} th{background:#f8fafc;font-weight:700;text-transform:uppercase;font-size:10px;color:#64748b;} h2{margin:0;color:#4f46e5;} p{color:#64748b;font-size:12px;}</style></head><body><h2>Registro Unico NNyA Institucionalizados Defensoría Civil y Comercial 6 Ministerio Público de Misiones</h2><p>Fecha / Hora de Impresión: ${this.getFormattedPrintDate()}</p><table><thead><tr>${columnas.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${filas.map(f=>`<tr>${f.map(cell=>`<td>${this.escapeHtml(String(cell))}</td>`).join('')}</tr>`).join('')}</tbody><table></body></html>`; 
+      let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte - ${entity.toUpperCase()}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:'Plus Jakarta Sans',sans-serif;padding:2cm;color:#0f172a;} table{border-collapse:collapse;width:100%;margin-top:20px;} th,td{border:1px solid #cbd5e1;padding:12px;text-align:left;font-size:12px;} th{background:#f8fafc;font-weight:700;text-transform:uppercase;font-size:10px;color:#64748b;} h2{margin:0;color:#4f46e5;} p{color:#64748b;font-size:12px;}</style></head><body><h2>Registro Unico NNyA Institucionalizados Defensoría Civil y Comercial 6 Ministerio Público de Misiones</h2><p>Fecha / Hora de Impresión: ${this.getFormattedPrintDate()}</p><table><thead><tr>${columnas.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${filas.map(f=>`<tr>${f.map(cell=>`<td>${this.escapeHtml(String(cell))}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`; 
       const win = window.open('','_blank'); 
       win.document.write(html); 
       win.document.close(); 
@@ -1415,7 +1425,9 @@
 
       const renderField = (key, value) => {
         const labelName = key.replace(/_/g, ' ').toUpperCase();
-        const valStr = (value === '' || value === null || value === undefined) ? '-' : value;
+        let valStr = (value === '' || value === null || value === undefined) ? '-' : value;
+        // Formatear fecha si es ISO
+        valStr = formatDisplayDate(valStr);
         const isFull = String(valStr).length > 60;
         return `<div class="field ${isFull ? 'full' : ''}"><div class="label">${labelName}</div><div class="value">${valStr}</div></div>`;
       };
@@ -1431,7 +1443,8 @@
         listData.forEach(row => {
           tHtml += `<tr>`;
           headers.forEach(h => {
-            const cellVal = (row[h] === null || row[h] === undefined || row[h] === '') ? '-' : row[h];
+            let cellVal = (row[h] === null || row[h] === undefined || row[h] === '') ? '-' : row[h];
+            cellVal = formatDisplayDate(cellVal); // formatear fechas en tablas
             tHtml += `<td>${cellVal}</td>`;
           });
           tHtml += `</tr>`;
@@ -1640,7 +1653,6 @@
       else if(entity === 'runnai') collectionRef = colRunnai; 
       else if(entity === 'apoyo') collectionRef = colApoyo; 
       else collectionRef = colOrganismos; 
-      // Mostrar modal personalizado en lugar de confirm nativo
       showDeleteConfirm(entity, collectionRef, id);
     },
     
@@ -1760,7 +1772,7 @@
           <td>${r.sumaDiasTotales||0}</td>
           <td>${r.expte_judicial||'-'}</td>
           <td><button class="btn btn-sm btn-outline" onclick='App.viewDetail("runnai","${r.id}")'>👁 Ver Ficha</button></td>
-        </tr>`).join(''); 
+         </tr>`).join(''); 
       }
     },
     
