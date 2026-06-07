@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Reporte Completo Defensoría 6</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background-color: #ffffff;
+            color: #212529;
+            overflow-x: hidden;
+        }
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .content-area {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        .filters-sidebar {
+            width: 340px;
+            background-color: #f8f9fa;
+            border-left: 1px solid #e9ecef;
+            padding: 30px 25px;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+        .page-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 0;
+            color: #111827;
+            letter-spacing: -0.5px;
+        }
+        .table {
+            font-size: 0.85rem;
+            vertical-align: middle;
+        }
+        .table thead th {
+            background-color: #ffffff;
+            color: #6b7280;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e7eb;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f9fafb;
+        }
+        .form-control, .form-select {
+            font-size: 0.85rem;
+            border-radius: 4px;
+            border-color: #d1d5db;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.15);
+        }
+        .inline-select {
+            min-width: 150px;
+        }
+        .date-input-hidden {
+            display: none;
+            margin-top: 8px;
+        }
+        .filter-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .print-btn {
+            background-color: #111827;
+            color: white;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 4px;
+        }
+        .print-btn:hover {
+            background-color: #374151;
+            color: white;
+        }
+        .reset-btn {
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 4px;
+        }
+        .summary-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        .toast-container {
+            z-index: 1060;
+        }
+        .estado-pendiente {
+            color: #dc3545 !important;
+            font-weight: 800 !important;
+            background-color: #fff5f5;
+            border-radius: 20px;
+            padding: 4px 12px;
+            display: inline-block;
+            font-size: 0.8rem;
+        }
+        .estado-control, .estado-pase-firma {
+            color: #0d6efd !important;
+            font-weight: 700 !important;
+            background-color: #e8f0fe;
+            border-radius: 20px;
+            padding: 4px 12px;
+            display: inline-block;
+            font-size: 0.8rem;
+        }
+        .estado-firmado {
+            color: #198754 !important;
+            font-weight: 800 !important;
+            background-color: #e0f2e9;
+            border-radius: 20px;
+            padding: 4px 12px;
+            display: inline-block;
+            font-size: 0.8rem;
+        }
+        .status-badge {
+            white-space: nowrap;
+        }
+        .empleado-bold {
+            font-weight: 700;
+            color: #0b2b44;
+        }
+        .secretario-bold {
+            font-weight: 700;
+            color: #0c4a6e;
+        }
+        .btn-filtros-movil {
+            display: none;
+            background-color: #111827;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 20px;
+            font-weight: 500;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .mobile-summary {
+            display: none;
+            margin-bottom: 24px;
+        }
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .content-area {
+                padding: 20px;
+            }
+            .filters-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 85%;
+                max-width: 320px;
+                height: 100%;
+                z-index: 1050;
+                transform: translateX(-100%);
+                border-left: none;
+                border-right: 1px solid #e9ecef;
+                box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+                transition: transform 0.25s ease;
+                background: #f8f9fa;
+            }
+            .filters-sidebar.open-mobile {
+                transform: translateX(0);
+            }
+            .btn-filtros-movil {
+                display: inline-flex;
+            }
+            .mobile-summary {
+                display: block;
+            }
+            .mobile-overlay.active {
+                display: block;
+            }
+            .table {
+                font-size: 0.75rem;
+            }
+            .inline-select {
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <!-- Área de contenido principal -->
+    <div class="content-area">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <h1 class="page-title">📋 Reporte de Pase de Causas, Control de Secretarios y Firma del Defensor</h1>
+            <div class="d-flex gap-2">
+                <button class="btn btn-filtros-movil" id="openFiltersBtn">
+                    <i class="fas fa-sliders-h"></i> Filtros
+                </button>
+                <button class="btn print-btn px-4 py-2" id="btnPrint">
+                    🖨️ Imprimir Reporte
+                </button>
+            </div>
+        </div>
+
+        <!-- Resumen móvil (visible solo en mobile) -->
+        <div class="mobile-summary summary-card" id="mobileSummaryCard">
+            <h6 class="fw-bold mb-3" style="font-size: 0.85rem;">📊 Resumen de Cantidades</h6>
+            <div id="summaryContainerMobile"></div>
+            <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
+                <span class="text-muted fw-semibold">Total Filtrado:</span>
+                <span class="badge bg-dark fs-6" id="totalMobileBadge">0</span>
+            </div>
+        </div>
+
+        <div id="loader" class="text-center py-5">
+            <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+            <p class="mt-3 text-muted fs-6">Cargando registros desde Firestore...</p>
+        </div>
+
+        <div class="bg-white rounded border border-light shadow-sm" id="tableContainer" style="display: none;">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="reportTable">
+                    <thead>
+                        <tr>
+                            <th class="text-center" width="5%">Nº</th>
+                            <th width="15%">Fecha y Hora Pase</th>
+                            <th width="15%">Expediente</th>
+                            <th width="20%">Empleado Asignado</th>
+                            <th width="20%">Secretario/a</th>
+                            <th width="25%">Estado de Control</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4" id="paginationWrapper" style="display: none;">
+            <span class="text-muted" style="font-size: 0.85rem;" id="paginationInfo">Mostrando 0 - 0 de 0 registros</span>
+            <nav>
+                <ul class="pagination pagination-sm mb-0" id="paginationContainer"></ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Sidebar de filtros (escritorio y drawer móvil) -->
+    <div class="filters-sidebar" id="filtersSidebar">
+        <div class="d-flex justify-content-between align-items-center mb-3 d-md-none">
+            <h5 class="fw-bold mb-0">🔍 Filtros</h5>
+            <button class="btn-close" id="closeFiltersBtn"></button>
+        </div>
+        <h5 class="mb-4 fw-bold d-none d-md-block" style="font-size: 1.1rem; color: #111827;">🔎 Filtros de Búsqueda</h5>
+        
+        <div class="mb-3">
+            <label class="filter-label">Búsqueda de texto</label>
+            <input type="text" id="filterText" class="form-control" placeholder="Expediente, empleado, secretario...">
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-6">
+                <label class="filter-label">Año</label>
+                <select id="filterAno" class="form-select">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="col-6">
+                <label class="filter-label">Mes</label>
+                <select id="filterMes" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="01">Enero</option>
+                    <option value="02">Febrero</option>
+                    <option value="03">Marzo</option>
+                    <option value="04">Abril</option>
+                    <option value="05">Mayo</option>
+                    <option value="06">Junio</option>
+                    <option value="07">Julio</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="filter-label">Estado de Control</label>
+            <select id="filterEstado" class="form-select">
+                <option value="">Todos</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Control">Control</option>
+                <option value="Pase a Firma">Pase a Firma</option>
+                <option value="Firmado">Firmado</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="filter-label">Secretario/a</label>
+            <select id="filterSecretario" class="form-select">
+                <option value="">Todos</option>
+                <option value="Corrales Alicia Mariela">Corrales Alicia Mariela</option>
+                <option value="Magnani Enzo Luciano">Magnani Enzo Luciano</option>
+                <option value="Riveros Patricia Soledad">Riveros Patricia Soledad</option>
+                <option value="Sin Asignar">Sin Asignar</option>
+            </select>
+        </div>
+
+        <div class="mb-4">
+            <label class="filter-label">Empleado Asignado</label>
+            <select id="filterEmpleado" class="form-select">
+                <option value="">Todos</option>
+            </select>
+        </div>
+
+        <button class="btn btn-outline-secondary w-100 reset-btn mb-4" id="btnResetFilters">
+            🧹 Limpiar Filtros
+        </button>
+        
+        <div class="summary-card d-none d-md-block">
+            <h6 class="fw-bold mb-3" style="font-size: 0.85rem; color: #111827;">📊 Resumen de Cantidades</h6>
+            <div id="summaryContainer"></div>
+            <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
+                <span class="text-muted fw-semibold" style="font-size: 0.85rem;">Total Filtrado:</span>
+                <span class="badge bg-dark fs-6" id="totalRecordsBadge">0</span>
+            </div>
+        </div>
+
+        <!-- NUEVA TARJETA: Estadísticas por Empleado (Mayor, Similar, Menor) - EXCLUYE Boillat Cesar Enrique -->
+        <div class="summary-card mt-4" id="employeeStatsCard">
+            <h6 class="fw-bold mb-3" style="font-size: 0.85rem; color: #111827;">👥 Distribución por Empleado</h6>
+            <div id="employeeStatsContent">
+                <div class="text-muted small">Cargando estadísticas...</div>
+            </div>
+        </div>
+    </div>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="statusToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMessage" style="font-size: 0.85rem; font-weight: 500;">
+                Actualización guardada con éxito.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+<script>
+    // --------------------------------------------------------------
+    // 1. Configuración Firebase - Reporte principal
+    // --------------------------------------------------------------
+    const firebaseConfig = {
+        apiKey: "AIzaSyDgxLS98sk6GkLrjMu3BVS2cmZ9exdh4dY",
+        authDomain: "atencion-publico-def6.firebaseapp.com",
+        databaseURL: "https://atencion-publico-def6-default-rtdb.firebaseio.com",
+        projectId: "atencion-publico-def6",
+        storageBucket: "atencion-publico-def6.firebasestorage.app",
+        messagingSenderId: "1052433106688",
+        appId: "1:1052433106688:web:8ac3e144bcf377ac4b55e5"
+    };
+    
+    // --------------------------------------------------------------
+    // 2. Configuraciones de los sistemas de cada secretario (exactamente los SDK originales)
+    // --------------------------------------------------------------
+    // Corrales (secretarios-def3)
+    const firebaseConfigCorrales = {
+        apiKey: "AIzaSyDhRdnI7u6fBBH9A5h31Y9WnDNopkZOlgE",
+        authDomain: "secretarios-def3.firebaseapp.com",
+        projectId: "secretarios-def3",
+        storageBucket: "secretarios-def3.firebasestorage.app",
+        messagingSenderId: "522102845445",
+        appId: "1:522102845445:web:bfdf7c211d8efad1a2ac6c"
+    };
+    // Riveros (secretarios-def)
+    const firebaseConfigRiveros = {
+        apiKey: "AIzaSyDJZiGAhByx5zCIVg79fIMlzE1njuauW3k",
+        authDomain: "secretarios-def.firebaseapp.com",
+        projectId: "secretarios-def",
+        storageBucket: "secretarios-def.firebasestorage.app",
+        messagingSenderId: "533584198983",
+        appId: "1:533584198983:web:f51f57146ed16c813ca062"
+    };
+    // Magnani (secretarios-def2)
+    const firebaseConfigMagnani = {
+        apiKey: "AIzaSyDBisAdWcLk_hzZrWjvZUtmx3Dn2bYhqZk",
+        authDomain: "secretarios-def2.firebaseapp.com",
+        projectId: "secretarios-def2",
+        storageBucket: "secretarios-def2.firebasestorage.app",
+        messagingSenderId: "153016824405",
+        appId: "1:153016824405:web:14ca6c9d586d2d7a21dadc"
+    };
+    
+    // Inicializar apps
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const expedientesRef = db.collection('causas');
+    
+    const appCorrales = firebase.initializeApp(firebaseConfigCorrales, "corrales");
+    const appRiveros = firebase.initializeApp(firebaseConfigRiveros, "riveros");
+    const appMagnani = firebase.initializeApp(firebaseConfigMagnani, "magnani");
+    const dbCorrales = firebase.firestore(appCorrales);
+    const dbRiveros = firebase.firestore(appRiveros);
+    const dbMagnani = firebase.firestore(appMagnani);
+    
+    // --------------------------------------------------------------
+    // 3. Funciones auxiliares
+    // --------------------------------------------------------------
+    function normalizarExpediente(texto) {
+        if (!texto) return '';
+        // Extraer la parte numérica antes del primer guión o espacio
+        const match = texto.match(/^([0-9]+)/);
+        return match ? match[1] : texto.trim();
+    }
+    
+    // Calcula el estado de control según los datos del secretario:
+    // - Si encuentra al menos un "Pendiente" -> "Control"
+    // - Si todos son "Cumplido" -> "Pase a Firma"
+    // - En cualquier otro caso (sin historial, expediente no encontrado, historial vacío, otros valores) -> "Pendiente"
+    function calcularEstadoDesdeHistorial(historial) {
+        if (!historial || !Array.isArray(historial) || historial.length === 0) {
+            return "Pendiente";
+        }
+        let tienePendiente = false;
+        let todosCumplidos = true;
+        for (const item of historial) {
+            const control = item.control;
+            if (control === "Pendiente") {
+                tienePendiente = true;
+                todosCumplidos = false;
+                break; // ya sabemos que hay pendiente, no hace falta seguir
+            } else if (control !== "Cumplido") {
+                todosCumplidos = false;
+            }
+        }
+        if (tienePendiente) return "Control";
+        if (todosCumplidos) return "Pase a Firma";
+        return "Pendiente"; // por si hay mezcla o valores no esperados
+    }
+    
+    // --------------------------------------------------------------
+    // 4. Cargar datos de todas las bases (principal + secretarios)
+    // --------------------------------------------------------------
+    let allData = [];
+    let filteredData = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    const monthNames = {
+        "01": "Enero", "02": "Febrero", "03": "Marzo", "04": "Abril",
+        "05": "Mayo", "06": "Junio", "07": "Julio", "08": "Agosto",
+        "09": "Septiembre", "10": "Octubre", "11": "Noviembre", "12": "Diciembre"
+    };
+    
+    // Mapas: número normalizado -> { historial, secretario }
+    let mapaCorrales = new Map();
+    let mapaRiveros = new Map();
+    let mapaMagnani = new Map();
+    
+    async function cargarMapaSecretario(dbRef, nombreColeccion, mapaDestino) {
+        try {
+            const snapshot = await dbRef.collection(nombreColeccion).get();
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const expedienteRaw = data.expediente || data.caratula || '';
+                const numNormalizado = normalizarExpediente(expedienteRaw);
+                if (numNormalizado) {
+                    mapaDestino.set(numNormalizado, {
+                        historial: data.historial || [],
+                        secretario: nombreColeccion
+                    });
+                }
+            });
+        } catch (error) {
+            console.warn(`Error cargando datos de ${nombreColeccion}:`, error);
+        }
+    }
+    
+    async function loadDataFromSecretarios() {
+        await Promise.all([
+            cargarMapaSecretario(dbCorrales, 'causas', mapaCorrales),
+            cargarMapaSecretario(dbRiveros, 'causas', mapaRiveros),
+            cargarMapaSecretario(dbMagnani, 'causas', mapaMagnani)
+        ]);
+    }
+    
+    function getEstadoCalculado(numeroExpediente) {
+        const numNorm = normalizarExpediente(numeroExpediente);
+        if (!numNorm) return "Pendiente";
+        
+        let historial = null;
+        if (mapaCorrales.has(numNorm)) {
+            historial = mapaCorrales.get(numNorm).historial;
+        } else if (mapaRiveros.has(numNorm)) {
+            historial = mapaRiveros.get(numNorm).historial;
+        } else if (mapaMagnani.has(numNorm)) {
+            historial = mapaMagnani.get(numNorm).historial;
+        }
+        
+        return calcularEstadoDesdeHistorial(historial);
+    }
+    
+    // Función principal de carga (modificada)
+    async function loadData() {
+        try {
+            // 1. Cargar datos de secretarios
+            await loadDataFromSecretarios();
+            
+            // 2. Cargar datos de la base principal
+            const snapshot = await expedientesRef.orderBy('fechaPase', 'desc').get();
+            allData = [];
+            const empleadosSet = new Set();
+            const anosSet = new Set();
+    
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const usuario = data.usuarioAsignado || 'Sin Asignar';
+                let secretario = data.secretarioAsignado;
+                if (!secretario || secretario === '') {
+                    secretario = obtenerSecretarioAutomatico(usuario);
+                }
+                const expedienteNum = data.numeroCausa || data['Número de Causa'] || data.numCausa || 'S/D';
+                
+                // Calcular estado automático según los sistemas de secretarios
+                const estadoAutomatico = getEstadoCalculado(expedienteNum);
+                
+                allData.push({
+                    id: doc.id,
+                    fechaPase: data.fechaPase || '',
+                    numeroCausa: expedienteNum,
+                    usuarioAsignado: usuario,
+                    secretarioAsignado: secretario,
+                    estadoControl: estadoAutomatico,
+                    fechaFirmaDefensor: data.fechaFirmaDefensor || ''
+                });
+                
+                if(usuario && usuario !== 'Sin Asignar') empleadosSet.add(usuario);
+                if(data.fechaPase) {
+                    const year = data.fechaPase.substring(0,4);
+                    if(year && !isNaN(year)) anosSet.add(year);
+                }
+            });
+    
+            // Poblar selects de filtros
+            filterEmpleado.innerHTML = '<option value="">Todos</option>';
+            Array.from(empleadosSet).sort().forEach(emp => {
+                const opt = document.createElement('option');
+                opt.value = emp; opt.textContent = emp;
+                filterEmpleado.appendChild(opt);
+            });
+    
+            const sortedYears = Array.from(anosSet).sort((a,b)=>b-a);
+            filterAno.innerHTML = '<option value="">Todos</option>';
+            sortedYears.forEach(year => {
+                const opt = document.createElement('option');
+                opt.value = year; opt.textContent = year;
+                filterAno.appendChild(opt);
+            });
+    
+            applyFilters();
+        } catch (error) {
+            console.error("Error cargando datos: ", error);
+            showToast("Error al cargar la base de datos.", "danger");
+        } finally {
+            loader.style.display = 'none';
+            tableContainer.style.display = 'block';
+            paginationWrapper.style.display = 'flex';
+        }
+    }
+    
+    // --------------------------------------------------------------
+    // 5. Funciones auxiliares ya existentes (sin cambios)
+    // --------------------------------------------------------------
+    function obtenerSecretarioAutomatico(empleado) {
+        if (!empleado) return "Sin Asignar";
+        const emp = empleado.trim();
+        const riverosGroup = ["Bazante Nadia Romina", "Sosa Rita Cecilia", "Fioravante Romulo"];
+        const corralesGroup = ["Palacios Ana Gabriela", "Gudiño Natalia Esther"];
+        const magnaniGroup = ["Escobar Monica Graciela", "Gonzalez Juan Jose"];
+        
+        if (emp === "Corrales Alicia Mariela") return "Corrales Alicia Mariela";
+        if (emp === "Magnani Enzo Luciano") return "Magnani Enzo Luciano";
+        if (emp === "Riveros Patricia Soledad") return "Riveros Patricia Soledad";
+        
+        if (riverosGroup.includes(emp)) return "Riveros Patricia Soledad";
+        if (corralesGroup.includes(emp)) return "Corrales Alicia Mariela";
+        if (magnaniGroup.includes(emp)) return "Magnani Enzo Luciano";
+        
+        return "Sin Asignar";
+    }
+    
+    function formatDateTime(isoString) {
+        if (!isoString) return 'No registrada';
+        try {
+            if(isoString.includes('T')) {
+                const [date, time] = isoString.split('T');
+                const [y, m, d] = date.split('-');
+                return `${d}/${m}/${y} ${time.substring(0,5)}`;
+            }
+            return isoString;
+        } catch(e) { return isoString; }
+    }
+    
+    function showToast(message, type = 'success') {
+        const toastEl = document.getElementById('statusToast');
+        const toastMsg = document.getElementById('toastMessage');
+        toastMsg.textContent = message;
+        toastEl.className = `toast align-items-center text-white border-0 bg-${type}`;
+        const bsToast = new bootstrap.Toast(toastEl);
+        bsToast.show();
+    }
+    
+    function getEstadoClase(estado) {
+        if (estado === 'Pendiente') return 'estado-pendiente';
+        if (estado === 'Control' || estado === 'Pase a Firma') return 'estado-control';
+        if (estado === 'Firmado') return 'estado-firmado';
+        return '';
+    }
+    
+    function renderEmployeeStats() {
+        const container = document.getElementById('employeeStatsContent');
+        if (!container) return;
+        if (filteredData.length === 0) {
+            container.innerHTML = '<div class="text-muted small">Sin datos para mostrar</div>';
+            return;
+        }
+        const counts = {};
+        filteredData.forEach(item => {
+            const emp = item.usuarioAsignado;
+            if (emp === "Boillat Cesar Enrique") return;
+            counts[emp] = (counts[emp] || 0) + 1;
+        });
+        const entries = Object.entries(counts);
+        if (entries.length === 0) {
+            container.innerHTML = '<div class="text-muted small">No hay datos después de excluir al usuario indicado</div>';
+            return;
+        }
+        entries.sort((a, b) => b[1] - a[1]);
+        const maxCount = entries[0][1];
+        const minCount = entries[entries.length - 1][1];
+        const totalExpedientes = entries.reduce((sum, [_, c]) => sum + c, 0);
+        const avg = totalExpedientes / entries.length;
+        const avgRounded = Math.round(avg);
+        const similarEmployees = entries.filter(([_, count]) => Math.abs(count - avgRounded) <= 1 && count !== maxCount && count !== minCount);
+        const maxEmployees = entries.filter(([_, count]) => count === maxCount);
+        const minEmployees = entries.filter(([_, count]) => count === minCount);
+        let html = `
+            <div class="mb-3">
+                <div class="fw-bold mb-1" style="font-size:0.75rem; color:#0c4a6e;">📈 Mayor carga</div>
+                ${maxEmployees.map(([emp, count]) => `<div class="d-flex justify-content-between small"><span>${emp}</span><span class="fw-bold">${count} exp.</span></div>`).join('')}
+                ${maxEmployees.length === 0 ? '<div class="text-muted small">—</div>' : ''}
+            </div>
+            <div class="mb-3">
+                <div class="fw-bold mb-1" style="font-size:0.75rem; color:#0c4a6e;">⚖️ Carga similar (media ≈ ${avgRounded})</div>
+                ${similarEmployees.length > 0 ? similarEmployees.map(([emp, count]) => `<div class="d-flex justify-content-between small"><span>${emp}</span><span class="fw-bold">${count} exp.</span></div>`).join('') : '<div class="text-muted small">No hay empleados en rango medio</div>'}
+            </div>
+            <div>
+                <div class="fw-bold mb-1" style="font-size:0.75rem; color:#0c4a6e;">📉 Menor carga</div>
+                ${minEmployees.map(([emp, count]) => `<div class="d-flex justify-content-between small"><span>${emp}</span><span class="fw-bold">${count} exp.</span></div>`).join('')}
+                ${minEmployees.length === 0 ? '<div class="text-muted small">—</div>' : ''}
+            </div>
+        `;
+        container.innerHTML = html;
+    }
+    
+    function applyFilters() {
+        const text = filterText.value.toLowerCase();
+        const estado = filterEstado.value;
+        const secretario = filterSecretario.value;
+        const empleado = filterEmpleado.value;
+        const ano = filterAno.value;
+        const mes = filterMes.value;
+    
+        filteredData = allData.filter(item => {
+            const matchText = !text || 
+                (item.numeroCausa.toLowerCase().includes(text) ||
+                 item.usuarioAsignado.toLowerCase().includes(text) || 
+                 item.secretarioAsignado.toLowerCase().includes(text) ||
+                 item.estadoControl.toLowerCase().includes(text));
+            const matchSecretario = !secretario || item.secretarioAsignado === secretario;
+            const matchEstado = !estado || item.estadoControl === estado;
+            const matchEmpleado = !empleado || item.usuarioAsignado === empleado;
+            let matchAno = true, matchMes = true;
+            if(item.fechaPase) {
+                const itemAno = item.fechaPase.substring(0,4);
+                const itemMes = item.fechaPase.substring(5,7);
+                if(ano) matchAno = (itemAno === ano);
+                if(mes) matchMes = (itemMes === mes);
+            } else if(ano || mes) { matchAno = false; matchMes = false; }
+            return matchText && matchSecretario && matchEstado && matchEmpleado && matchAno && matchMes;
+        });
+    
+        const totalCount = filteredData.length;
+        if(totalRecordsBadge) totalRecordsBadge.textContent = totalCount;
+        if(totalMobileBadge) totalMobileBadge.textContent = totalCount;
+        currentPage = 1;
+        renderSummary();
+        renderEmployeeStats();
+        renderTable();
+        renderPagination();
+    }
+    
+    function renderSummary() {
+        const ano = filterAno.value;
+        const mes = filterMes.value;
+        let html = '';
+        if (ano && !mes) {
+            const counts = {};
+            filteredData.forEach(item => {
+                if(item.fechaPase) {
+                    const m = item.fechaPase.substring(5,7);
+                    counts[m] = (counts[m] || 0) + 1;
+                }
+            });
+            for(let i=1;i<=12;i++) {
+                let m = i.toString().padStart(2,'0');
+                if(counts[m]) {
+                    html += `<div class="summary-item"><span class="text-muted">${monthNames[m]} ${ano}</span><span class="fw-medium">${counts[m]}</span></div>`;
+                }
+            }
+        } else if (!ano && !mes) {
+            const counts = {};
+            filteredData.forEach(item => {
+                if(item.fechaPase) {
+                    const y = item.fechaPase.substring(0,4);
+                    counts[y] = (counts[y] || 0) + 1;
+                }
+            });
+            Object.keys(counts).sort((a,b)=>b-a).forEach(y => {
+                html += `<div class="summary-item"><span class="text-muted">Año ${y}</span><span class="fw-medium">${counts[y]}</span></div>`;
+            });
+        } else {
+            const label = mes ? `${monthNames[mes]} ${ano || ''}`.trim() : 'Período seleccionado';
+            html += `<div class="summary-item"><span class="text-muted">${label}</span><span class="fw-medium">${filteredData.length}</span></div>`;
+        }
+        if(html === '') html = '<div class="text-muted" style="font-size: 0.8rem;">Sin datos en el período.</div>';
+        if(summaryContainer) summaryContainer.innerHTML = html;
+        if(summaryContainerMobile) summaryContainerMobile.innerHTML = html;
+    }
+    
+    function renderTable() {
+        tableBody.innerHTML = '';
+        if(filteredData.length === 0) {
+            tableBody.innerHTML = '<td><td colspan="6" class="text-center py-4 text-muted">No se encontraron registros.</td></tr>';
+            return;
+        }
+        const start = (currentPage-1)*itemsPerPage;
+        const end = Math.min(start+itemsPerPage, filteredData.length);
+        const pageData = filteredData.slice(start,end);
+        const total = filteredData.length;
+        pageData.forEach((item, idx) => {
+            const rowNum = total - start - idx;
+            const isFirmado = item.estadoControl === 'Firmado';
+            const estadoClass = getEstadoClase(item.estadoControl);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="text-center fw-medium text-muted">${rowNum}</td>
+                <td>${formatDateTime(item.fechaPase)}</td>
+                <td class="fw-semibold text-dark">${item.numeroCausa}</td>
+                <td class="empleado-bold">${item.usuarioAsignado}</td>
+                <td>
+                    <span class="secretario-bold">${item.secretarioAsignado}</span>
+                    <select class="form-select form-select-sm inline-select update-field mt-1" data-id="${item.id}" data-field="secretarioAsignado">
+                        <option value="Sin Asignar" ${item.secretarioAsignado === 'Sin Asignar' ? 'selected' : ''}>Sin Asignar</option>
+                        <option value="Corrales Alicia Mariela" ${item.secretarioAsignado === 'Corrales Alicia Mariela' ? 'selected' : ''}>Corrales Alicia Mariela</option>
+                        <option value="Magnani Enzo Luciano" ${item.secretarioAsignado === 'Magnani Enzo Luciano' ? 'selected' : ''}>Magnani Enzo Luciano</option>
+                        <option value="Riveros Patricia Soledad" ${item.secretarioAsignado === 'Riveros Patricia Soledad' ? 'selected' : ''}>Riveros Patricia Soledad</option>
+                    </select>
+                </td>
+                <td>
+                    <div class="d-flex flex-column gap-2">
+                        <select class="form-select form-select-sm update-field estado-select" data-id="${item.id}" data-field="estadoControl">
+                            <option value="Pendiente" ${item.estadoControl === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="Control" ${item.estadoControl === 'Control' ? 'selected' : ''}>Control</option>
+                            <option value="Pase a Firma" ${item.estadoControl === 'Pase a Firma' ? 'selected' : ''}>Pase a Firma</option>
+                            <option value="Firmado" ${item.estadoControl === 'Firmado' ? 'selected' : ''}>Firmado</option>
+                        </select>
+                        <input type="date" class="form-control form-control-sm update-field date-input-hidden" 
+                               data-id="${item.id}" data-field="fechaFirmaDefensor" 
+                               value="${item.fechaFirmaDefensor || ''}" 
+                               style="display: ${isFirmado ? 'block' : 'none'};">
+                        <span class="status-badge ${estadoClass}" style="display: inline-block; text-align: center;">${item.estadoControl}</span>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        });
+        document.getElementById('paginationInfo').innerHTML = `Mostrando ${start+1} - ${end} de ${total} registros`;
+    }
+    
+    function renderPagination() {
+        const paginationContainerElem = document.getElementById('paginationContainer');
+        paginationContainerElem.innerHTML = '';
+        const totalPages = Math.ceil(filteredData.length/itemsPerPage);
+        if(totalPages<=1) return;
+        const prev = document.createElement('li');
+        prev.className = `page-item ${currentPage===1?'disabled':''}`;
+        prev.innerHTML = `<a class="page-link" href="#" data-page="${currentPage-1}">Anterior</a>`;
+        paginationContainerElem.appendChild(prev);
+        let startPage = Math.max(1, currentPage-2);
+        let endPage = Math.min(totalPages, startPage+4);
+        if(endPage-startPage<4) startPage = Math.max(1, endPage-4);
+        for(let i=startPage;i<=endPage;i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i===currentPage?'active':''}`;
+            li.innerHTML = `<a class="page-link" href="#" data-page="${i}">${i}</a>`;
+            paginationContainerElem.appendChild(li);
+        }
+        const next = document.createElement('li');
+        next.className = `page-item ${currentPage===totalPages?'disabled':''}`;
+        next.innerHTML = `<a class="page-link" href="#" data-page="${currentPage+1}">Siguiente</a>`;
+        paginationContainerElem.appendChild(next);
+    }
+    
+    // Actualizaciones en tiempo real (edición manual, se mantiene)
+    tableBody.addEventListener('change', async (e) => {
+        if(e.target.classList.contains('update-field')) {
+            const docId = e.target.getAttribute('data-id');
+            const field = e.target.getAttribute('data-field');
+            let value = e.target.value;
+            const index = allData.findIndex(d => d.id === docId);
+            if(index !== -1) allData[index][field] = value;
+            if(field === 'estadoControl') {
+                const parentTd = e.target.closest('td');
+                const dateInput = parentTd.querySelector('.date-input-hidden');
+                const badgeSpan = parentTd.querySelector('.status-badge');
+                if(value === 'Firmado') {
+                    if(dateInput) dateInput.style.display = 'block';
+                } else {
+                    if(dateInput) { dateInput.style.display = 'none'; dateInput.value = ''; }
+                    if(index !== -1) allData[index].fechaFirmaDefensor = '';
+                    await expedientesRef.doc(docId).update({ fechaFirmaDefensor: '' });
+                }
+                if(badgeSpan) {
+                    badgeSpan.textContent = value;
+                    badgeSpan.className = `status-badge ${getEstadoClase(value)}`;
+                }
+            }
+            try {
+                await expedientesRef.doc(docId).update({ [field]: value });
+                showToast(`Campo "${field}" actualizado.`, 'success');
+                applyFilters();
+            } catch(error) { showToast('Error al guardar', 'danger'); }
+        }
+    });
+    
+    // Eventos de filtros
+    const filterText = document.getElementById('filterText');
+    const filterAno = document.getElementById('filterAno');
+    const filterMes = document.getElementById('filterMes');
+    const filterEstado = document.getElementById('filterEstado');
+    const filterSecretario = document.getElementById('filterSecretario');
+    const filterEmpleado = document.getElementById('filterEmpleado');
+    const btnResetFilters = document.getElementById('btnResetFilters');
+    filterText.addEventListener('input', applyFilters);
+    filterAno.addEventListener('change', applyFilters);
+    filterMes.addEventListener('change', applyFilters);
+    filterEstado.addEventListener('change', applyFilters);
+    filterSecretario.addEventListener('change', applyFilters);
+    filterEmpleado.addEventListener('change', applyFilters);
+    btnResetFilters.addEventListener('click', () => {
+        filterText.value = ''; filterAno.value = ''; filterMes.value = ''; filterEstado.value = '';
+        filterSecretario.value = ''; filterEmpleado.value = '';
+        applyFilters();
+        showToast('Filtros restablecidos', 'info');
+    });
+    document.getElementById('paginationContainer').addEventListener('click', (e) => {
+        e.preventDefault();
+        if(e.target.tagName === 'A') {
+            const page = parseInt(e.target.dataset.page);
+            if(!isNaN(page)) { currentPage = page; renderTable(); renderPagination(); window.scrollTo({top:0,behavior:'smooth'}); }
+        }
+    });
+    
+    // Impresión
+    const btnPrint = document.getElementById('btnPrint');
+    btnPrint.addEventListener('click', () => {
+        if(filteredData.length === 0) { alert("No hay datos para imprimir."); return; }
+        const printDate = new Date().toLocaleString('es-AR');
+        let rows = '';
+        filteredData.forEach((item, i) => {
+            const n = filteredData.length - i;
+            let estiloColor = '';
+            if(item.estadoControl === 'Pendiente') estiloColor = 'color:#dc3545; font-weight:bold;';
+            else if(item.estadoControl === 'Control' || item.estadoControl === 'Pase a Firma') estiloColor = 'color:#0d6efd; font-weight:bold;';
+            else if(item.estadoControl === 'Firmado') estiloColor = 'color:#198754; font-weight:bold;';
+            const firmaHtml = (item.estadoControl === 'Firmado' && item.fechaFirmaDefensor) ? `<br><small>Firma: ${item.fechaFirmaDefensor}</small>` : '';
+            rows += `<tr><td style="text-align:center">${n}</td><td>${formatDateTime(item.fechaPase)}</td><td><strong>${item.numeroCausa}</strong></td><td>${item.usuarioAsignado}</td><td>${item.secretarioAsignado}</td><td style="${estiloColor}">${item.estadoControl}${firmaHtml}</td></tr>`;
+        });
+        const printWin = window.open('', '_blank');
+        printWin.document.write(`
+            <html><head><title>Reporte Pase y Control</title><style>
+            body{font-family:Inter,sans-serif;padding:20px} table{border-collapse:collapse;width:100%}
+            th,td{border:1px solid #ccc;padding:8px;text-align:left} th{background:#f1f5f9}
+            h1{font-size:1.5rem} .meta{margin-bottom:20px;color:#555}
+            </style></head>
+            <body><h1>Reporte de Pase y Control de Secretarios y Firma del Defensor</h1>
+            <div class="meta">Impreso: ${printDate} | Total: ${filteredData.length}</div>
+            <table><thead><tr><th>#</th><th>Fecha/Hora</th><th>Expediente</th><th>Empleado</th><th>Secretario</th><th>Estado</th></tr></thead><tbody>${rows}</tbody></table></body></html>
+        `);
+        printWin.document.close(); printWin.print(); printWin.close();
+    });
+    
+    // Lógica móvil: abrir/cerrar sidebar
+    const sidebar = document.getElementById('filtersSidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    const openBtn = document.getElementById('openFiltersBtn');
+    const closeBtn = document.getElementById('closeFiltersBtn');
+    function openMobileFilters() { sidebar.classList.add('open-mobile'); overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function closeMobileFilters() { sidebar.classList.remove('open-mobile'); overlay.classList.remove('active'); document.body.style.overflow = ''; }
+    if(openBtn) openBtn.addEventListener('click', openMobileFilters);
+    if(closeBtn) closeBtn.addEventListener('click', closeMobileFilters);
+    if(overlay) overlay.addEventListener('click', closeMobileFilters);
+    
+    document.addEventListener('DOMContentLoaded', loadData);
+</script>
+</body>
+</html>
