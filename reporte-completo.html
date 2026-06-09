@@ -184,6 +184,18 @@
             background: rgba(0,0,0,0.5);
             z-index: 1040;
         }
+        /* Estilos para modal de control */
+        .control-history-item {
+            border-left: 3px solid #0d6efd;
+            background-color: #f8f9fa;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .control-date {
+            font-weight: 600;
+            color: #0c4a6e;
+        }
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -269,7 +281,8 @@
                             <th width="15%">Expediente</th>
                             <th width="20%">Empleado Asignado</th>
                             <th width="20%">Secretario/a</th>
-                            <th width="25%">Estado de Control</th>
+                            <th width="20%">Estado de Control</th>
+                            <th width="5%">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -379,6 +392,24 @@
     <div class="mobile-overlay" id="mobileOverlay"></div>
 </div>
 
+<!-- Modal para ver el control detallado del secretario -->
+<div class="modal fade" id="controlModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="fas fa-clipboard-list me-2"></i>Informe de Control del Secretario</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="controlModalBody">
+                <div class="text-center py-4">Cargando historial...</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
     <div id="statusToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
@@ -477,14 +508,14 @@
             if (control === "Pendiente") {
                 tienePendiente = true;
                 todosCumplidos = false;
-                break; // ya sabemos que hay pendiente, no hace falta seguir
+                break;
             } else if (control !== "Cumplido") {
                 todosCumplidos = false;
             }
         }
         if (tienePendiente) return "Control";
         if (todosCumplidos) return "Pase a Firma";
-        return "Pendiente"; // por si hay mezcla o valores no esperados
+        return "Pendiente";
     }
     
     // --------------------------------------------------------------
@@ -500,8 +531,8 @@
         "09": "Septiembre", "10": "Octubre", "11": "Noviembre", "12": "Diciembre"
     };
     
-    // Mapas: número normalizado -> { historial, secretario }
-    let mapaCorrales = new Map();
+    // Mapas: número normalizado -> { historial, secretario, docId? }
+    let mapaCorrales = new Map();   // key: numNorm, value: { historial, secretario, docId }
     let mapaRiveros = new Map();
     let mapaMagnani = new Map();
     
@@ -515,7 +546,8 @@
                 if (numNormalizado) {
                     mapaDestino.set(numNormalizado, {
                         historial: data.historial || [],
-                        secretario: nombreColeccion
+                        secretario: nombreColeccion,
+                        docId: doc.id
                     });
                 }
             });
@@ -544,17 +576,31 @@
         } else if (mapaMagnani.has(numNorm)) {
             historial = mapaMagnani.get(numNorm).historial;
         }
-        
         return calcularEstadoDesdeHistorial(historial);
     }
     
-    // Función principal de carga (modificada)
+    // Obtener el informe completo del secretario para un expediente (para el modal)
+    async function obtenerInformeSecretario(numeroExpediente) {
+        const numNorm = normalizarExpediente(numeroExpediente);
+        if (!numNorm) return null;
+        
+        if (mapaCorrales.has(numNorm)) {
+            const data = mapaCorrales.get(numNorm);
+            return { secretario: "Corrales Alicia Mariela", historial: data.historial, docId: data.docId };
+        } else if (mapaRiveros.has(numNorm)) {
+            const data = mapaRiveros.get(numNorm);
+            return { secretario: "Riveros Patricia Soledad", historial: data.historial, docId: data.docId };
+        } else if (mapaMagnani.has(numNorm)) {
+            const data = mapaMagnani.get(numNorm);
+            return { secretario: "Magnani Enzo Luciano", historial: data.historial, docId: data.docId };
+        }
+        return null;
+    }
+    
+    // Función principal de carga
     async function loadData() {
         try {
-            // 1. Cargar datos de secretarios
             await loadDataFromSecretarios();
-            
-            // 2. Cargar datos de la base principal
             const snapshot = await expedientesRef.orderBy('fechaPase', 'desc').get();
             allData = [];
             const empleadosSet = new Set();
@@ -568,8 +614,6 @@
                     secretario = obtenerSecretarioAutomatico(usuario);
                 }
                 const expedienteNum = data.numeroCausa || data['Número de Causa'] || data.numCausa || 'S/D';
-                
-                // Calcular estado automático según los sistemas de secretarios
                 const estadoAutomatico = getEstadoCalculado(expedienteNum);
                 
                 allData.push({
@@ -589,7 +633,6 @@
                 }
             });
     
-            // Poblar selects de filtros
             filterEmpleado.innerHTML = '<option value="">Todos</option>';
             Array.from(empleadosSet).sort().forEach(emp => {
                 const opt = document.createElement('option');
@@ -616,9 +659,7 @@
         }
     }
     
-    // --------------------------------------------------------------
-    // 5. Funciones auxiliares ya existentes (sin cambios)
-    // --------------------------------------------------------------
+    // Función auxiliar para asignar secretario automáticamente
     function obtenerSecretarioAutomatico(empleado) {
         if (!empleado) return "Sin Asignar";
         const emp = empleado.trim();
@@ -786,10 +827,68 @@
         if(summaryContainerMobile) summaryContainerMobile.innerHTML = html;
     }
     
+    // Función para mostrar el modal con el historial de control del secretario
+    async function verControlSecretario(expedienteNumero) {
+        const modalBody = document.getElementById('controlModalBody');
+        modalBody.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Cargando historial de control...</p></div>';
+        const modal = new bootstrap.Modal(document.getElementById('controlModal'));
+        modal.show();
+        
+        try {
+            const informe = await obtenerInformeSecretario(expedienteNumero);
+            if (!informe || !informe.historial || informe.historial.length === 0) {
+                modalBody.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No se encontraron registros de control para el expediente <strong>${expedienteNumero}</strong> en el sistema del secretario.
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div class="mb-3">
+                    <p><strong>Expediente:</strong> ${expedienteNumero}</p>
+                    <p><strong>Secretario/a:</strong> ${informe.secretario}</p>
+                    <hr>
+                    <h6 class="fw-bold">Historial de controles realizados:</h6>
+                </div>
+                <div class="list-group">
+            `;
+            // Ordenar historial por fecha descendente si existe campo fecha, sino mostrar en orden original
+            const historialOrdenado = [...informe.historial].sort((a,b) => {
+                if (a.fecha && b.fecha) return b.fecha.localeCompare(a.fecha);
+                return 0;
+            });
+            historialOrdenado.forEach((item, idx) => {
+                const fecha = item.fecha ? formatDateTime(item.fecha) : 'Fecha no registrada';
+                const control = item.control || 'Sin estado';
+                const observaciones = item.observaciones || 'Sin observaciones';
+                let badgeClass = 'bg-secondary';
+                if (control === 'Cumplido') badgeClass = 'bg-success';
+                else if (control === 'Pendiente') badgeClass = 'bg-warning text-dark';
+                html += `
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong class="control-date">${fecha}</strong>
+                            <span class="badge ${badgeClass}">${control}</span>
+                        </div>
+                        <div class="mt-2 small">${observaciones}</div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            modalBody.innerHTML = html;
+        } catch (error) {
+            console.error(error);
+            modalBody.innerHTML = `<div class="alert alert-danger">Error al cargar el informe: ${error.message}</div>`;
+        }
+    }
+    
     function renderTable() {
         tableBody.innerHTML = '';
         if(filteredData.length === 0) {
-            tableBody.innerHTML = '<td><td colspan="6" class="text-center py-4 text-muted">No se encontraron registros.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No se encontraron registros.</td></tr>';
             return;
         }
         const start = (currentPage-1)*itemsPerPage;
@@ -830,10 +929,24 @@
                         <span class="status-badge ${estadoClass}" style="display: inline-block; text-align: center;">${item.estadoControl}</span>
                     </div>
                 </td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-info ver-control-btn" data-expediente="${item.numeroCausa}" title="Ver control del secretario">
+                        <i class="fas fa-list-ul"></i>
+                    </button>
+                </td>
             `;
             tableBody.appendChild(tr);
         });
         document.getElementById('paginationInfo').innerHTML = `Mostrando ${start+1} - ${end} de ${total} registros`;
+        
+        // Asignar eventos a los botones de ver control
+        document.querySelectorAll('.ver-control-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const expediente = btn.getAttribute('data-expediente');
+                verControlSecretario(expediente);
+            });
+        });
     }
     
     function renderPagination() {
@@ -860,7 +973,7 @@
         paginationContainerElem.appendChild(next);
     }
     
-    // Actualizaciones en tiempo real (edición manual, se mantiene)
+    // Actualizaciones en tiempo real
     tableBody.addEventListener('change', async (e) => {
         if(e.target.classList.contains('update-field')) {
             const docId = e.target.getAttribute('data-id');
@@ -949,7 +1062,7 @@
         printWin.document.close(); printWin.print(); printWin.close();
     });
     
-    // Lógica móvil: abrir/cerrar sidebar
+    // Lógica móvil
     const sidebar = document.getElementById('filtersSidebar');
     const overlay = document.getElementById('mobileOverlay');
     const openBtn = document.getElementById('openFiltersBtn');
