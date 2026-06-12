@@ -274,7 +274,6 @@
     <footer>Haga clic en el número de expediente para ver el detalle completo registrado en la base de datos.</footer>
 </div>
 
-<!-- Modal de Bootstrap para mostrar detalles del expediente -->
 <div class="modal fade" id="detalleCausaModal" tabindex="-1" aria-labelledby="detalleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -295,7 +294,7 @@
 
 <script>
     // --------------------------------------------------------------
-    // Configuración Firebase (igual que reporte-completo)
+    // Configuración Firebase Original
     // --------------------------------------------------------------
     const firebaseConfig = {
         apiKey: "AIzaSyDgxLS98sk6GkLrjMu3BVS2cmZ9exdh4dY",
@@ -331,8 +330,20 @@
         messagingSenderId: "153016824405",
         appId: "1:153016824405:web:14ca6c9d586d2d7a21dadc"
     };
+
+    // --------------------------------------------------------------
+    // NUEVO SDK: Configuración para guardar el historial de PDFs
+    // --------------------------------------------------------------
+    const firebaseConfigNuevo = {
+        apiKey: "TU_NUEVA_API_KEY",
+        authDomain: "tu-nuevo-proyecto.firebaseapp.com",
+        projectId: "tu-nuevo-proyecto",
+        storageBucket: "tu-nuevo-proyecto.firebasestorage.app",
+        messagingSenderId: "TU_NUEVO_SENDER_ID",
+        appId: "TU_NUEVA_APP_ID"
+    };
     
-    // Inicializar apps
+    // Inicializar apps originales
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const causasRef = db.collection('causas');
@@ -343,6 +354,10 @@
     const dbCorrales = firebase.firestore(appCorrales);
     const dbRiveros = firebase.firestore(appRiveros);
     const dbMagnani = firebase.firestore(appMagnani);
+
+    // Inicializar app nueva para guardado
+    const appGuardadoPDF = firebase.initializeApp(firebaseConfigNuevo, "dbGuardadoPDF");
+    const dbNuevo = firebase.firestore(appGuardadoPDF);
     
     // Mapas
     let mapaCorrales = new Map();
@@ -487,6 +502,50 @@
         }
         return expedientes;
     }
+
+    // NUEVA FUNCIÓN: Guardar en el nuevo SDK
+    async function guardarNuevosExpedientesEnFirestore(expedientes) {
+        const statusDiv = document.getElementById('status');
+        
+        // Firestore permite un máximo de 500 operaciones por lote (batch).
+        // Dividimos los datos en bloques de 450 para estar seguros.
+        const chunks = [];
+        for (let i = 0; i < expedientes.length; i += 450) {
+            chunks.push(expedientes.slice(i, i + 450));
+        }
+
+        try {
+            for (const chunk of chunks) {
+                const batch = dbNuevo.batch();
+                
+                chunk.forEach(exp => {
+                    // Generar un ID único para evitar duplicados en el futuro.
+                    // Formato: NumeroExpediente_DD-MM-AAAA_Movimiento
+                    const numNorm = normalizarExpediente(exp.expediente) || exp.expediente;
+                    const idUnico = `${numNorm}_${exp.fechaStr.replace(/\//g, '-')}_${exp.movimiento}`;
+                    
+                    const docRef = dbNuevo.collection('historial_entradas_siged').doc(idUnico);
+                    
+                    batch.set(docRef, {
+                        movimiento: exp.movimiento,
+                        fechaStr: exp.fechaStr,
+                        fechaDate: exp.fechaDate,
+                        expediente: exp.expediente,
+                        usuarioAsignado: exp.usuarioAsignado || 'No registrado',
+                        secretarioAsignado: exp.secretarioAsignado || 'No registrado',
+                        estadoControl: exp.estadoControl || 'Pendiente',
+                        fechaGuardadoBase: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true }); // merge: true sobreescribe/actualiza sin crear duplicados
+                });
+
+                await batch.commit();
+            }
+            console.log("Guardado exitoso en el nuevo Firestore.");
+        } catch (error) {
+            console.error("Error al guardar en el nuevo Firestore:", error);
+            throw error;
+        }
+    }
     
     let todosExpedientes = [];
     let datosFiltrados = [];
@@ -496,21 +555,23 @@
     async function procesarPDFs(files) {
         if (!files || files.length === 0) return;
         const statusDiv = document.getElementById('status');
-        statusDiv.innerHTML = "⏳ Procesando PDFs... Esto puede tomar unos segundos.";
-        let nuevosExpedientes = [];
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            statusDiv.innerHTML = `📄 Leyendo ${file.name} (${i+1}/${files.length})...`;
+        statusDiv.innerHTML = "⏳ Procesando PDFs en paralelo... Esto tomará un instante.";
+        
+        // 1. Procesar todos los PDFs de forma simultánea (paralelo)
+        const promesas = Array.from(files).map(async (file) => {
             try {
                 const arrayBuffer = await file.arrayBuffer();
                 const extras = await extraerExpedientesDePDF(arrayBuffer, file.name);
-                nuevosExpedientes.push(...extras);
-                statusDiv.innerHTML = `✅ ${file.name}: ${extras.length} expedientes encontrados.`;
+                return extras;
             } catch(err) {
                 console.error(`Error en ${file.name}:`, err);
-                statusDiv.innerHTML = `⚠️ Error en ${file.name}: ${err.message}`;
+                return []; // Si un PDF falla, retornamos vacío para que los demás sigan cargando
             }
-        }
+        });
+
+        // Esperamos a que todos terminen al mismo tiempo
+        const resultados = await Promise.all(promesas);
+        const nuevosExpedientes = resultados.flat(); // Unificamos todos los arrays en uno solo
         
         todosExpedientes = nuevosExpedientes.map(exp => {
             const clave = normalizarExpediente(exp.expediente);
@@ -549,10 +610,22 @@
             selectAnio.innerHTML += `<option value="${anio}">${anio}</option>`;
         });
         
+        // 2. MOSTRAR EN TABLA INMEDIATAMENTE (Sin esperar a la base de datos)
         document.getElementById('filtersSection').style.display = 'flex';
         document.getElementById('paginationBar').style.display = 'flex';
         resetFiltros();
-        statusDiv.innerHTML = `✅ Procesamiento completo. ${todosExpedientes.length} expedientes cargados.`;
+        
+        statusDiv.innerHTML = `✅ ${todosExpedientes.length} expedientes mostrados en tabla. ⏳ Guardando en base de datos...`;
+
+        // 3. GUARDAR EN BACKGROUND (Sin bloquear la interfaz)
+        guardarNuevosExpedientesEnFirestore(todosExpedientes)
+            .then(() => {
+                statusDiv.innerHTML = `✅ Procesamiento y guardado completo. ${todosExpedientes.length} expedientes cargados.`;
+            })
+            .catch((err) => {
+                console.error("Error en guardado background:", err);
+                statusDiv.innerHTML = `⚠️ Tabla cargada, pero hubo un error al guardar en base de datos: ${err.message}`;
+            });
     }
     
     function filtrarExpedientes() {
