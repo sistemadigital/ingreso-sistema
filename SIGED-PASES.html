@@ -125,13 +125,48 @@
             font-size: 14px;
         }
         .print-button-container button:hover { background: #218838; }
+        
+        /* Estilos del nuevo contenedor informativo */
+        .info-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+            gap: 15px;
+        }
+        .info-box {
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 15px 25px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            flex: 1;
+            min-width: 250px;
+        }
+        .info-box-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .info-box-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .info-box-value.menor { color: #dc3545; }
+
         .pagination-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 12px 20px;
             background: #f1f3f5;
-            border-top: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
             flex-wrap: wrap;
         }
         .pagination-controls button {
@@ -190,6 +225,7 @@
         @media (max-width: 700px) {
             .filters { flex-direction: column; align-items: stretch; }
             .print-button-container { margin-left: 0; text-align: center; margin-top: 10px; }
+            .info-container { flex-direction: column; }
         }
     </style>
 </head>
@@ -207,12 +243,12 @@
     </div>
     <div class="upload-area">
         <input type="file" id="pdfUpload" accept=".pdf" multiple>
-        <div id="status" class="status">✅ Selecciona uno o más archivos PDF para comenzar</div>
+        <div id="status" class="status">⏳ Inicializando sistemas...</div>
     </div>
     <div class="filters" id="filtersSection" style="display: none;">
         <div class="filter-group">
             <label>Mes</label>
-            <select id="filterMes">
+            <select id="filterMes" onchange="aplicarFiltros()">
                 <option value="">Todos</option>
                 <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
                 <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
@@ -222,19 +258,27 @@
         </div>
         <div class="filter-group">
             <label>Año</label>
-            <select id="filterAnio"><option value="">Todos</option></select>
+            <select id="filterAnio" onchange="aplicarFiltros()"><option value="">Todos</option></select>
         </div>
         <div class="filter-group">
-            <label>Texto (expediente, empleado, secretario, estado)</label>
-            <input type="text" id="filterTexto" placeholder="Buscar...">
+            <label>Empleado</label>
+            <select id="filterEmpleado" onchange="aplicarFiltros()"><option value="">Todos</option></select>
+        </div>
+        <div class="filter-group">
+            <label>Secretario/a</label>
+            <select id="filterSecretario" onchange="aplicarFiltros()"><option value="">Todos</option></select>
+        </div>
+        <div class="filter-group">
+            <label>Texto (expediente, estado)</label>
+            <input type="text" id="filterTexto" placeholder="Buscar..." onkeypress="if(event.key === 'Enter') aplicarFiltros()">
         </div>
         <div class="filter-group">
             <label>Fecha desde</label>
-            <input type="date" id="filterFechaDesde">
+            <input type="date" id="filterFechaDesde" onchange="aplicarFiltros()">
         </div>
         <div class="filter-group">
             <label>Fecha hasta</label>
-            <input type="date" id="filterFechaHasta">
+            <input type="date" id="filterFechaHasta" onchange="aplicarFiltros()">
         </div>
         <div class="filter-group">
             <button onclick="aplicarFiltros()">🔍 Aplicar filtros</button>
@@ -246,6 +290,27 @@
             <button onclick="imprimirFiltrados()">🖨️ Imprimir</button>
         </div>
     </div>
+    
+    <div class="info-container" id="infoContainer" style="display: none;">
+        <div class="info-box">
+            <div class="info-box-title">🏆 Empleado con Mayor Cantidad</div>
+            <div class="info-box-value" id="empMayor">-</div>
+        </div>
+        <div class="info-box">
+            <div class="info-box-title">📉 Empleado con Menor Cantidad</div>
+            <div class="info-box-value menor" id="empMenor">-</div>
+        </div>
+    </div>
+
+    <div class="pagination-bar" id="paginationBar" style="display: none;">
+        <div>Total: <span id="totalRegistros">0</span> expedientes</div>
+        <div class="pagination-controls">
+            <button id="btnPrev" onclick="cambiarPagina(-1)">◀ Anterior</button>
+            <span>Página <span id="paginaActual">1</span> de <span id="totalPaginas">1</span></span>
+            <button id="btnNext" onclick="cambiarPagina(1)">Siguiente ▶</button>
+        </div>
+    </div>
+
     <div class="table-wrapper">
         <table id="tablaExpedientes">
             <thead>
@@ -259,17 +324,9 @@
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <tr><td colspan="6">Cargue uno o más PDFs para comenzar</td></tr>
+                <tr><td colspan="6">Cargando datos...</td></tr>
             </tbody>
         </table>
-    </div>
-    <div class="pagination-bar" id="paginationBar" style="display: none;">
-        <div>Total: <span id="totalRegistros">0</span> expedientes</div>
-        <div class="pagination-controls">
-            <button id="btnPrev" onclick="cambiarPagina(-1)">◀ Anterior</button>
-            <span>Página <span id="paginaActual">1</span> de <span id="totalPaginas">1</span></span>
-            <button id="btnNext" onclick="cambiarPagina(1)">Siguiente ▶</button>
-        </div>
     </div>
     <footer>Haga clic en el número de expediente para ver el detalle completo registrado en la base de datos.</footer>
 </div>
@@ -335,12 +392,12 @@
     // NUEVO SDK: Configuración para guardar el historial de PDFs
     // --------------------------------------------------------------
     const firebaseConfigNuevo = {
-        apiKey: "TU_NUEVA_API_KEY",
-        authDomain: "tu-nuevo-proyecto.firebaseapp.com",
-        projectId: "tu-nuevo-proyecto",
-        storageBucket: "tu-nuevo-proyecto.firebasestorage.app",
-        messagingSenderId: "TU_NUEVO_SENDER_ID",
-        appId: "TU_NUEVA_APP_ID"
+        apiKey: "AIzaSyA7nDpWOBlcI6rMHlJ72lrCOU6yVlfokFs",
+        authDomain: "siged-pases.firebaseapp.com",
+        projectId: "siged-pases",
+        storageBucket: "siged-pases.firebasestorage.app",
+        messagingSenderId: "116846107131",
+        appId: "1:116846107131:web:8b0638c38b5de6d8b2d35e"
     };
     
     // Inicializar apps originales
@@ -462,6 +519,91 @@
             console.error("Error cargando causas principales:", error);
         }
     }
+
+    // Función para poblar selects dinámicos
+    function actualizarSelectoresDinamicos() {
+        const aniosSet = new Set();
+        const empSet = new Set();
+        const secSet = new Set();
+        
+        todosExpedientes.forEach(exp => {
+            if (exp.fechaDate) aniosSet.add(exp.fechaDate.getFullYear());
+            if (exp.usuarioAsignado && exp.usuarioAsignado !== 'No registrado') empSet.add(exp.usuarioAsignado);
+            if (exp.secretarioAsignado && exp.secretarioAsignado !== 'No registrado') secSet.add(exp.secretarioAsignado);
+        });
+
+        // Actualizar Años
+        const aniosOrdenados = Array.from(aniosSet).sort((a,b)=>b-a);
+        const selectAnio = document.getElementById('filterAnio');
+        selectAnio.innerHTML = '<option value="">Todos</option>';
+        aniosOrdenados.forEach(anio => selectAnio.innerHTML += `<option value="${anio}">${anio}</option>`);
+
+        // Actualizar Empleados
+        const selectEmp = document.getElementById('filterEmpleado');
+        const empPrev = selectEmp.value;
+        selectEmp.innerHTML = '<option value="">Todos</option>';
+        Array.from(empSet).sort().forEach(emp => selectEmp.innerHTML += `<option value="${emp}">${emp}</option>`);
+        if(empPrev && empSet.has(empPrev)) selectEmp.value = empPrev;
+
+        // Actualizar Secretarios
+        const selectSec = document.getElementById('filterSecretario');
+        const secPrev = selectSec.value;
+        selectSec.innerHTML = '<option value="">Todos</option>';
+        Array.from(secSet).sort().forEach(sec => selectSec.innerHTML += `<option value="${sec}">${sec}</option>`);
+        if(secPrev && secSet.has(secPrev)) selectSec.value = secPrev;
+    }
+
+    // Cargar datos ya guardados al abrir la aplicación
+    async function cargarHistorialGuardado() {
+        const statusDiv = document.getElementById('status');
+        try {
+            const snapshot = await dbNuevo.collection('historial_entradas_siged').get();
+            let expedientesCargados = [];
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                let fechaDate = null;
+                if (data.fechaDate && data.fechaDate.toDate) {
+                    fechaDate = data.fechaDate.toDate();
+                } else if (data.fechaStr) {
+                    fechaDate = parseFechaDDMMAAAA(data.fechaStr);
+                }
+
+                const numNorm = normalizarExpediente(data.expediente);
+                const causa = mapaCausas.get(numNorm);
+
+                expedientesCargados.push({
+                    movimiento: data.movimiento,
+                    fechaStr: data.fechaStr,
+                    fechaDate: fechaDate,
+                    expediente: data.expediente,
+                    usuarioAsignado: data.usuarioAsignado,
+                    secretarioAsignado: data.secretarioAsignado,
+                    estadoControl: data.estadoControl,
+                    detallesCompletos: causa || null
+                });
+            });
+
+            todosExpedientes = expedientesCargados;
+            todosExpedientes.sort((a,b) => a.fechaDate - b.fechaDate);
+
+            if (todosExpedientes.length > 0) {
+                actualizarSelectoresDinamicos();
+
+                document.getElementById('filtersSection').style.display = 'flex';
+                document.getElementById('infoContainer').style.display = 'flex';
+                document.getElementById('paginationBar').style.display = 'flex';
+                resetFiltros();
+                statusDiv.innerHTML = `✅ ${todosExpedientes.length} expedientes cargados desde la base de datos.`;
+            } else {
+                statusDiv.innerHTML = "✅ Base de datos vacía. Selecciona uno o más archivos PDF para comenzar.";
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="6">Sube un PDF para comenzar</td></tr>';
+            }
+        } catch (error) {
+            console.error("Error cargando el historial:", error);
+            statusDiv.innerHTML = "⚠️ Error al cargar los datos guardados.";
+        }
+    }
     
     // PDF.js
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
@@ -503,12 +645,8 @@
         return expedientes;
     }
 
-    // NUEVA FUNCIÓN: Guardar en el nuevo SDK
+    // Guardar en el nuevo SDK
     async function guardarNuevosExpedientesEnFirestore(expedientes) {
-        const statusDiv = document.getElementById('status');
-        
-        // Firestore permite un máximo de 500 operaciones por lote (batch).
-        // Dividimos los datos en bloques de 450 para estar seguros.
         const chunks = [];
         for (let i = 0; i < expedientes.length; i += 450) {
             chunks.push(expedientes.slice(i, i + 450));
@@ -519,8 +657,6 @@
                 const batch = dbNuevo.batch();
                 
                 chunk.forEach(exp => {
-                    // Generar un ID único para evitar duplicados en el futuro.
-                    // Formato: NumeroExpediente_DD-MM-AAAA_Movimiento
                     const numNorm = normalizarExpediente(exp.expediente) || exp.expediente;
                     const idUnico = `${numNorm}_${exp.fechaStr.replace(/\//g, '-')}_${exp.movimiento}`;
                     
@@ -535,7 +671,7 @@
                         secretarioAsignado: exp.secretarioAsignado || 'No registrado',
                         estadoControl: exp.estadoControl || 'Pendiente',
                         fechaGuardadoBase: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true }); // merge: true sobreescribe/actualiza sin crear duplicados
+                    }, { merge: true });
                 });
 
                 await batch.commit();
@@ -557,7 +693,7 @@
         const statusDiv = document.getElementById('status');
         statusDiv.innerHTML = "⏳ Procesando PDFs en paralelo... Esto tomará un instante.";
         
-        // 1. Procesar todos los PDFs de forma simultánea (paralelo)
+        // 1. Procesar todos los PDFs de forma simultánea
         const promesas = Array.from(files).map(async (file) => {
             try {
                 const arrayBuffer = await file.arrayBuffer();
@@ -565,15 +701,14 @@
                 return extras;
             } catch(err) {
                 console.error(`Error en ${file.name}:`, err);
-                return []; // Si un PDF falla, retornamos vacío para que los demás sigan cargando
+                return []; 
             }
         });
 
-        // Esperamos a que todos terminen al mismo tiempo
         const resultados = await Promise.all(promesas);
-        const nuevosExpedientes = resultados.flat(); // Unificamos todos los arrays en uno solo
+        const nuevosExpedientes = resultados.flat(); 
         
-        todosExpedientes = nuevosExpedientes.map(exp => {
+        const expedientesProcesados = nuevosExpedientes.map(exp => {
             const clave = normalizarExpediente(exp.expediente);
             const causa = mapaCausas.get(clave);
             let usuarioAsignado = causa ? (causa.usuarioAsignado || 'Sin Asignar') : 'No registrado';
@@ -589,57 +724,75 @@
             }
             return { ...exp, usuarioAsignado, secretarioAsignado: secretario, estadoControl, detallesCompletos: causa || null };
         });
+
+        // FUSIONAR NUEVOS CON LOS YA CARGADOS (Sin duplicados)
+        const mapaUnicos = new Map();
         
+        todosExpedientes.forEach(exp => {
+            const numNorm = normalizarExpediente(exp.expediente) || exp.expediente;
+            const id = `${numNorm}_${exp.fechaStr.replace(/\//g, '-')}_${exp.movimiento}`;
+            mapaUnicos.set(id, exp);
+        });
+
+        expedientesProcesados.forEach(exp => {
+            const numNorm = normalizarExpediente(exp.expediente) || exp.expediente;
+            const id = `${numNorm}_${exp.fechaStr.replace(/\//g, '-')}_${exp.movimiento}`;
+            mapaUnicos.set(id, exp);
+        });
+
+        todosExpedientes = Array.from(mapaUnicos.values());
         todosExpedientes.sort((a,b) => a.fechaDate - b.fechaDate);
         
         if (todosExpedientes.length === 0) {
-            statusDiv.innerHTML = "⚠️ No se encontraron expedientes en los PDFs. Verifica el formato.";
+            statusDiv.innerHTML = "⚠️ No se encontraron expedientes en los PDFs ni en la base de datos.";
             document.getElementById('filtersSection').style.display = 'none';
+            document.getElementById('infoContainer').style.display = 'none';
             document.getElementById('paginationBar').style.display = 'none';
             document.getElementById('tableBody').innerHTML = '<tr><td colspan="6">No hay datos para mostrar</td></tr>';
             actualizarKPI();
             return;
         }
         
-        const aniosSet = new Set();
-        todosExpedientes.forEach(exp => aniosSet.add(exp.fechaDate.getFullYear()));
-        const aniosOrdenados = Array.from(aniosSet).sort((a,b)=>b-a);
-        const selectAnio = document.getElementById('filterAnio');
-        selectAnio.innerHTML = '<option value="">Todos</option>';
-        aniosOrdenados.forEach(anio => {
-            selectAnio.innerHTML += `<option value="${anio}">${anio}</option>`;
-        });
+        actualizarSelectoresDinamicos();
         
-        // 2. MOSTRAR EN TABLA INMEDIATAMENTE (Sin esperar a la base de datos)
+        // 2. MOSTRAR EN TABLA INMEDIATAMENTE
         document.getElementById('filtersSection').style.display = 'flex';
+        document.getElementById('infoContainer').style.display = 'flex';
         document.getElementById('paginationBar').style.display = 'flex';
         resetFiltros();
         
-        statusDiv.innerHTML = `✅ ${todosExpedientes.length} expedientes mostrados en tabla. ⏳ Guardando en base de datos...`;
+        statusDiv.innerHTML = `✅ Actualizando tabla... ⏳ Guardando ${expedientesProcesados.length} expedientes procesados en base de datos...`;
 
-        // 3. GUARDAR EN BACKGROUND (Sin bloquear la interfaz)
-        guardarNuevosExpedientesEnFirestore(todosExpedientes)
+        // 3. GUARDAR EN BACKGROUND LOS RECIÉN PROCESADOS
+        guardarNuevosExpedientesEnFirestore(expedientesProcesados)
             .then(() => {
-                statusDiv.innerHTML = `✅ Procesamiento y guardado completo. ${todosExpedientes.length} expedientes cargados.`;
+                statusDiv.innerHTML = `✅ Guardado completo. Mostrando un total de ${todosExpedientes.length} expedientes en historial.`;
             })
             .catch((err) => {
                 console.error("Error en guardado background:", err);
-                statusDiv.innerHTML = `⚠️ Tabla cargada, pero hubo un error al guardar en base de datos: ${err.message}`;
+                statusDiv.innerHTML = `⚠️ Tabla actualizada, pero hubo un error al guardar en base de datos: ${err.message}`;
             });
     }
     
     function filtrarExpedientes() {
         const mes = document.getElementById('filterMes').value;
         const anio = document.getElementById('filterAnio').value;
+        const empleado = document.getElementById('filterEmpleado').value;
+        const secretario = document.getElementById('filterSecretario').value;
         const texto = document.getElementById('filterTexto').value.trim().toLowerCase();
         const fechaDesdeStr = document.getElementById('filterFechaDesde').value;
         const fechaHastaStr = document.getElementById('filterFechaHasta').value;
+        
         let fechaDesde = fechaDesdeStr ? new Date(fechaDesdeStr) : null;
         let fechaHasta = fechaHastaStr ? new Date(fechaHastaStr) : null;
         if (fechaHasta) fechaHasta.setHours(23,59,59,999);
+        
         return todosExpedientes.filter(exp => {
+            if (!exp.fechaDate) return false;
             if (mes && exp.fechaDate.getMonth()+1 !== parseInt(mes)) return false;
             if (anio && exp.fechaDate.getFullYear() !== parseInt(anio)) return false;
+            if (empleado && exp.usuarioAsignado !== empleado) return false;
+            if (secretario && exp.secretarioAsignado !== secretario) return false;
             if (texto) {
                 const searchable = `${exp.expediente} ${exp.usuarioAsignado} ${exp.secretarioAsignado} ${exp.estadoControl}`.toLowerCase();
                 if (!searchable.includes(texto)) return false;
@@ -650,9 +803,52 @@
         });
     }
     
+    function actualizarEstadisticasEmpleados() {
+        const empMayorElem = document.getElementById('empMayor');
+        const empMenorElem = document.getElementById('empMenor');
+
+        if (datosFiltrados.length === 0) {
+            empMayorElem.innerText = '-';
+            empMenorElem.innerText = '-';
+            return;
+        }
+
+        // Contar expedientes por empleado (excluyendo no asignados y los usuarios indicados)
+        const conteoEmpleados = {};
+        const usuariosExcluidos = ['No registrado', 'Sin Asignar', 'Boillat Cesar Enrique', 'Ramos Marcelo Gustavo'];
+
+        datosFiltrados.forEach(exp => {
+            const emp = exp.usuarioAsignado;
+            if (emp && !usuariosExcluidos.includes(emp)) {
+                conteoEmpleados[emp] = (conteoEmpleados[emp] || 0) + 1;
+            }
+        });
+
+        const empleados = Object.keys(conteoEmpleados);
+        if (empleados.length === 0) {
+            empMayorElem.innerText = 'Sin datos';
+            empMenorElem.innerText = 'Sin datos';
+            return;
+        }
+
+        let mayorEmp = empleados[0];
+        let menorEmp = empleados[0];
+
+        empleados.forEach(emp => {
+            if (conteoEmpleados[emp] > conteoEmpleados[mayorEmp]) mayorEmp = emp;
+            if (conteoEmpleados[emp] < conteoEmpleados[menorEmp]) menorEmp = emp;
+        });
+
+        empMayorElem.innerText = `${mayorEmp} (${conteoEmpleados[mayorEmp]})`;
+        empMenorElem.innerText = `${menorEmp} (${conteoEmpleados[menorEmp]})`;
+    }
+
     function actualizarKPI() {
         document.getElementById('totalGeneral').innerText = todosExpedientes.length;
         document.getElementById('totalFiltrados').innerText = datosFiltrados.length;
+        
+        // Llamar a la actualización de estadísticas de empleados
+        actualizarEstadisticasEmpleados();
     }
     
     function aplicarFiltros() {
@@ -666,6 +862,8 @@
     function resetFiltros() {
         document.getElementById('filterMes').value = '';
         document.getElementById('filterAnio').value = '';
+        document.getElementById('filterEmpleado').value = '';
+        document.getElementById('filterSecretario').value = '';
         document.getElementById('filterTexto').value = '';
         document.getElementById('filterFechaDesde').value = '';
         document.getElementById('filterFechaHasta').value = '';
@@ -842,7 +1040,25 @@
     
     // Inicialización
     window.addEventListener('DOMContentLoaded', async () => {
+        const statusDiv = document.getElementById('status');
+        statusDiv.innerHTML = "⏳ Inicializando sistemas y cargando mapeos...";
+
+        // Ejecutar filtros al presionar Enter en cualquier campo del panel de filtros
+        document.getElementById('filtersSection').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                aplicarFiltros();
+            }
+        });
+
+        // 1. Cargar mapeos de referencia
         await Promise.all([loadDataFromSecretarios(), cargarCausasPrincipales()]);
+        
+        statusDiv.innerHTML = "⏳ Cargando historial guardado...";
+        
+        // 2. Cargar historial desde Firebase para mostrar en tabla inicial
+        await cargarHistorialGuardado();
+
+        // 3. Habilitar la carga de nuevos PDFs
         document.getElementById('pdfUpload').addEventListener('change', (e) => {
             if (e.target.files.length) procesarPDFs(e.target.files);
         });
