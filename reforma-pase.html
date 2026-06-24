@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Defensoría 6</title>
+    <title>Defensoría - Sistema Optimizado</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -59,6 +59,7 @@
         .form-group label { display: block; font-weight: 500; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; }
         .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 0.95rem; background: var(--bg-body); transition: border 0.2s; font-family: inherit; }
         .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); background: #fff; }
+        .form-control:disabled { background: #e2e8f0; color: #64748b; cursor: not-allowed; }
         
         .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
         .btn-primary { background: var(--primary); color: #fff; } .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
@@ -190,7 +191,7 @@
                         </div>
                         <div class="form-group">
                             <label>Complejidad *</label>
-                            <select id="inpNivel" class="form-control" required><option value="1">Lvl 1</option><option value="2" selected>Lvl 2</option><option value="3">Lvl 3</option><option value="4">Lvl 4</option></select>
+                            <select id="inpNivel" class="form-control" required><option value="1">Nivel 1</option><option value="2" selected>Nivel 2</option><option value="3">Nivel 3</option><option value="4">Nivel 4</option></select>
                         </div>
                     </div>
                     <div class="form-group">
@@ -244,7 +245,7 @@
             <div class="kpi-card"><div class="kpi-icon" style="background:#ecfdf5; color:#059669;"><i class="fas fa-check-double"></i></div><div class="kpi-info"><h4>Finalizadas</h4><span id="kpiFinalizadas">0</span></div></div>
         </div>
         <div class="grid-2">
-            <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-chart-bar"></i> Carga de Empleados (Pts)</div></div><div class="chart-container"><canvas id="chartCargaEmpleados"></canvas></div></div>
+            <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-chart-bar"></i> Carga de Empleados (Puntos)</div></div><div class="chart-container"><canvas id="chartCargaEmpleados"></canvas></div></div>
             <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-chart-pie"></i> Estado Global</div></div><div class="chart-container"><canvas id="chartEstadoGlobal"></canvas></div></div>
         </div>
         <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-users"></i> Desempeño y Asignación</div></div><div id="tablaCargaDetalle"></div></div>
@@ -253,7 +254,7 @@
     <div id="panelAuditoria" class="tab-panel hide-operador hide-empleado">
         <div class="card">
             <div class="card-header"><div class="card-title"><i class="fas fa-clipboard-list"></i> Trazabilidad General (Últimos 50)</div>
-                <button class="btn btn-outline btn-sm" id="btnLimpiarStorage"><i class="fas fa-trash"></i> Reset</button>
+                <button class="btn btn-outline btn-sm" id="btnLimpiarStorage"><i class="fas fa-trash"></i> Reinicio</button>
             </div>
             <div id="tablaAuditoriaGeneral"></div>
         </div>
@@ -285,13 +286,16 @@
         config: {
             storageKey: 'defensoria_core_v8',
             maxPuntosEmpleado: 20,
+            passwords: { defensor: 'def6', secretario: 'def6' },
             nivelesPuntos: { 1:1, 2:2, 3:3, 4:5 },
             nivelesDias: { 1:5, 2:3, 3:3, 4:2 },
             nivelesAuto: { 'Oficios/Cédulas': 1, 'Vistas simples': 2, 'Amparo Salud': 4, 'Violencia Familiar': 4, 'Otro': 2 },
             secretarios: [{ id:'sec1', nombre:'Corrales A.' }, { id:'sec2', nombre:'Riveros P.' }],
             empleados: [
-                { id:'emp1', nombre:'Bazante N.' }, { id:'emp2', nombre:'Fioravante R.' },
-                { id:'emp3', nombre:'Cedron N.' }, { id:'emp4', nombre:'Escobar M.' }
+                { id:'emp1', nombre:'Bazante N.', clave: '123bz' }, 
+                { id:'emp2', nombre:'Fioravante R.', clave: '123rf' },
+                { id:'emp3', nombre:'Cedron N.', clave: '123cn' }, 
+                { id:'emp4', nombre:'Escobar M.', clave: '123em' }
             ]
         },
         state: { causas: [], searchTerm: '' },
@@ -318,11 +322,13 @@
             container.appendChild(toast);
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
         },
-        askPrompt(title) {
+        askPrompt(title, isPassword = false) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('modalPrompt');
                 const input = document.getElementById('promptInput');
                 document.getElementById('promptTitle').innerText = title;
+                
+                input.type = isPassword ? 'password' : 'text';
                 input.value = ''; modal.classList.add('active'); input.focus();
                 
                 const cleanup = () => { modal.classList.remove('active'); btnConf.removeEventListener('click', onConf); btnCanc.removeEventListener('click', onCanc); };
@@ -363,7 +369,7 @@
             const c = this.state.causas.find(x => x.id === id); if(!c || c.estado !== 'en_secretaria') return false;
             c.nivelSecretario = parseInt(nivSec); c.puntos = this.config.nivelesPuntos[c.nivelSecretario]; c.empleadoId = empId; c.estado = 'en_proceso';
             c.fechaAsignacion = new Date().toISOString(); c.fechaLimite = new Date(Date.now() + (this.config.nivelesDias[c.nivelSecretario]||3)*86400000).toISOString();
-            c.historial.push({ fecha: new Date().toISOString(), accion: `Asignado (Lvl ${c.nivelSecretario})`, usuario: this.getSecName(secId || c.secretarioId), comentario: com || `A ${this.getEmpName(empId)}` });
+            c.historial.push({ fecha: new Date().toISOString(), accion: `Asignado (Nivel ${c.nivelSecretario})`, usuario: this.getSecName(secId || c.secretarioId), comentario: com || `A ${this.getEmpName(empId)}` });
             this.saveState(); return true;
         },
         cambiarEstado(id, nuevoEstado, accion, usuario, com) {
@@ -409,19 +415,19 @@
 
         renderIngreso() {
             const rec = this.getFilteredCausas().reverse().slice(0, 5);
-            document.getElementById('tablaIngresosRecientes').innerHTML = rec.length ? `<table><thead><tr><th>Exp.</th><th>Lvl</th><th>Pase</th></tr></thead><tbody>${rec.map(c=>`<tr><td><strong>${c.numero}</strong></td><td>L${c.nivelOperador}</td><td style="font-size:0.8rem">${this.fmtDt(c.fechaPaseSecretario)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty-state">Sin datos</div>';
+            document.getElementById('tablaIngresosRecientes').innerHTML = rec.length ? `<table><thead><tr><th>Exp.</th><th>Nivel</th><th>Pase</th></tr></thead><tbody>${rec.map(c=>`<tr><td><strong>${c.numero}</strong></td><td>N${c.nivelOperador}</td><td style="font-size:0.8rem">${this.fmtDt(c.fechaPaseSecretario)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty-state">Sin datos</div>';
         },
         renderDistribucion() {
             const pend = this.getFilteredCausas().filter(c => c.estado === 'en_secretaria').sort((a,b)=>b.nivelOperador - a.nivelOperador);
             document.getElementById('lblPendientesCount').textContent = pend.length;
             if(!pend.length) return document.getElementById('tablaPendientes').innerHTML = '<div class="empty-state">No hay pendientes.</div>';
             
-            const opts = this.config.empleados.map(e => `<option value="${e.id}">${e.nombre} (${this.calcularCargaReal(e.id).toFixed(1)}pts)${this.tieneAtrasos(e.id)?'⚠️':''}</option>`).join('');
-            document.getElementById('tablaPendientes').innerHTML = `<table><thead><tr><th>Exp.</th><th>Op. Lvl</th><th>Revisión</th><th>Asignar</th><th>Acciones</th></tr></thead><tbody>${pend.map(c=>`
-                <tr><td><strong>${c.numero}</strong><br><small>${c.tipo}</small></td><td>L${c.nivelOperador}</td>
-                <td><select class="form-control" id="nv_${c.id}" style="padding:4px"><option value="1" ${c.nivelOperador===1?'selected':''}>L1</option><option value="2" ${c.nivelOperador===2?'selected':''}>L2</option><option value="3" ${c.nivelOperador===3?'selected':''}>L3</option><option value="4" ${c.nivelOperador===4?'selected':''}>L4</option></select></td>
+            const opts = this.config.empleados.map(e => `<option value="${e.id}">${e.nombre} (${this.calcularCargaReal(e.id).toFixed(1)} Puntos)${this.tieneAtrasos(e.id)?'⚠️':''}</option>`).join('');
+            document.getElementById('tablaPendientes').innerHTML = `<table><thead><tr><th>Exp.</th><th>Nivel Op.</th><th>Revisión</th><th>Asignar</th><th>Acciones</th></tr></thead><tbody>${pend.map(c=>`
+                <tr><td><strong>${c.numero}</strong><br><small>${c.tipo}</small></td><td>N${c.nivelOperador}</td>
+                <td><select class="form-control" id="nv_${c.id}" style="padding:4px"><option value="1" ${c.nivelOperador===1?'selected':''}>N1</option><option value="2" ${c.nivelOperador===2?'selected':''}>N2</option><option value="3" ${c.nivelOperador===3?'selected':''}>N3</option><option value="4" ${c.nivelOperador===4?'selected':''}>N4</option></select></td>
                 <td><select class="form-control" id="em_${c.id}" style="padding:4px"><option value="">Seleccionar...</option>${opts}</select><button class="btn btn-outline btn-xs btn-auto" data-id="${c.id}" style="margin-top:4px">Auto</button></td>
-                <td><button class="btn btn-primary btn-sm btn-asig" data-id="${c.id}">Asignar</button> <button class="btn btn-danger btn-sm btn-elevar-sec" data-id="${c.id}"><i class="fas fa-gavel"></i></button> <button class="btn btn-outline btn-xs btn-ver" data-id="${c.id}"><i class="fas fa-eye"></i></button></td></tr>`).join('')}</tbody></table>`;
+                <td><button class="btn btn-primary btn-sm btn-asig">Asignar</button> <button class="btn btn-danger btn-sm btn-elevar-sec" data-id="${c.id}"><i class="fas fa-gavel"></i></button> <button class="btn btn-outline btn-xs btn-ver" data-id="${c.id}"><i class="fas fa-eye"></i></button></td></tr>`).join('')}</tbody></table>`;
         },
         renderDefensor() {
             const def = this.getFilteredCausas().filter(c => c.estado === 'en_defensor').reverse();
@@ -430,21 +436,21 @@
         renderMisTareas() {
             const eId = document.getElementById('simularEmpleado').value;
             const mis = this.getFilteredCausas().filter(c => c.empleadoId === eId).sort((a,b) => new Date(b.fechaAsignacion) - new Date(a.fechaAsignacion));
-            document.getElementById('tablaMisTareas').innerHTML = mis.length ? `<table><thead><tr><th>Exp.</th><th>Asignación</th><th>Vencimiento</th><th>Tiempo</th><th>Lvl</th><th>Acciones</th></tr></thead><tbody>${mis.map(c=>{
+            document.getElementById('tablaMisTareas').innerHTML = mis.length ? `<table><thead><tr><th>Exp.</th><th>Asignación</th><th>Vencimiento</th><th>Tiempo</th><th>Nivel</th><th>Acciones</th></tr></thead><tbody>${mis.map(c=>{
                 const done = c.estado==='finalizada';
                 return `<tr><td><strong>${c.numero}</strong><br><small>${c.tipo}</small></td><td style="font-size:0.8rem">${this.fmtDt(c.fechaAsignacion)}</td><td style="font-size:0.8rem">${c.fechaLimite?this.fmtDt(c.fechaLimite):'-'}</td>
-                <td>${done?'<span class="badge badge-green">OK</span>':`<span class="cronometro" data-limite="${c.fechaLimite}">-</span>`}</td><td>L${c.nivelSecretario}</td>
+                <td>${done?'<span class="badge badge-green">Listo</span>':`<span class="cronometro" data-limite="${c.fechaLimite}">-</span>`}</td><td>N${c.nivelSecretario}</td>
                 <td>${!done?`<button class="btn btn-success btn-xs btn-ok" data-id="${c.id}">Cumplir</button> <button class="btn btn-warning btn-xs btn-dev" data-id="${c.id}">Devolver</button> <button class="btn btn-danger btn-xs btn-elv" data-id="${c.id}">Elevar</button>`:`<i class="fas fa-check" style="color:green"></i>`} <button class="btn btn-outline btn-xs btn-ver" data-id="${c.id}"><i class="fas fa-eye"></i></button></td></tr>`;
             }).join('')}</tbody></table>` : '<div class="empty-state">Sin tareas.</div>';
         },
         renderGraficos() {
             document.getElementById('tablaCargaDetalle').innerHTML = `<table><thead><tr><th>Empleado</th><th>Activas</th><th>Carga Real (Fatiga)</th><th>Moroso</th></tr></thead><tbody>${this.config.empleados.map(e=>{
                 const cReal = this.calcularCargaReal(e.id).toFixed(1); const act = this.state.causas.filter(c=>c.empleadoId===e.id && c.estado==='en_proceso').length; const mor = this.tieneAtrasos(e.id);
-                return `<tr><td><strong>${e.nombre}</strong></td><td>${act}</td><td>${cReal} pts</td><td>${mor?'<span class="badge badge-red">SÍ</span>':'-'}</td></tr>`;
+                return `<tr><td><strong>${e.nombre}</strong></td><td>${act}</td><td>${cReal} Puntos</td><td>${mor?'<span class="badge badge-red">SÍ</span>':'-'}</td></tr>`;
             }).join('')}</tbody></table>`;
         },
         renderAuditoria() {
-            const list = this.getFilteredCausas().reverse().slice(0, 50); // Límite de 50 para performance
+            const list = this.getFilteredCausas().reverse().slice(0, 50);
             document.getElementById('tablaAuditoriaGeneral').innerHTML = list.length ? `<table><thead><tr><th>Expediente</th><th>Estado</th><th>Empleado</th><th>T. Res.</th><th>Ver</th></tr></thead><tbody>${list.map(c=>`<tr><td><strong>${c.numero}</strong></td><td><span class="badge badge-gray">${c.estado}</span></td><td>${this.getEmpName(c.empleadoId)}</td><td>${c.estado==='finalizada'?this.calcDur(c.fechaAsignacion, c.fechaFinalizacion):'-'}</td><td><button class="btn btn-outline btn-xs btn-ver" data-id="${c.id}"><i class="fas fa-eye"></i></button></td></tr>`).join('')}</tbody></table>` : '<div class="empty-state">Sin registros</div>';
         },
 
@@ -458,27 +464,61 @@
         // --- Events ---
         bindEvents() {
             document.getElementById('globalSearch').addEventListener('input', (e) => { this.state.searchTerm = e.target.value; this.renderActiveTab(); });
-            document.getElementById('roleSelector').addEventListener('change', (e) => { document.body.setAttribute('data-role', e.target.value); document.querySelectorAll('.nav-tab:not([style*="display: none"])')[0]?.click(); });
+            
+            document.getElementById('roleSelector').addEventListener('change', async (e) => { 
+                const targetRole = e.target.value;
+                const prevRole = document.body.getAttribute('data-role');
+                const simularSelect = document.getElementById('simularEmpleado');
+
+                if (targetRole === 'defensor' || targetRole === 'secretario') {
+                    const pwd = await this.askPrompt(`Ingrese clave de acceso para ${targetRole.toUpperCase()}:`, true);
+                    if (pwd !== this.config.passwords[targetRole]) {
+                        this.showToast('Clave incorrecta. Acceso denegado.', 'danger');
+                        e.target.value = prevRole;
+                        return;
+                    }
+                    this.showToast(`Acceso concedido a la vista de ${targetRole}`, 'success');
+                } else if (targetRole === 'empleado') {
+                    const pwd = await this.askPrompt('Ingrese su clave personal de empleado:', true);
+                    const emp = this.config.empleados.find(x => x.clave === pwd);
+                    
+                    if (!emp) {
+                        this.showToast('Clave de empleado no encontrada.', 'danger');
+                        e.target.value = prevRole;
+                        return;
+                    }
+                    
+                    simularSelect.value = emp.id;
+                    simularSelect.disabled = true;
+                    this.showToast(`Bienvenido/a ${emp.nombre}. Panel personal bloqueado.`, 'success');
+                }
+
+                if (targetRole !== 'empleado') {
+                    simularSelect.disabled = false;
+                }
+
+                document.body.setAttribute('data-role', targetRole); 
+                document.querySelectorAll('.nav-tab:not([style*="display: none"])')[0]?.click(); 
+                this.refreshUI();
+            });
+
             document.querySelectorAll('.nav-tab').forEach(t => t.addEventListener('click', (e) => { document.querySelectorAll('.nav-tab, .tab-panel').forEach(el=>el.classList.remove('active')); e.currentTarget.classList.add('active'); document.getElementById(e.currentTarget.dataset.target).classList.add('active'); this.refreshUI(); }));
             
             document.getElementById('formIngreso').addEventListener('submit', (e) => { e.preventDefault(); this.registrarCausa(document.getElementById('inpExpediente').value, document.getElementById('inpTipo').value, document.getElementById('inpObs').value, document.getElementById('inpNivel').value, document.getElementById('inpOperador').value); e.target.reset(); this.refreshUI(); });
             
             document.addEventListener('click', async (e) => {
                 const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id;
-                // Distribucion
+                
                 if(btn.classList.contains('btn-asig')) { const eId = document.getElementById(`em_${id}`).value; if(!eId)return this.showToast('Seleccione empleado','warning'); this.asignarCausa(id, document.getElementById(`nv_${id}`).value, eId); this.refreshUI(); }
                 if(btn.classList.contains('btn-auto')) { this.asignarAlMenosCargado(id, document.getElementById(`nv_${id}`).value); this.refreshUI(); }
                 if(btn.classList.contains('btn-elevar-sec')) { const m = await this.askPrompt('Motivo elevación:'); if(m) { this.cambiarEstado(id,'en_defensor','Elevado Sec','Sec',m); this.refreshUI(); } }
                 
-                // Empleado
                 if(btn.classList.contains('btn-ok')) { this.cambiarEstado(id,'finalizada','Finalizado',this.getEmpName(document.getElementById('simularEmpleado').value)); this.refreshUI(); }
-                if(btn.classList.contains('btn-dev')) { const m = await this.askPrompt('Motivo devolución:'); if(m) { this.cambiarEstado(id,'en_secretaria','Devuelto',this.getEmpName(),m); this.refreshUI(); } }
-                if(btn.classList.contains('btn-elv')) { const m = await this.askPrompt('Motivo elevación:'); if(m) { this.cambiarEstado(id,'en_defensor','Elevado Emp',this.getEmpName(),m); this.refreshUI(); } }
+                if(btn.classList.contains('btn-dev')) { const m = await this.askPrompt('Motivo devolución:'); if(m) { this.cambiarEstado(id,'en_secretaria','Devuelto',this.getEmpName(document.getElementById('simularEmpleado').value),m); this.refreshUI(); } }
+                if(btn.classList.contains('btn-elv')) { const m = await this.askPrompt('Motivo elevación:'); if(m) { this.cambiarEstado(id,'en_defensor','Elevado Emp',this.getEmpName(document.getElementById('simularEmpleado').value),m); this.refreshUI(); } }
                 
-                // Masivo
                 if(btn.id === 'btnDistribuirMasivo') { this.state.causas.filter(c=>c.estado==='en_secretaria').forEach(c=>this.asignarAlMenosCargado(c.id, c.nivelOperador)); this.refreshUI(); this.showToast('Distribución automática finalizada'); }
                 
-                // Modal Historial
                 if(btn.classList.contains('btn-ver')) { const c = this.state.causas.find(x=>x.id===id); document.getElementById('modalTituloExpediente').innerText=c.numero; document.getElementById('modalBodyMovimientos').innerHTML=c.historial.slice().reverse().map(m=>`<div class="movimiento-item"><span class="movimiento-fecha">${this.fmtDt(m.fecha)}</span><span class="movimiento-usuario">${m.usuario}</span><span class="movimiento-accion">${m.accion}</span><div class="movimiento-comentario">${m.comentario}</div></div>`).join(''); document.getElementById('modalTrazabilidad').classList.add('active'); }
                 if(btn.id === 'modalClose') document.getElementById('modalTrazabilidad').classList.remove('active');
             });
@@ -502,11 +542,11 @@
                     el.textContent = (v?'+':'') + (m<60?`${m}m`:m<1440?`${Math.floor(m/60)}h`:`${Math.floor(m/1440)}d`);
                     el.className = `cronometro ${v?'vencido':'normal'}`;
                 });
-            }, 60000); // 1 minuto update
+            }, 60000);
         },
 
         initCharts() {
-            this.charts.carga = new Chart(document.getElementById('chartCargaEmpleados'), { type:'bar', data:{labels:[], datasets:[{label:'Pts',data:[]}]}, options:{responsive:true,maintainAspectRatio:false} });
+            this.charts.carga = new Chart(document.getElementById('chartCargaEmpleados'), { type:'bar', data:{labels:[], datasets:[{label:'Puntos',data:[]}]}, options:{responsive:true,maintainAspectRatio:false} });
             this.charts.estado = new Chart(document.getElementById('chartEstadoGlobal'), { type:'doughnut', data:{labels:['Sec','Proc','Fin','Def','Dev'], datasets:[{data:[], backgroundColor:['#f59e0b','#2563eb','#10b981','#8b5cf6','#f97316']}]}, options:{responsive:true,maintainAspectRatio:false} });
             this.updateCharts();
         },
