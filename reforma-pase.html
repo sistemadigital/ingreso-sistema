@@ -141,6 +141,23 @@
         .table-container .table-modern { min-width:auto; }
         .table-container .table-modern thead th, .table-container .table-modern tbody td { padding:4px 6px; font-size:.7rem; }
 
+        /* estilos para impresión de reporte empleado */
+        @media print {
+            .modal-modern .modal-header { background: #0a2a44 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .modal-modern .modal-content { border-radius: 0 !important; box-shadow: none !important; }
+            .modal-modern .modal-footer { display: none !important; }
+            .btn-modern, .btn-close { display: none !important; }
+            body * { visibility: hidden; }
+            #modalReporteEmpleado, #modalReporteEmpleado * { visibility: visible; }
+            #modalReporteEmpleado { position: absolute; left: 0; top: 0; width: 100%; background: #fff; padding: 20px; }
+            .modal-backdrop { display: none !important; }
+        }
+
+        .equidad-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .equidad-item { background:#f9fcff; border-radius:16px; padding:0.8rem 1.2rem; border:1px solid #e2edf7; text-align:center; }
+        .equidad-item .eq-label { font-size:.7rem; font-weight:700; text-transform:uppercase; color:#5f7f9f; letter-spacing:.3px; }
+        .equidad-item .eq-value { font-size:1.4rem; font-weight:800; color:#0a2a44; }
+
         @media (max-width:768px) { .app-header { flex-direction:column; align-items:stretch; padding:1rem; } .search-box { max-width:100%; } .nav-tabs-custom { border-radius:20px; padding:6px 10px; gap:4px; overflow-x:auto; flex-wrap:nowrap; } .nav-tabs-custom .tab-btn { padding:6px 14px; font-size:.75rem; white-space:nowrap; } .card-modern { padding:1rem; } .kpi-grid { grid-template-columns:repeat(2,1fr); gap:.75rem; } .kpi-item .value { font-size:1.4rem; } .pagination-bar { flex-direction:column; align-items:stretch; text-align:center; } }
         @media (max-width:480px) { .kpi-grid { grid-template-columns:1fr 1fr; } .login-card { padding:1.5rem 1.2rem; } }
         .text-muted-light { color:#8aa3bc; }
@@ -152,6 +169,7 @@
 </head>
 <body>
 
+    <!-- ===== LOGIN ===== -->
     <div id="loginOverlay" class="login-overlay">
         <div class="login-card">
             <div class="icon"><i class="bi bi-shield-lock-fill"></i></div>
@@ -181,12 +199,13 @@
         </div>
     </div>
 
+    <!-- ===== APP ===== -->
     <div id="appWrapper" class="app-wrapper">
         <header class="app-header">
             <div class="brand">
                 <i class="bi bi-balance-scale"></i>
                 <div>
-                    <h1>Sistema Digital de Pases <small>Defensoría</small></h1>
+                    <h1>Sistema Digital de Pases <small>Defensoría Oficial Civil y Comercial 6</small></h1>
                 </div>
             </div>
             <div class="header-actions">
@@ -214,6 +233,7 @@
         </footer>
     </div>
 
+    <!-- ===== MODAL HISTORIAL ===== -->
     <div class="modal fade modal-modern" id="modalHistorial" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -231,6 +251,7 @@
         </div>
     </div>
 
+    <!-- ===== MODAL REPORTE GENERAL ===== -->
     <div class="modal fade modal-modern" id="modalReporte" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -249,6 +270,26 @@
         </div>
     </div>
 
+    <!-- ===== MODAL REPORTE EMPLEADO ===== -->
+    <div class="modal fade modal-modern" id="modalReporteEmpleado" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reporte de Actividades · <span id="modalReporteEmpNombre"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalReporteEmpBody">
+                    <div class="text-muted">Cargando...</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button class="btn btn-modern btn-modern-primary" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LOGOUT ALERT ===== -->
     <div id="logoutAlert">
         <div class="alert-header">
             <i class="bi bi-exclamation-triangle-fill"></i>
@@ -263,8 +304,11 @@
         </div>
     </div>
 
+    <!-- ===== TOAST ===== -->
     <div id="toastContainer" style="position:fixed; bottom:24px; right:24px; z-index:3000; display:flex; flex-direction:column; gap:10px; pointer-events:none;"></div>
 
+    <!-- ============================================================ -->
+    <!-- ===== SCRIPT ===== -->
     <script>
         (function() {
             'use strict';
@@ -273,7 +317,7 @@
             const CONFIG = {
                 storageKey: 'defensoria_nuevo_v1',
                 passwords: { secretario: 'def6', empleado: '123', defensor: 'def6', admin: 'admin' },
-                operadoresClaves: { 'Boillat Cesar': '111', 'Cardozo Maria': '222', 'Cedron Noelia': '444', 'Pablos Patricia': '333' },
+                operadoresClaves: { 'Boillat Enrique': '111', 'Cardozo Raquel': '222', 'Cedron Noelia': '444', 'Pablos Pato': '333' },
                 nivelesPuntos: { 1: 1, 2: 2, 3: 3, 4: 5 },
                 nivelesDias: { 1: 5, 2: 3, 3: 3, 4: 2 },
                 empleados: [
@@ -284,8 +328,12 @@
                     { id: 'emp9', nombre: 'Ortega Lucia Noemi' }, { id: 'emp10', nombre: 'Pablos Patricia Tamara' },
                     { id: 'emp11', nombre: 'Palacios Ana Gabriela' }, { id: 'emp12', nombre: 'Sosa Rita Cecilia' }
                 ],
-                secretarios: [ { id: 'sec1', nombre: 'Corrales A.' }, { id: 'sec2', nombre: 'Riveros P.' } ],
-                operadores: [ 'Boillat Cesar', 'Cardozo Maria', 'Cedron Noelia', 'Pablos Patricia' ]
+                secretarios: [
+                    { id: 'sec1', nombre: 'Corrales A.Mariela' },
+                    { id: 'sec2', nombre: 'Riveros Patricia' },
+                    { id: 'sec3', nombre: 'Magnani Enzo' }
+                ],
+                operadores: [ 'Boillat Enrique', 'Cardozo Raquel', 'Cedron Noelia', 'Pablos Pato' ]
             };
 
             // ---------- ESTADO ----------
@@ -300,12 +348,15 @@
             function generateId() { return Date.now().toString(36) + Math.random().toString(36).substring(2, 6); }
             function loadState() {
                 try { const raw = localStorage.getItem(CONFIG.storageKey); if (raw) state = JSON.parse(raw); if (!state.causas) state.causas = []; } catch (_) { state.causas = []; }
+                // Asegurar campo asistenciaCamaraGesell en causas existentes
+                state.causas.forEach(c => { if (c.asistenciaCamaraGesell === undefined) c.asistenciaCamaraGesell = false; });
             }
             function saveState() { localStorage.setItem(CONFIG.storageKey, JSON.stringify(state)); }
             function getEmpName(id) { const e = CONFIG.empleados.find(x => x.id === id); return e ? e.nombre : '-'; }
             function getSecName(id) { const s = CONFIG.secretarios.find(x => x.id === id); return s ? s.nombre : '-'; }
             function fmtDt(iso) { if (!iso) return '-'; const d = new Date(iso); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
             function fmtDate(iso) { if (!iso) return '-'; const d = new Date(iso); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; }
+            function fmtDateShort(iso) { if (!iso) return '-'; const d = new Date(iso); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; }
             function calcDur(ini, fin) { if (!ini || !fin) return '-'; const m = Math.floor((new Date(fin) - new Date(ini)) / 60000); if (m < 60) return `${m}m`; if (m < 1440) return `${Math.floor(m / 60)}h ${m % 60}m`; return `${Math.floor(m / 1440)}d`; }
 
             function calcularCargaReal(empId) {
@@ -315,25 +366,23 @@
                 return activos + (resueltosHoy * 0.4);
             }
 
-            // --- NUEVO: SISTEMA DE PUNTAJES POR RENDIMIENTO ---
             function calcularPuntajeRendimiento(empId) {
                 const resueltas = state.causas.filter(c => c.empleadoId === empId && (c.estado === 'finalizada' || c.estado === 'en_defensor') && c.fechaResolucionEmpleado);
                 let score = 0;
                 resueltas.forEach(c => {
-                    // Puntos base por complejidad (N1=10, N2=20, N3=30, N4=50)
                     const puntosBase = (CONFIG.nivelesPuntos[c.nivelSecretario] || 1) * 10;
-                    
                     const tiempoTomado = new Date(c.fechaResolucionEmpleado) - new Date(c.fechaAsignacion);
                     const tiempoPermitido = (CONFIG.nivelesDias[c.nivelSecretario] || 3) * 86400000;
-                    
                     let multiplicador = 1.0;
-                    if (tiempoTomado <= tiempoPermitido * 0.25) multiplicador = 1.5; // Muy rápido: bono 50%
-                    else if (tiempoTomado <= tiempoPermitido * 0.50) multiplicador = 1.2; // Rápido: bono 20%
-                    else if (tiempoTomado > tiempoPermitido) multiplicador = 0.5; // Tarde: penalidad 50%
-                    
+                    if (tiempoTomado <= tiempoPermitido * 0.25) multiplicador = 1.5;
+                    else if (tiempoTomado <= tiempoPermitido * 0.50) multiplicador = 1.2;
+                    else if (tiempoTomado > tiempoPermitido) multiplicador = 0.5;
                     score += (puntosBase * multiplicador);
                 });
-                return Math.round(score);
+                let maxPosible = resueltas.length * 75;
+                if (maxPosible === 0) return 0;
+                let normalizado = Math.min(10, (score / maxPosible) * 10);
+                return Math.round(normalizado * 10) / 10;
             }
 
             function tieneAtrasos(empId) {
@@ -359,6 +408,18 @@
                 return map[estado] || `<span class="badge-estado">${estado}</span>`;
             }
 
+            function getEstadoBadgePlain(estado) {
+                const map = {
+                    'en_secretaria': 'Secretaría',
+                    'en_proceso': 'En proceso',
+                    'finalizada': 'Finalizada',
+                    'en_defensor': 'Defensor',
+                    'devuelto_siged': 'Devuelto a SIGED',
+                    'remitido': 'Remitido'
+                };
+                return map[estado] || estado;
+            }
+
             // ---------- CRONOMETRO ----------
             function getTiempoRestante(fechaLimite) {
                 if (!fechaLimite) return null;
@@ -377,7 +438,7 @@
             function formatearTiempo(ms) {
                 if (ms === null || ms === undefined) return '—';
                 const seg = Math.floor(ms / 1000);
-                const dias = Math.floor(seg / 86400);
+                const dias = Math.floor((seg % 86400) / 3600);
                 const horas = Math.floor((seg % 86400) / 3600);
                 const mins = Math.floor((seg % 3600) / 60);
                 const secs = Math.floor(seg % 60);
@@ -420,6 +481,7 @@
                     empleadoId: null, fechaPaseSecretario: new Date().toISOString(),
                     fechaAsignacion: null, fechaFinalizacion: null, fechaLimite: null, fechaResolucionEmpleado: null,
                     operador: op || currentOperator || 'Desconocido',
+                    asistenciaCamaraGesell: false,  // nuevo campo
                     historial: [{ fecha: new Date().toISOString(), accion: `Ingreso a Secretaría (${sec.nombre})`, usuario: op || currentOperator || 'Operador', comentario: obs || 'Sin observaciones' }]
                 };
                 state.causas.push(nueva); saveState();
@@ -440,16 +502,13 @@
                 showToast(`📌 ${c.numero} asignado a ${getEmpName(empId)}`); return true;
             }
 
-            // --- NUEVO: ASIGNACIÓN AUTOMÁTICA EQUITATIVA (Cantidad y Complejidad) ---
+            // --- ASIGNACIÓN AUTOMÁTICA EQUITATIVA ---
             function asignarAlMenosCargado(id, nivSec) {
                 nivSec = parseInt(nivSec);
-                
                 let candidatos = CONFIG.empleados.map(e => {
                     const activas = state.causas.filter(c => c.empleadoId === e.id && c.estado === 'en_proceso');
                     const cargaTotal = activas.reduce((sum, c) => sum + (c.puntos || 0), 0);
-                    // Contamos exactamente cuántas tareas DE ESTE MISMO NIVEL tiene el empleado en curso
                     const countMismoNivel = activas.filter(c => c.nivelSecretario === nivSec).length;
-                    
                     return {
                         id: e.id,
                         cargaTotal: cargaTotal,
@@ -457,23 +516,13 @@
                         atrasado: tieneAtrasos(e.id)
                     };
                 });
-
-                // Priorizamos a quienes NO tienen atrasos
                 let elegibles = candidatos.filter(c => !c.atrasado);
-                if (elegibles.length === 0) elegibles = candidatos; // Si todos están atrasados, elegimos entre todos
-
-                // CRITERIO DE ORDENAMIENTO (Equidad)
+                if (elegibles.length === 0) elegibles = candidatos;
                 elegibles.sort((a, b) => {
-                    // 1. Primero priorizamos equilibrar el nivel de complejidad (quien tenga menos de este nivel)
-                    if (a.countMismoNivel !== b.countMismoNivel) {
-                        return a.countMismoNivel - b.countMismoNivel;
-                    }
-                    // 2. Si empatan en cantidad de expedientes de este nivel, desempatamos por la carga total
+                    if (a.countMismoNivel !== b.countMismoNivel) return a.countMismoNivel - b.countMismoNivel;
                     return a.cargaTotal - b.cargaTotal;
                 });
-
-                const mejorEmp = elegibles[0].id;
-                
+                const mejorEmp = elegibles[0]?.id;
                 if (mejorEmp) {
                     return asignarCausa(id, nivSec, mejorEmp, 'Asignación automática equitativa (Nivel ' + nivSec + ')');
                 }
@@ -484,26 +533,23 @@
             function cambiarEstado(id, nuevoEstado, accion, usuario, com) {
                 const c = state.causas.find(x => x.id === id);
                 if (!c) return;
-                
-                // Si el empleado cumple/eleva la tarea, registramos el timestamp para calcular su puntaje luego
                 if ((nuevoEstado === 'finalizada' || nuevoEstado === 'en_defensor') && c.empleadoId) {
                     if (!c.fechaResolucionEmpleado) c.fechaResolucionEmpleado = new Date().toISOString();
                 }
-
                 c.estado = nuevoEstado;
                 if (nuevoEstado === 'finalizada') c.fechaFinalizacion = new Date().toISOString();
                 if (nuevoEstado === 'en_secretaria' || nuevoEstado === 'devuelto_siged' || nuevoEstado === 'remitido') {
                     c.empleadoId = null;
                     c.fechaAsignacion = null;
                     c.fechaLimite = null;
-                    c.fechaResolucionEmpleado = null; // Reiniciar si se devuelve
+                    c.fechaResolucionEmpleado = null;
                 }
                 c.historial.push({ fecha: new Date().toISOString(), accion: accion, usuario: usuario || 'Sistema', comentario: com || '-' });
                 saveState();
                 showToast(`🔄 ${c.numero} actualizado: ${accion}`);
             }
 
-            // ---------- REPORTE POR OPERADOR ----------
+            // ---------- REPORTES ----------
             function devolverSIGED(id, operador) {
                 const c = state.causas.find(x => x.id === id);
                 if (!c) { showToast('Causa no encontrada', 'danger'); return; }
@@ -525,7 +571,6 @@
                 const total = causas.length;
                 const now = new Date();
                 const fechaStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
                 let html = `
                     <div class="mb-3">
                         <p><strong>Operador:</strong> ${operador}</p>
@@ -556,7 +601,6 @@
                 const total = causas.length;
                 const now = new Date();
                 const fechaStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
                 let html = `
                     <div class="mb-3">
                         <p><strong>Operador:</strong> ${operador}</p>
@@ -588,6 +632,78 @@
                 `;
                 document.getElementById('modalReporteBody').innerHTML = html;
                 new bootstrap.Modal(document.getElementById('modalReporte')).show();
+            }
+
+            // ---------- REPORTE EMPLEADO ----------
+            function generarReporteEmpleado(empId) {
+                const emp = CONFIG.empleados.find(e => e.id === empId);
+                if (!emp) { showToast('Empleado no encontrado', 'danger'); return; }
+                const causas = state.causas.filter(c => c.empleadoId === empId).sort((a,b) => new Date(b.fechaAsignacion) - new Date(a.fechaAsignacion));
+                const total = causas.length;
+                const now = new Date();
+                const fechaStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+                let html = `
+                    <div style="font-family: 'Inter', sans-serif; color: #1f384f;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 2px solid #e2edf7; padding-bottom: 1rem;">
+                            <div>
+                                <h5 style="margin: 0; font-weight: 700; color: #0a2a44;">Reporte de Actividades</h5>
+                                <p style="margin: 0.25rem 0 0; color: #5f7f9f; font-size: 0.85rem;">Empleado: <strong>${emp.nombre}</strong></p>
+                            </div>
+                            <div style="text-align: right; font-size: 0.8rem; color: #5f7f9f;">
+                                <div>${fechaStr}</div>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                            <div style="background: #f9fcff; border-radius: 12px; padding: 0.8rem 1rem; border: 1px solid #e2edf7; text-align: center;">
+                                <div style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #5f7f9f; letter-spacing: 0.3px;">Total Asignadas</div>
+                                <div style="font-size: 1.6rem; font-weight: 800; color: #0a2a44;">${total}</div>
+                            </div>
+                            <div style="background: #f9fcff; border-radius: 12px; padding: 0.8rem 1rem; border: 1px solid #e2edf7; text-align: center;">
+                                <div style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #5f7f9f; letter-spacing: 0.3px;">En Proceso</div>
+                                <div style="font-size: 1.6rem; font-weight: 800; color: #1976d2;">${causas.filter(c => c.estado === 'en_proceso').length}</div>
+                            </div>
+                            <div style="background: #f9fcff; border-radius: 12px; padding: 0.8rem 1rem; border: 1px solid #e2edf7; text-align: center;">
+                                <div style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #5f7f9f; letter-spacing: 0.3px;">Finalizadas</div>
+                                <div style="font-size: 1.6rem; font-weight: 800; color: #2e7d32;">${causas.filter(c => c.estado === 'finalizada').length}</div>
+                            </div>
+                        </div>
+                        <h6 style="font-weight: 600; color: #0a2a44; margin-bottom: 0.5rem;">Detalle de expedientes</h6>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; min-width: 600px;">
+                                <thead>
+                                    <tr style="background: #f1f6fd; color: #1a4c74;">
+                                        <th style="padding: 6px 8px; text-align: left; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.4px; border-bottom: 1px solid #dce5ec;">Expediente</th>
+                                        <th style="padding: 6px 8px; text-align: left; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.4px; border-bottom: 1px solid #dce5ec;">Tipo</th>
+                                        <th style="padding: 6px 8px; text-align: left; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.4px; border-bottom: 1px solid #dce5ec;">Nivel</th>
+                                        <th style="padding: 6px 8px; text-align: left; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.4px; border-bottom: 1px solid #dce5ec;">Asignación</th>
+                                        <th style="padding: 6px 8px; text-align: left; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.4px; border-bottom: 1px solid #dce5ec;">Finalización</th>
+                                        <th style="padding: 6px 8px; text-align: left; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.4px; border-bottom: 1px solid #dce5ec;">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${causas.map(c => `
+                                        <tr style="border-bottom: 1px solid #eef2f7;">
+                                            <td style="padding: 6px 8px; font-weight: 600;">${c.numero}</td>
+                                            <td style="padding: 6px 8px;">${c.tipo || '-'}</td>
+                                            <td style="padding: 6px 8px;">N${c.nivelSecretario || c.nivelOperador}</td>
+                                            <td style="padding: 6px 8px; font-size: 0.7rem;">${fmtDateShort(c.fechaAsignacion)}</td>
+                                            <td style="padding: 6px 8px; font-size: 0.7rem;">${c.fechaFinalizacion ? fmtDateShort(c.fechaFinalizacion) : '-'}</td>
+                                            <td style="padding: 6px 8px;">${getEstadoBadgePlain(c.estado)}</td>
+                                        </tr>
+                                    `).join('')}
+                                    ${total === 0 ? `<tr><td colspan="6" style="padding: 20px; text-align: center; color: #8aa3bc;">No hay expedientes asignados a este empleado.</td></tr>` : ''}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="margin-top: 1rem; font-size: 0.65rem; color: #8aa3bc; border-top: 1px solid #e2edf7; padding-top: 0.5rem;">
+                            Reporte generado el ${fechaStr} · Sistema Digital de Pases
+                        </div>
+                    </div>
+                `;
+                document.getElementById('modalReporteEmpBody').innerHTML = html;
+                document.getElementById('modalReporteEmpNombre').textContent = emp.nombre;
+                new bootstrap.Modal(document.getElementById('modalReporteEmpleado')).show();
             }
 
             // ---------- PAGINACIÓN ----------
@@ -631,7 +747,7 @@
                 if (perPageSelect) { perPageSelect.addEventListener('change', function(e) { callback(1, parseInt(this.value)); }); }
             }
 
-            // ---------- PANELES DE VISTA ----------
+            // ---------- PANELES ----------
             function renderIngreso() {
                 const panel = document.getElementById('panelIngreso');
                 let causasFiltradas = getFilteredCausas();
@@ -649,6 +765,25 @@
                 if (currentRole === 'operador' && currentOperator) { operadorOptions = `<option value="${currentOperator}" selected>${currentOperator}</option>`; } 
                 else { operadorOptions = CONFIG.operadores.map(op => `<option value="${op}" ${op===currentOperator?'selected':''}>${op}</option>`).join(''); }
 
+                // NUEVA LISTA DE TIPOS (orden alfabético, con Otro al final)
+                const tipos = [
+                    'Acción de protección de persona',
+                    'Alimentos',
+                    'Cuidado personal',
+                    'Desalojo',
+                    'Divorcio',
+                    'Evaluación Art 42 C.C.C.N.',
+                    'Filiación',
+                    'Filiación y Daño',
+                    'Laboral',
+                    'Penal (cámara gesell)',
+                    'Prescripción Adquisitiva',
+                    'Régimen de comunicación y contacto',
+                    'Violencia Familiar',
+                    'Otro'
+                ];
+                const tipoOptions = tipos.map(t => `<option value="${t}">${t}</option>`).join('');
+
                 panel.innerHTML = `
                     <div class="row g-4">
                         <div class="col-lg-5">
@@ -658,7 +793,7 @@
                                     <div class="mb-3"><label class="form-label">Operador *</label><select id="inpOperador" class="form-select" required ${currentRole === 'operador' ? 'disabled' : ''}>${operadorOptions}</select></div>
                                     <div class="mb-3"><label class="form-label">N° Expediente *</label><input type="text" id="inpExpediente" class="form-control" required autocomplete="off" /></div>
                                     <div class="row g-3">
-                                        <div class="col-md-6"><label class="form-label">Tipo *</label><select id="inpTipo" class="form-select" required><option value="">Seleccione...</option><option value="Oficios/Cédulas">Oficios / Cédulas</option><option value="Vistas simples">Vistas simples</option><option value="Amparo Salud">Amparo de Salud</option><option value="Violencia Familiar">Violencia Familiar</option><option value="Otro">Otro</option></select></div>
+                                        <div class="col-md-6"><label class="form-label">Tipo *</label><select id="inpTipo" class="form-select" required><option value="">Seleccione...</option>${tipoOptions}</select></div>
                                         <div class="col-md-6"><label class="form-label">Complejidad *</label><select id="inpNivel" class="form-select" required><option value="1">Nivel 1</option><option value="2" selected>Nivel 2</option><option value="3">Nivel 3</option><option value="4">Nivel 4</option></select></div>
                                     </div>
                                     <div class="mb-3 mt-2"><label class="form-label">Observaciones</label><textarea id="inpObs" class="form-control" rows="2"></textarea></div>
@@ -699,6 +834,7 @@
                 const btnReporte = document.getElementById('btnReporteOperador'); if (btnReporte) { btnReporte.addEventListener('click', function() { generarReporte(currentOperator); }); }
             }
 
+            // ---------- DISTRIBUCIÓN ----------
             function renderDistribucion() {
                 const panel = document.getElementById('panelDistribucion');
                 const pend = getFilteredCausas().filter(c => c.estado === 'en_secretaria').sort((a, b) => b.nivelOperador - a.nivelOperador);
@@ -706,6 +842,18 @@
                 const { items, total, totalPages, page, start, end } = paginateData(pend, pState.page, pState.perPage);
 
                 const optsEmpleados = CONFIG.empleados.map(e => `<option value="${e.id}">${e.nombre} (${calcularCargaReal(e.id).toFixed(1)} pts)${tieneAtrasos(e.id)?' ⚠️':''}</option>`).join('');
+
+                // Estadísticas de equidad
+                let secStats = CONFIG.secretarios.map(sec => {
+                    const asignadas = state.causas.filter(c => c.secretarioId === sec.id && c.estado !== 'en_secretaria').length;
+                    return { ...sec, asignadas };
+                });
+                let empStats = CONFIG.empleados.map(e => {
+                    const activas = state.causas.filter(c => c.empleadoId === e.id && c.estado === 'en_proceso').length;
+                    const carga = calcularCargaReal(e.id);
+                    return { ...e, activas, carga };
+                });
+                empStats.sort((a,b) => b.carga - a.carga);
 
                 panel.innerHTML = `
                     <div class="card-modern">
@@ -738,6 +886,36 @@
                             </div><div id="paginationDistribucion"></div>
                         ` : `<div class="text-center text-muted py-4"><i class="bi bi-check-circle" style="font-size:2rem;display:block;margin-bottom:8px;color:#2e7d32;"></i>Bandeja vacía</div>`}
                     </div>
+
+                    <!-- Estadísticas de equidad -->
+                    <div class="card-modern">
+                        <div class="card-title"><i class="bi bi-bar-chart-fill"></i> Estadísticas de Equidad</div>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h6 style="font-size:0.8rem; font-weight:700; color:#0a2a44;">Asignaciones por Secretario</h6>
+                                <div class="equidad-grid">
+                                    ${secStats.map(s => `
+                                        <div class="equidad-item">
+                                            <div class="eq-label">${s.nombre}</div>
+                                            <div class="eq-value">${s.asignadas}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 style="font-size:0.8rem; font-weight:700; color:#0a2a44;">Carga actual por Empleado</h6>
+                                <div class="equidad-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+                                    ${empStats.map(e => `
+                                        <div class="equidad-item" style="${e.carga >= 20 ? 'border-color:#c62828; background:#fff5f5;' : ''}">
+                                            <div class="eq-label">${e.nombre.split(' ').slice(0,2).join(' ')}</div>
+                                            <div class="eq-value" style="${e.carga >= 20 ? 'color:#c62828;' : ''}">${e.carga.toFixed(1)} pts</div>
+                                            <div style="font-size:0.65rem; color:#5f7f9f;">${e.activas} activas</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 `;
 
                 if (total > 0) renderPagination('paginationDistribucion', total, totalPages, page, pState.perPage, (newPage, newPerPage) => { paginationState.distribucion.page = newPage; paginationState.distribucion.perPage = newPerPage; renderDistribucion(); });
@@ -758,11 +936,55 @@
                 }
             }
 
+            // ---------- DEFENSOR (con Cámara Gesell) ----------
             function renderDefensor() {
                 const panel = document.getElementById('panelDefensor');
                 const lista = getFilteredCausas().filter(c => c.estado === 'en_defensor').sort((a, b) => new Date(b.fechaPaseSecretario) - new Date(a.fechaPaseSecretario));
                 const pState = paginationState.defensor; const { items, total, totalPages, page, start, end } = paginateData(lista, pState.page, pState.perPage);
 
+                // ===== SECCIÓN CÁMARA GESELL =====
+                // Filtramos causas que tengan tipo "Penal (cámara gesell)" (coincidencia exacta o parcial)
+                const causasGesell = state.causas.filter(c => c.tipo && c.tipo.toLowerCase().includes('cámara gesell'));
+                const enDefensorGesell = causasGesell.filter(c => c.estado === 'en_defensor');
+                const finalizadasGesell = causasGesell.filter(c => c.estado === 'finalizada');
+                const conAsistencia = causasGesell.filter(c => c.asistenciaCamaraGesell === true);
+                const sinAsistencia = causasGesell.filter(c => c.asistenciaCamaraGesell === false);
+
+                // Construir tabla de Cámara Gesell
+                let tablaGesell = '';
+                if (causasGesell.length === 0) {
+                    tablaGesell = `<div class="text-muted">No hay causas registradas con tipo "Penal (cámara gesell)".</div>`;
+                } else {
+                    tablaGesell = `
+                        <div class="table-wrap">
+                            <table class="table-modern table">
+                                <thead><tr><th>Expediente</th><th>Tipo</th><th>Estado</th><th>Asistencia</th><th>Acción</th></tr></thead>
+                                <tbody>
+                                    ${causasGesell.sort((a,b) => new Date(b.fechaPaseSecretario) - new Date(a.fechaPaseSecretario)).map(c => `
+                                        <tr>
+                                            <td><strong>${c.numero}</strong></td>
+                                            <td>${c.tipo}</td>
+                                            <td>${getEstadoBadge(c.estado)}</td>
+                                            <td>${c.asistenciaCamaraGesell ? '✅ Realizada' : '⏳ Pendiente'}</td>
+                                            <td>
+                                                ${c.estado === 'en_defensor' && !c.asistenciaCamaraGesell ? 
+                                                    `<button class="btn btn-modern btn-modern-success btn-modern-sm btn-marcar-asistencia" data-id="${c.id}">Marcar asistencia</button>` : 
+                                                    c.asistenciaCamaraGesell ? '<span class="badge bg-success">✔</span>' : '—'
+                                                }
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+
+                // Gráfico de Cámara Gesell
+                const chartId = 'chartCamaraGesell';
+                // El gráfico se renderizará al final de esta función con setTimeout
+
+                // Construir el HTML de la vista Defensor (manteniendo lo anterior y agregando la sección Gesell)
                 panel.innerHTML = `
                     <div class="card-modern">
                         <div class="card-title"><i class="bi bi-gavel"></i> A Resolución · Defensor</div>
@@ -775,14 +997,90 @@
                             </div><div id="paginationDefensor"></div>
                         ` : `<div class="text-center text-muted py-4"><i class="bi bi-inbox" style="font-size:2rem;display:block;margin-bottom:8px;"></i>Sin causas en Defensor</div>`}
                     </div>
+
+                    <!-- NUEVA SECCIÓN CÁMARA GESELL -->
+                    <div class="card-modern">
+                        <div class="card-title"><i class="bi bi-camera-reels"></i> Cámara Gesell</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <h6 style="font-size:0.8rem; font-weight:700; color:#0a2a44;">Resumen</h6>
+                                <div class="kpi-grid" style="grid-template-columns: repeat(2,1fr);">
+                                    <div class="kpi-item"><div class="label">Total</div><div class="value">${causasGesell.length}</div></div>
+                                    <div class="kpi-item"><div class="label">En Defensor</div><div class="value warning">${enDefensorGesell.length}</div></div>
+                                    <div class="kpi-item"><div class="label">Finalizadas</div><div class="value success">${finalizadasGesell.length}</div></div>
+                                    <div class="kpi-item"><div class="label">Asistencia realizada</div><div class="value info">${conAsistencia.length}</div></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chart-container"><canvas id="${chartId}"></canvas></div>
+                            </div>
+                        </div>
+                        <hr />
+                        ${tablaGesell}
+                    </div>
                 `;
 
                 if (total > 0) renderPagination('paginationDefensor', total, totalPages, page, pState.perPage, (newPage, newPerPage) => { paginationState.defensor.page = newPage; paginationState.defensor.perPage = newPerPage; renderDefensor(); });
 
+                // Eventos para botones de la vista Defensor (finalizar, historial)
                 document.querySelectorAll('.btn-def-finalizar').forEach(btn => { btn.addEventListener('click', function() { const id = this.dataset.id; if (confirm('¿Finalizar esta causa?')) { cambiarEstado(id, 'finalizada', 'Finalizada por Defensor', 'Defensor'); renderAll(); } }); });
                 document.querySelectorAll('.btn-ver-hist').forEach(btn => { btn.addEventListener('click', function() { abrirHistorial(this.dataset.id); }); });
+
+                // Evento para marcar asistencia en Cámara Gesell
+                document.querySelectorAll('.btn-marcar-asistencia').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.dataset.id;
+                        const causa = state.causas.find(c => c.id === id);
+                        if (!causa) return;
+                        if (causa.asistenciaCamaraGesell) {
+                            showToast('La asistencia ya fue marcada', 'info');
+                            return;
+                        }
+                        causa.asistenciaCamaraGesell = true;
+                        causa.historial.push({ fecha: new Date().toISOString(), accion: 'Asistencia a Cámara Gesell registrada', usuario: 'Defensor', comentario: 'Asistencia marcada' });
+                        saveState();
+                        showToast(`✅ Asistencia registrada para ${causa.numero}`, 'success');
+                        renderAll();
+                    });
+                });
+
+                // Renderizar gráfico de Cámara Gesell
+                setTimeout(() => {
+                    const canvas = document.getElementById(chartId);
+                    if (!canvas) return;
+                    if (chartInstances.camaraGesell) chartInstances.camaraGesell.destroy();
+                    chartInstances.camaraGesell = new Chart(canvas, {
+                        type: 'bar',
+                        data: {
+                            labels: ['En Defensor', 'Finalizadas', 'Asistencia realizada', 'Pendientes'],
+                            datasets: [{
+                                label: 'Cantidad',
+                                data: [
+                                    enDefensorGesell.length,
+                                    finalizadasGesell.length,
+                                    conAsistencia.length,
+                                    sinAsistencia.length
+                                ],
+                                backgroundColor: ['#e67e22', '#2e7d32', '#1976d2', '#c62828'],
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { callbacks: { label: ctx => `${ctx.raw} causa(s)` } }
+                            },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                            }
+                        }
+                    });
+                }, 150);
             }
 
+            // ---------- EMPLEADO ----------
             function renderEmpleado() {
                 const panel = document.getElementById('panelEmpleado');
                 let empSeleccionado = document.getElementById('simularEmpleado')?.value || CONFIG.empleados[0]?.id || '';
@@ -797,9 +1095,10 @@
                     <div class="card-modern">
                         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                             <div class="card-title mb-0"><i class="bi bi-person-check"></i> Mis Tareas</div>
-                            <div>
-                                <label class="form-label me-2" style="font-size:0.75rem;">Simular empleado:</label>
+                            <div class="d-flex gap-2 align-items-center flex-wrap">
+                                <label class="form-label me-1" style="font-size:0.75rem; margin:0;">Empleado:</label>
                                 <select id="simularEmpleado" class="form-select form-select-sm" style="width:auto;display:inline-block;">${opts}</select>
+                                <button class="btn btn-modern btn-modern-outline btn-modern-sm" id="btnReporteEmpleado"><i class="bi bi-printer"></i> Imprimir reporte</button>
                             </div>
                         </div>
                         ${total ? `
@@ -835,8 +1134,11 @@
                 document.querySelectorAll('.btn-emp-elevar').forEach(btn => { btn.addEventListener('click', function() { const id = this.dataset.id; const com = prompt('Motivo de elevación a Defensor:'); if (com !== null) { cambiarEstado(id, 'en_defensor', 'Elevada a Defensor', getEmpName(empSeleccionado), com || 'Sin motivo'); renderAll(); } }); });
                 document.querySelectorAll('.btn-ver-hist').forEach(btn => { btn.addEventListener('click', function() { abrirHistorial(this.dataset.id); }); });
                 document.getElementById('simularEmpleado').addEventListener('change', function() { renderAll(); });
+                const btnReporteEmp = document.getElementById('btnReporteEmpleado');
+                if (btnReporteEmp) { btnReporteEmp.addEventListener('click', function() { const empId = document.getElementById('simularEmpleado').value; if (empId) generarReporteEmpleado(empId); else showToast('Seleccione un empleado', 'warning'); }); }
             }
 
+            // ---------- GRÁFICOS ----------
             function renderGraficos() {
                 const panel = document.getElementById('panelGraficos');
                 const total = state.causas.length;
@@ -848,7 +1150,6 @@
                 const remitidos = state.causas.filter(c => c.estado === 'remitido').length;
                 const saturados = CONFIG.empleados.filter(e => calcularCargaReal(e.id) >= 20 || tieneAtrasos(e.id)).length;
 
-                // --- NUEVO: Inclusión de puntaje de rendimiento en la tabla de desempeño ---
                 const empleadosData = CONFIG.empleados.map(e => ({
                     nombre: e.nombre,
                     carga: calcularCargaReal(e.id),
@@ -856,9 +1157,10 @@
                     moroso: tieneAtrasos(e.id),
                     puntaje: calcularPuntajeRendimiento(e.id)
                 }));
-
-                // Ordenar por puntaje descendente para destacar el rendimiento
                 empleadosData.sort((a, b) => b.puntaje - a.puntaje);
+
+                const niveles = [1,2,3,4];
+                const nivelCounts = niveles.map(n => state.causas.filter(c => c.nivelSecretario === n).length);
 
                 panel.innerHTML = `
                     <div class="kpi-grid">
@@ -871,38 +1173,54 @@
                     </div>
 
                     <div class="row g-4">
-                        <div class="col-lg-6">
+                        <div class="col-lg-4">
                             <div class="card-modern">
-                                <div class="card-title"><i class="bi bi-bar-chart-fill"></i> Carga por Empleado (puntos actuales)</div>
+                                <div class="card-title"><i class="bi bi-bar-chart-fill"></i> Carga por Empleado</div>
                                 <div class="chart-container"><canvas id="chartCarga"></canvas></div>
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-4">
                             <div class="card-modern">
                                 <div class="card-title"><i class="bi bi-pie-chart-fill"></i> Estado Global</div>
                                 <div class="chart-container"><canvas id="chartEstado"></canvas></div>
                             </div>
                         </div>
+                        <div class="col-lg-4">
+                            <div class="card-modern">
+                                <div class="card-title"><i class="bi bi-graph-up"></i> Rendimiento (0-10)</div>
+                                <div class="chart-container"><canvas id="chartRendimiento"></canvas></div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="card-modern">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="card-title mb-0"><i class="bi bi-table"></i> Desempeño de Empleados (Ranking)</div>
-                            <small class="text-muted"><i class="bi bi-info-circle"></i> A más complejidad y velocidad, mayor puntaje.</small>
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <div class="card-modern">
+                                <div class="card-title"><i class="bi bi-diagram-3"></i> Distribución por Nivel</div>
+                                <div class="chart-container"><canvas id="chartNivel"></canvas></div>
+                            </div>
                         </div>
-                        <div class="table-wrap">
-                            <table class="table-modern table">
-                                <thead><tr><th>Empleado</th><th>Activas</th><th>Carga (fatiga)</th><th>Puntaje Total</th><th>Moroso</th></tr></thead>
-                                <tbody>${empleadosData.map((e, index) => `
-                                    <tr>
-                                        <td><strong>${index === 0 && e.puntaje > 0 ? '🏆 ' : ''}${e.nombre}</strong></td>
-                                        <td>${e.activas}</td>
-                                        <td>${e.carga.toFixed(1)} pts</td>
-                                        <td><span class="badge badge-estado badge-score" style="font-size:0.75rem;">${e.puntaje} pts</span></td>
-                                        <td>${e.moroso ? '<span class="badge bg-danger">⚠️ SÍ</span>' : '<span class="badge bg-success">✓</span>'}</td>
-                                    </tr>
-                                `).join('')}</tbody>
-                            </table>
+                        <div class="col-lg-6">
+                            <div class="card-modern">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="card-title mb-0"><i class="bi bi-table"></i> Desempeño de Empleados (Ranking)</div>
+                                    <small class="text-muted"><i class="bi bi-info-circle"></i> Puntaje 0-10</small>
+                                </div>
+                                <div class="table-wrap">
+                                    <table class="table-modern table">
+                                        <thead><tr><th>Empleado</th><th>Activas</th><th>Carga</th><th>Puntaje</th><th>Moroso</th></tr></thead>
+                                        <tbody>${empleadosData.map((e, index) => `
+                                            <tr>
+                                                <td><strong>${index === 0 && e.puntaje > 0 ? '🏆 ' : ''}${e.nombre}</strong></td>
+                                                <td>${e.activas}</td>
+                                                <td>${e.carga.toFixed(1)} pts</td>
+                                                <td><span class="badge badge-estado badge-score" style="font-size:0.75rem;">${e.puntaje.toFixed(1)}</span></td>
+                                                <td>${e.moroso ? '<span class="badge bg-danger">⚠️</span>' : '<span class="badge bg-success">✓</span>'}</td>
+                                            </tr>
+                                        `).join('')}</tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -912,7 +1230,7 @@
                         if (chartInstances.carga) chartInstances.carga.destroy();
                         chartInstances.carga = new Chart(document.getElementById('chartCarga'), {
                             type: 'bar',
-                            data: { labels: empleadosData.map(e => e.nombre), datasets: [{ label: 'Puntos de carga', data: empleadosData.map(e => e.carga), backgroundColor: empleadosData.map(e => e.carga >= 20 ? '#c62828' : e.carga > 15 ? '#e67e22' : '#1976d2'), borderRadius: 6 }] },
+                            data: { labels: empleadosData.map(e => e.nombre.split(' ').slice(0,2).join(' ')), datasets: [{ label: 'Puntos de carga', data: empleadosData.map(e => e.carga), backgroundColor: empleadosData.map(e => e.carga >= 20 ? '#c62828' : e.carga > 15 ? '#e67e22' : '#1976d2'), borderRadius: 6 }] },
                             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
                         });
                     }
@@ -924,7 +1242,23 @@
                             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
                         });
                     }
-                }, 100);
+                    if (document.getElementById('chartRendimiento')) {
+                        if (chartInstances.rendimiento) chartInstances.rendimiento.destroy();
+                        chartInstances.rendimiento = new Chart(document.getElementById('chartRendimiento'), {
+                            type: 'bar',
+                            data: { labels: empleadosData.map(e => e.nombre.split(' ').slice(0,2).join(' ')), datasets: [{ label: 'Puntaje (0-10)', data: empleadosData.map(e => e.puntaje), backgroundColor: empleadosData.map(e => e.puntaje >= 8 ? '#2e7d32' : e.puntaje >= 5 ? '#e67e22' : '#c62828'), borderRadius: 6 }] },
+                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 10 } } }
+                        });
+                    }
+                    if (document.getElementById('chartNivel')) {
+                        if (chartInstances.nivel) chartInstances.nivel.destroy();
+                        chartInstances.nivel = new Chart(document.getElementById('chartNivel'), {
+                            type: 'bar',
+                            data: { labels: ['Nivel 1', 'Nivel 2', 'Nivel 3', 'Nivel 4'], datasets: [{ label: 'Cantidad', data: nivelCounts, backgroundColor: ['#66bb6a', '#42a5f5', '#ffa726', '#ef5350'], borderRadius: 6 }] },
+                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                        });
+                    }
+                }, 150);
             }
 
             function renderAuditoria() {
