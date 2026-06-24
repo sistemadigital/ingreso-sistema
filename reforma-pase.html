@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Defensoría - Sistema Optimizado</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Montserrat para la página de inicio -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         /* ---------- VARIABLES ---------- */
@@ -19,11 +20,215 @@
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
             --radius-md: 12px; --radius-lg: 20px;
             --font-main: 'Inter', sans-serif;
+            --font-inicio: 'Montserrat', sans-serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: var(--font-main); background: var(--bg-body); color: var(--text-main); min-height: 100vh; padding: 24px; line-height: 1.5; }
         .app-container { max-width: 1400px; margin: 0 auto; }
+
+        /* ========== PÁGINA DE INICIO ========== */
+        #paginaInicio {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #f0f4ff 0%, #d9e2f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+        #paginaInicio.oculta {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .inicio-contenedor {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 50px 40px 40px;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0, 20, 40, 0.25);
+            text-align: center;
+            max-width: 480px;
+            width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: transform 0.3s ease;
+        }
+        .inicio-contenedor:hover {
+            transform: translateY(-6px);
+        }
+        .inicio-titulo {
+            font-family: var(--font-inicio);
+            font-weight: 700;
+            font-size: 1.9rem;
+            color: #0b2a4a;
+            margin: 10px 0 6px;
+            letter-spacing: -0.02em;
+        }
+        .inicio-subtitulo {
+            font-family: var(--font-inicio);
+            font-weight: 400;
+            font-size: 1.1rem;
+            color: #2c4a6e;
+            letter-spacing: 0.3px;
+            margin-bottom: 28px;
+            opacity: 0.8;
+        }
+        .inicio-subtitulo span {
+            display: inline-block;
+            background: rgba(37, 99, 235, 0.08);
+            padding: 2px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .btn-ingresar {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 14px 44px;
+            font-family: var(--font-inicio);
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+            letter-spacing: 0.5px;
+        }
+        .btn-ingresar:hover {
+            background: var(--primary-hover);
+            transform: scale(1.02);
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.4);
+        }
+
+        /* ========== SISTEMA (contenedor principal) ========== */
+        #sistema {
+            display: none;
+            animation: fadeInSistema 0.4s ease;
+        }
+        #sistema.visible {
+            display: block;
+        }
+        @keyframes fadeInSistema {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== BOTÓN SALIR FLOTANTE ========== */
+        #btnSalir {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 900;
+            background: #dc2626;
+            color: #fff;
+            border: none;
+            border-radius: 40px;
+            padding: 10px 18px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: var(--font-main);
+            display: none;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.35);
+            transition: background 0.2s, transform 0.2s;
+            letter-spacing: 0.3px;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        #btnSalir.visible {
+            display: flex;
+        }
+        #btnSalir:hover {
+            background: #b91c1c;
+            transform: scale(1.04);
+        }
+        #btnSalir i {
+            font-size: 1rem;
+        }
+
+        /* ========== MODAL CONFIRMACIÓN SALIDA ========== */
+        #modalConfirmacionSalida {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(3px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+        }
+        #modalConfirmacionSalida.activo {
+            display: flex;
+        }
+        .modal-confirmacion-contenido {
+            background: #fff;
+            max-width: 400px;
+            width: 90%;
+            padding: 32px 28px 24px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+            border-top: 6px solid #dc2626;
+            animation: zoomIn 0.25s ease;
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-confirmacion-contenido .icono-alerta {
+            font-size: 3.2rem;
+            color: #dc2626;
+            margin-bottom: 8px;
+        }
+        .modal-confirmacion-contenido h3 {
+            font-family: var(--font-main);
+            font-weight: 600;
+            font-size: 1.3rem;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+        .modal-confirmacion-contenido p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+        }
+        .modal-confirmacion-botones {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .modal-confirmacion-botones .btn {
+            min-width: 110px;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-family: var(--font-main);
+            transition: 0.2s;
+        }
+        .btn-confirmar-salir {
+            background: #dc2626;
+            color: #fff;
+        }
+        .btn-confirmar-salir:hover {
+            background: #b91c1c;
+        }
+        .btn-cancelar-salir {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .btn-cancelar-salir:hover {
+            background: #cbd5e1;
+        }
+
+        /* ========== RESTO DEL SISTEMA (sin cambios) ========== */
 
         /* HEADER & SEARCH */
         .app-header { display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 20px 32px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); margin-bottom: 24px; border: 1px solid var(--border); flex-wrap: wrap; gap: 16px; }
@@ -134,430 +339,542 @@
 </head>
 <body data-role="admin">
 
-<div class="app-container">
-    <header class="app-header">
-        <div class="app-header-left">
-            <h1><i class="fas fa-balance-scale"></i>Sistema de Pases</h1>
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text" id="globalSearch" placeholder="Buscar expediente..." autocomplete="off">
+    <!-- ===== PÁGINA DE INICIO ===== -->
+    <div id="paginaInicio">
+        <div class="inicio-contenedor">
+            <!-- Imagen eliminada -->
+            <h1 class="inicio-titulo">Sistema de Control y Seguimiento</h1>
+            <div class="inicio-subtitulo">
+                <span>Operador</span> · <span>Secretarios</span> · <span>Defensor</span>
             </div>
-        </div>
-        <div class="role-selector">
-            <label for="roleSelector" style="font-size:0.85rem; color:var(--text-muted); margin-right:8px;">Simular Vista:</label>
-            <select id="roleSelector">
-                <option value="admin">Administrador (Todas)</option>
-                <option value="defensor">Defensor Oficial</option>
-                <option value="operador">Operador</option>
-                <option value="secretario">Secretario</option>
-                <option value="empleado">Empleado</option>
-            </select>
-        </div>
-    </header>
-
-    <nav class="nav-tabs" id="mainTabs">
-        <button class="nav-tab active hide-defensor hide-secretario hide-empleado" data-target="panelIngreso"><i class="fas fa-inbox"></i> 1. Ingreso</button>
-        <button class="nav-tab hide-operador hide-defensor hide-empleado" data-target="panelDistribucion"><i class="fas fa-hand-holding-medical"></i> 2. Distribución</button>
-        <button class="nav-tab hide-operador hide-empleado hide-secretario" data-target="panelDefensor"><i class="fas fa-gavel"></i> 3. Defensor</button>
-        <button class="nav-tab hide-operador hide-secretario hide-defensor" data-target="panelEmpleado"><i class="fas fa-tasks"></i> Mis Tareas</button>
-        <button class="nav-tab hide-operador hide-empleado" data-target="panelGraficos"><i class="fas fa-chart-pie"></i> Gráficos</button>
-        <button class="nav-tab hide-operador hide-empleado" data-target="panelAuditoria"><i class="fas fa-file-contract"></i> Auditoría</button>
-    </nav>
-
-    <div id="panelIngreso" class="tab-panel active hide-defensor hide-secretario hide-empleado">
-        <div class="grid-2">
-            <div class="card">
-                <div class="card-header"><div class="card-title"><i class="fas fa-file-signature"></i> Nueva Causa</div><span class="badge badge-blue" id="lblSecretarioAsignado">Secretario: automático</span></div>
-                <form id="formIngreso">
-                    <div class="form-group">
-                        <label>Operador *</label>
-                        <select id="inpOperador" class="form-control" required>
-                            <option value="">Seleccione...</option><option value="Boillat Cesar Enrique">Boillat Cesar Enrique</option>
-                            <option value="Cardozo Maria Raquel">Cardozo Maria Raquel</option><option value="Pablos Patricia Tamara">Pablos Patricia Tamara</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>N° Expediente *</label>
-                        <input type="text" id="inpExpediente" class="form-control" required autocomplete="off">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tipo *</label>
-                            <select id="inpTipo" class="form-control" required>
-                                <option value="">Seleccione...</option><option value="Oficios/Cédulas">Oficios / Cédulas</option>
-                                <option value="Vistas simples">Vistas simples</option><option value="Amparo Salud">Amparo de Salud</option>
-                                <option value="Violencia Familiar">Violencia Familiar</option><option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Complejidad *</label>
-                            <select id="inpNivel" class="form-control" required><option value="1">Nivel 1</option><option value="2" selected>Nivel 2</option><option value="3">Nivel 3</option><option value="4">Nivel 4</option></select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Obs</label><textarea id="inpObs" class="form-control" rows="2"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width:100%;">Pase a Secretaría <i class="fas fa-share"></i></button>
-                </form>
-            </div>
-            <div class="card">
-                <div class="card-header"><div class="card-title"><i class="fas fa-clock-rotate-left"></i> Recientes</div></div>
-                <div id="tablaIngresosRecientes"></div>
-            </div>
+            <button class="btn-ingresar" id="btnIngresarSistema">
+                <i class="fas fa-arrow-right-to-bracket"></i> Acceder al Sistema
+            </button>
         </div>
     </div>
 
-    <div id="panelDistribucion" class="tab-panel hide-operador hide-defensor hide-empleado">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title"><i class="fas fa-share-nodes"></i> Pendientes Secretaría</div>
-                <div>
-                    <span class="badge badge-blue" id="lblPendientesCount" style="margin-right: 10px;">0 Pendientes</span>
-                    <button class="btn btn-success btn-sm" id="btnDistribuirMasivo"><i class="fas fa-magic"></i> Distribuir Automático</button>
+    <!-- ===== SISTEMA (contenido original) ===== -->
+    <div id="sistema">
+        <div class="app-container">
+            <header class="app-header">
+                <div class="app-header-left">
+                    <h1><i class="fas fa-balance-scale"></i>Sistema de Pases</h1>
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="globalSearch" placeholder="Buscar expediente..." autocomplete="off">
+                    </div>
+                </div>
+                <div class="role-selector">
+                    <label for="roleSelector" style="font-size:0.85rem; color:var(--text-muted); margin-right:8px;">Simular Vista:</label>
+                    <select id="roleSelector">
+                        <option value="admin">Administrador (Todas)</option>
+                        <option value="defensor">Defensor Oficial</option>
+                        <option value="operador">Operador</option>
+                        <option value="secretario">Secretario</option>
+                        <option value="empleado">Empleado</option>
+                    </select>
+                </div>
+            </header>
+
+            <nav class="nav-tabs" id="mainTabs">
+                <button class="nav-tab active hide-defensor hide-secretario hide-empleado" data-target="panelIngreso"><i class="fas fa-inbox"></i> 1. Ingreso</button>
+                <button class="nav-tab hide-operador hide-defensor hide-empleado" data-target="panelDistribucion"><i class="fas fa-hand-holding-medical"></i> 2. Distribución</button>
+                <button class="nav-tab hide-operador hide-empleado hide-secretario" data-target="panelDefensor"><i class="fas fa-gavel"></i> 3. Defensor</button>
+                <button class="nav-tab hide-operador hide-secretario hide-defensor" data-target="panelEmpleado"><i class="fas fa-tasks"></i> Mis Tareas</button>
+                <button class="nav-tab hide-operador hide-empleado" data-target="panelGraficos"><i class="fas fa-chart-pie"></i> Gráficos</button>
+                <button class="nav-tab hide-operador hide-empleado" data-target="panelAuditoria"><i class="fas fa-file-contract"></i> Auditoría</button>
+            </nav>
+
+            <div id="panelIngreso" class="tab-panel active hide-defensor hide-secretario hide-empleado">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><i class="fas fa-file-signature"></i> Nueva Causa</div><span class="badge badge-blue" id="lblSecretarioAsignado">Secretario: automático</span></div>
+                        <form id="formIngreso">
+                            <div class="form-group">
+                                <label>Operador *</label>
+                                <select id="inpOperador" class="form-control" required>
+                                    <option value="">Seleccione...</option><option value="Boillat Cesar Enrique">Boillat Cesar Enrique</option>
+                                    <option value="Cardozo Maria Raquel">Cardozo Maria Raquel</option><option value="Pablos Patricia Tamara">Pablos Patricia Tamara</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>N° Expediente *</label>
+                                <input type="text" id="inpExpediente" class="form-control" required autocomplete="off">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Tipo *</label>
+                                    <select id="inpTipo" class="form-control" required>
+                                        <option value="">Seleccione...</option><option value="Oficios/Cédulas">Oficios / Cédulas</option>
+                                        <option value="Vistas simples">Vistas simples</option><option value="Amparo Salud">Amparo de Salud</option>
+                                        <option value="Violencia Familiar">Violencia Familiar</option><option value="Otro">Otro</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Complejidad *</label>
+                                    <select id="inpNivel" class="form-control" required><option value="1">Nivel 1</option><option value="2" selected>Nivel 2</option><option value="3">Nivel 3</option><option value="4">Nivel 4</option></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Obs</label><textarea id="inpObs" class="form-control" rows="2"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width:100%;">Pase a Secretaría <i class="fas fa-share"></i></button>
+                        </form>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><i class="fas fa-clock-rotate-left"></i> Recientes</div></div>
+                        <div id="tablaIngresosRecientes"></div>
+                    </div>
                 </div>
             </div>
-            <div id="tablaPendientes"></div>
-        </div>
-    </div>
 
-    <div id="panelDefensor" class="tab-panel hide-operador hide-empleado hide-secretario">
-        <div class="card">
-            <div class="card-header"><div class="card-title"><i class="fas fa-gavel" style="color: var(--danger);"></i> A Resolución</div></div>
-            <div id="tablaDefensor"></div>
-        </div>
-    </div>
-
-    <div id="panelEmpleado" class="tab-panel hide-operador hide-secretario hide-defensor">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title"><i class="fas fa-tasks"></i> Mis Asignaciones</div>
-                <div><label style="font-size:0.85rem; margin-right:8px;">Simular:</label><select id="simularEmpleado" class="form-control" style="width:auto; display:inline-block; padding:6px;"></select></div>
+            <div id="panelDistribucion" class="tab-panel hide-operador hide-defensor hide-empleado">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-share-nodes"></i> Pendientes Secretaría</div>
+                        <div>
+                            <span class="badge badge-blue" id="lblPendientesCount" style="margin-right: 10px;">0 Pendientes</span>
+                            <button class="btn btn-success btn-sm" id="btnDistribuirMasivo"><i class="fas fa-magic"></i> Distribuir Automático</button>
+                        </div>
+                    </div>
+                    <div id="tablaPendientes"></div>
+                </div>
             </div>
-            <div id="tablaMisTareas"></div>
-        </div>
-    </div>
 
-    <div id="panelGraficos" class="tab-panel hide-operador hide-empleado">
-        <div class="kpi-grid">
-            <div class="kpi-card"><div class="kpi-icon" style="background:#eff6ff; color:#2563eb;"><i class="fas fa-folder-open"></i></div><div class="kpi-info"><h4>En Proceso</h4><span id="kpiActivas">0</span></div></div>
-            <div class="kpi-card"><div class="kpi-icon" style="background:#fefce8; color:#d97706;"><i class="fas fa-hourglass-half"></i></div><div class="kpi-info"><h4>En Secretaría</h4><span id="kpiSinAsignar">0</span></div></div>
-            <div class="kpi-card"><div class="kpi-icon" style="background:#fef2f2; color:#dc2626;"><i class="fas fa-exclamation-triangle"></i></div><div class="kpi-info"><h4>Saturados/Morosos</h4><span id="kpiSaturados">0</span></div></div>
-            <div class="kpi-card"><div class="kpi-icon" style="background:#ecfdf5; color:#059669;"><i class="fas fa-check-double"></i></div><div class="kpi-info"><h4>Finalizadas</h4><span id="kpiFinalizadas">0</span></div></div>
-        </div>
-        <div class="grid-2">
-            <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-chart-bar"></i> Carga de Empleados (Puntos)</div></div><div class="chart-container"><canvas id="chartCargaEmpleados"></canvas></div></div>
-            <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-chart-pie"></i> Estado Global</div></div><div class="chart-container"><canvas id="chartEstadoGlobal"></canvas></div></div>
-        </div>
-        <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-users"></i> Desempeño y Asignación</div></div><div id="tablaCargaDetalle"></div></div>
-    </div>
-
-    <div id="panelAuditoria" class="tab-panel hide-operador hide-empleado">
-        <div class="card">
-            <div class="card-header"><div class="card-title"><i class="fas fa-clipboard-list"></i> Trazabilidad General (Últimos 50)</div>
-                <button class="btn btn-outline btn-sm" id="btnLimpiarStorage"><i class="fas fa-trash"></i> Reinicio</button>
+            <div id="panelDefensor" class="tab-panel hide-operador hide-empleado hide-secretario">
+                <div class="card">
+                    <div class="card-header"><div class="card-title"><i class="fas fa-gavel" style="color: var(--danger);"></i> A Resolución</div></div>
+                    <div id="tablaDefensor"></div>
+                </div>
             </div>
-            <div id="tablaAuditoriaGeneral"></div>
+
+            <div id="panelEmpleado" class="tab-panel hide-operador hide-secretario hide-defensor">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-tasks"></i> Mis Asignaciones</div>
+                        <div><label style="font-size:0.85rem; margin-right:8px;">Simular:</label><select id="simularEmpleado" class="form-control" style="width:auto; display:inline-block; padding:6px;"></select></div>
+                    </div>
+                    <div id="tablaMisTareas"></div>
+                </div>
+            </div>
+
+            <div id="panelGraficos" class="tab-panel hide-operador hide-empleado">
+                <div class="kpi-grid">
+                    <div class="kpi-card"><div class="kpi-icon" style="background:#eff6ff; color:#2563eb;"><i class="fas fa-folder-open"></i></div><div class="kpi-info"><h4>En Proceso</h4><span id="kpiActivas">0</span></div></div>
+                    <div class="kpi-card"><div class="kpi-icon" style="background:#fefce8; color:#d97706;"><i class="fas fa-hourglass-half"></i></div><div class="kpi-info"><h4>En Secretaría</h4><span id="kpiSinAsignar">0</span></div></div>
+                    <div class="kpi-card"><div class="kpi-icon" style="background:#fef2f2; color:#dc2626;"><i class="fas fa-exclamation-triangle"></i></div><div class="kpi-info"><h4>Saturados/Morosos</h4><span id="kpiSaturados">0</span></div></div>
+                    <div class="kpi-card"><div class="kpi-icon" style="background:#ecfdf5; color:#059669;"><i class="fas fa-check-double"></i></div><div class="kpi-info"><h4>Finalizadas</h4><span id="kpiFinalizadas">0</span></div></div>
+                </div>
+                <div class="grid-2">
+                    <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-chart-bar"></i> Carga de Empleados (Puntos)</div></div><div class="chart-container"><canvas id="chartCargaEmpleados"></canvas></div></div>
+                    <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-chart-pie"></i> Estado Global</div></div><div class="chart-container"><canvas id="chartEstadoGlobal"></canvas></div></div>
+                </div>
+                <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-users"></i> Desempeño y Asignación</div></div><div id="tablaCargaDetalle"></div></div>
+            </div>
+
+            <div id="panelAuditoria" class="tab-panel hide-operador hide-empleado">
+                <div class="card">
+                    <div class="card-header"><div class="card-title"><i class="fas fa-clipboard-list"></i> Trazabilidad General (Últimos 50)</div>
+                        <button class="btn btn-outline btn-sm" id="btnLimpiarStorage"><i class="fas fa-trash"></i> Reinicio</button>
+                    </div>
+                    <div id="tablaAuditoriaGeneral"></div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="modal-overlay" id="modalTrazabilidad">
-    <div class="modal-content">
-        <div class="modal-header"><h3><i class="fas fa-history" style="color:var(--primary);"></i> Historial: <span id="modalTituloExpediente"></span></h3><button class="modal-close" id="modalClose">&times;</button></div>
-        <div class="modal-body" id="modalBodyMovimientos"></div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="modalPrompt">
-    <div class="modal-content" style="max-width:400px; text-align:center;">
-        <h3 id="promptTitle" style="margin-bottom:15px; font-size:1.1rem;"></h3>
-        <input type="text" id="promptInput" class="form-control" style="margin-bottom:20px;" autocomplete="off">
-        <div style="display:flex; gap:10px; justify-content:center;">
-            <button class="btn btn-outline" id="btnPromptCancel">Cancelar</button>
-            <button class="btn btn-primary" id="btnPromptConfirm">Confirmar</button>
+    <!-- ===== MODALES DEL SISTEMA ===== -->
+    <div class="modal-overlay" id="modalTrazabilidad">
+        <div class="modal-content">
+            <div class="modal-header"><h3><i class="fas fa-history" style="color:var(--primary);"></i> Historial: <span id="modalTituloExpediente"></span></h3><button class="modal-close" id="modalClose">&times;</button></div>
+            <div class="modal-body" id="modalBodyMovimientos"></div>
         </div>
     </div>
-</div>
 
-<div id="toastContainer" class="toast-container"></div>
+    <div class="modal-overlay" id="modalPrompt">
+        <div class="modal-content" style="max-width:400px; text-align:center;">
+            <h3 id="promptTitle" style="margin-bottom:15px; font-size:1.1rem;"></h3>
+            <input type="text" id="promptInput" class="form-control" style="margin-bottom:20px;" autocomplete="off">
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button class="btn btn-outline" id="btnPromptCancel">Cancelar</button>
+                <button class="btn btn-primary" id="btnPromptConfirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
 
-<script>
-    const App = {
-        config: {
-            storageKey: 'defensoria_core_v8',
-            maxPuntosEmpleado: 20,
-            passwords: { defensor: 'def6', secretario: 'def6' },
-            nivelesPuntos: { 1:1, 2:2, 3:3, 4:5 },
-            nivelesDias: { 1:5, 2:3, 3:3, 4:2 },
-            nivelesAuto: { 'Oficios/Cédulas': 1, 'Vistas simples': 2, 'Amparo Salud': 4, 'Violencia Familiar': 4, 'Otro': 2 },
-            secretarios: [{ id:'sec1', nombre:'Corrales A.' }, { id:'sec2', nombre:'Riveros P.' }],
-            empleados: [
-                { id:'emp1', nombre:'Bazante N.', clave: '123bz' }, 
-                { id:'emp2', nombre:'Fioravante R.', clave: '123rf' },
-                { id:'emp3', nombre:'Cedron N.', clave: '123cn' }, 
-                { id:'emp4', nombre:'Escobar M.', clave: '123em' }
-            ]
-        },
-        state: { causas: [], searchTerm: '' },
-        charts: {}, cronometroInterval: null,
+    <!-- ===== BOTÓN SALIR FLOTANTE ===== -->
+    <button id="btnSalir" class="visible">
+        <i class="fas fa-sign-out-alt"></i> Salir
+    </button>
 
-        init() {
-            this.loadState(); this.initSelects(); this.bindEvents(); this.generarDemo();
-            this.renderActiveTab(); this.actualizarKPIs(); setTimeout(() => this.initCharts(), 100);
-            this.iniciarCronometros();
-        },
+    <!-- ===== MODAL CONFIRMACIÓN SALIDA ===== -->
+    <div id="modalConfirmacionSalida">
+        <div class="modal-confirmacion-contenido">
+            <div class="icono-alerta"><i class="fas fa-exclamation-circle"></i></div>
+            <h3>¿Cerrar sesión?</h3>
+            <p>Volverás a la pantalla de inicio. Los datos no se perderán.</p>
+            <div class="modal-confirmacion-botones">
+                <button class="btn btn-cancelar-salir" id="btnCancelarSalida">Cancelar</button>
+                <button class="btn btn-confirmar-salir" id="btnConfirmarSalida">Sí, salir</button>
+            </div>
+        </div>
+    </div>
 
-        // --- Utils & Storage ---
-        loadState() { const s = localStorage.getItem(this.config.storageKey); if (s) this.state = JSON.parse(s); },
-        saveState() { localStorage.setItem(this.config.storageKey, JSON.stringify(this.state)); },
-        generateId() { return typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : Date.now().toString() + Math.random().toString(36).substring(2); },
-        
-        // --- UI Feedback (Toasts & Prompts) ---
-        showToast(msg, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', danger: 'fa-times-circle' };
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `<i class="fas ${icons[type]}"></i> ${msg}`;
-            container.appendChild(toast);
-            setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
-        },
-        askPrompt(title, isPassword = false) {
-            return new Promise((resolve) => {
-                const modal = document.getElementById('modalPrompt');
-                const input = document.getElementById('promptInput');
-                document.getElementById('promptTitle').innerText = title;
-                
-                input.type = isPassword ? 'password' : 'text';
-                input.value = ''; modal.classList.add('active'); input.focus();
-                
-                const cleanup = () => { modal.classList.remove('active'); btnConf.removeEventListener('click', onConf); btnCanc.removeEventListener('click', onCanc); };
-                const onConf = () => { cleanup(); resolve(input.value.trim() || null); };
-                const onCanc = () => { cleanup(); resolve(null); };
-                
-                const btnConf = document.getElementById('btnPromptConfirm');
-                const btnCanc = document.getElementById('btnPromptCancel');
-                btnConf.addEventListener('click', onConf); btnCanc.addEventListener('click', onCanc);
-            });
-        },
+    <div id="toastContainer" class="toast-container"></div>
 
-        // --- Cálculos Equidad (Fatiga Diaria y Morosidad) ---
-        calcularCargaReal(empleadoId) {
-            const activos = this.state.causas.filter(c => c.empleadoId === empleadoId && c.estado === 'en_proceso').reduce((sum, c) => sum + (c.puntos || 0), 0);
-            const hoy = new Date().toDateString();
-            const resueltosHoy = this.state.causas.filter(c => c.empleadoId === empleadoId && c.estado === 'finalizada' && new Date(c.fechaFinalizacion).toDateString() === hoy).reduce((sum, c) => sum + (c.puntos || 0), 0);
-            return activos + (resueltosHoy * 0.4); // 40% del peso de lo resuelto se arrastra como "fatiga"
-        },
-        tieneAtrasos(empleadoId) {
-            const ahora = Date.now();
-            return this.state.causas.some(c => c.empleadoId === empleadoId && c.estado === 'en_proceso' && c.fechaLimite && new Date(c.fechaLimite).getTime() < ahora);
-        },
+    <script>
+        // ======================================================================
+        //  CÓDIGO EXISTENTE (con modificación para clave admin)
+        // ======================================================================
+        const App = {
+            config: {
+                storageKey: 'defensoria_core_v8',
+                maxPuntosEmpleado: 20,
+                passwords: { admin: 'admin', defensor: 'def6', secretario: 'def6' },
+                nivelesPuntos: { 1:1, 2:2, 3:3, 4:5 },
+                nivelesDias: { 1:5, 2:3, 3:3, 4:2 },
+                nivelesAuto: { 'Oficios/Cédulas': 1, 'Vistas simples': 2, 'Amparo Salud': 4, 'Violencia Familiar': 4, 'Otro': 2 },
+                secretarios: [{ id:'sec1', nombre:'Corrales A.' }, { id:'sec2', nombre:'Riveros P.' }],
+                empleados: [
+                    { id:'emp1', nombre:'Bazante N.', clave: '123bz' }, 
+                    { id:'emp2', nombre:'Fioravante R.', clave: '123rf' },
+                    { id:'emp3', nombre:'Cedron N.', clave: '123cn' }, 
+                    { id:'emp4', nombre:'Escobar M.', clave: '123em' }
+                ]
+            },
+            state: { causas: [], searchTerm: '' },
+            charts: {}, cronometroInterval: null,
 
-        // --- Core Negocio ---
-        registrarCausa(num, tipo, obs, nivel, op) {
-            const sec = this.config.secretarios.sort((a,b) => this.state.causas.filter(c=>c.secretarioId===a.id && c.estado==='en_secretaria').length - this.state.causas.filter(c=>c.secretarioId===b.id && c.estado==='en_secretaria').length)[0];
-            const nueva = {
-                id: this.generateId(), numero: num.toUpperCase().trim(), tipo, nivelOperador: parseInt(nivel), nivelSecretario: null, puntos: 0,
-                observaciones: obs, estado: 'en_secretaria', secretarioId: sec.id, empleadoId: null, fechaPaseSecretario: new Date().toISOString(),
-                fechaAsignacion: null, fechaFinalizacion: null, fechaLimite: null,
-                historial: [{ fecha: new Date().toISOString(), accion: `Ingreso a Sec. (${sec.nombre})`, usuario: op, comentario: obs || 'Sin obs' }]
-            };
-            this.state.causas.push(nueva); this.saveState(); this.showToast(`Pase registrado: ${num}`);
-            return nueva;
-        },
-        asignarCausa(id, nivSec, empId, com = '', secId = null) {
-            const c = this.state.causas.find(x => x.id === id); if(!c || c.estado !== 'en_secretaria') return false;
-            c.nivelSecretario = parseInt(nivSec); c.puntos = this.config.nivelesPuntos[c.nivelSecretario]; c.empleadoId = empId; c.estado = 'en_proceso';
-            c.fechaAsignacion = new Date().toISOString(); c.fechaLimite = new Date(Date.now() + (this.config.nivelesDias[c.nivelSecretario]||3)*86400000).toISOString();
-            c.historial.push({ fecha: new Date().toISOString(), accion: `Asignado (Nivel ${c.nivelSecretario})`, usuario: this.getSecName(secId || c.secretarioId), comentario: com || `A ${this.getEmpName(empId)}` });
-            this.saveState(); return true;
-        },
-        cambiarEstado(id, nuevoEstado, accion, usuario, com) {
-            const c = this.state.causas.find(x => x.id === id); if(!c) return;
-            c.estado = nuevoEstado; 
-            if(nuevoEstado==='finalizada') c.fechaFinalizacion = new Date().toISOString();
-            if(nuevoEstado==='en_secretaria') { c.empleadoId=null; c.fechaAsignacion=null; c.fechaLimite=null; }
-            c.historial.push({ fecha: new Date().toISOString(), accion, usuario, comentario: com || '-' });
-            this.saveState(); this.showToast(`Causa ${c.numero} actualizada.`);
-        },
-        
-        // Auto-asignación con factor equidad
-        asignarAlMenosCargado(id, nivSec) {
-            let mejorEmp = null; let menorCarga = Infinity;
-            this.config.empleados.forEach(e => {
-                if(this.tieneAtrasos(e.id)) return; // Bloquea morosos
-                const carga = this.calcularCargaReal(e.id);
-                if(carga < menorCarga) { menorCarga = carga; mejorEmp = e.id; }
-            });
-            if(!mejorEmp) { // Fallback si todos son morosos
-                this.config.empleados.forEach(e => { const carga = this.calcularCargaReal(e.id); if(carga < menorCarga) { menorCarga = carga; mejorEmp = e.id; }});
-            }
-            if(mejorEmp) { this.asignarCausa(id, nivSec, mejorEmp, 'Auto-asignación inteligente'); return true; }
-            return false;
-        },
+            init() {
+                this.loadState(); this.initSelects(); this.bindEvents(); this.generarDemo();
+                this.renderActiveTab(); this.actualizarKPIs(); setTimeout(() => this.initCharts(), 100);
+                this.iniciarCronometros();
+            },
 
-        // --- Render UI ---
-        getFilteredCausas() {
-            if(!this.state.searchTerm) return this.state.causas;
-            const term = this.state.searchTerm.toLowerCase();
-            return this.state.causas.filter(c => c.numero.toLowerCase().includes(term));
-        },
-        refreshUI() { this.renderActiveTab(); this.actualizarKPIs(); this.updateCharts(); },
-        renderActiveTab() {
-            const act = document.querySelector('.nav-tab.active').dataset.target;
-            if(act === 'panelIngreso') this.renderIngreso();
-            if(act === 'panelDistribucion') this.renderDistribucion();
-            if(act === 'panelDefensor') this.renderDefensor();
-            if(act === 'panelEmpleado') this.renderMisTareas();
-            if(act === 'panelGraficos') this.renderGraficos();
-            if(act === 'panelAuditoria') this.renderAuditoria();
-        },
-
-        renderIngreso() {
-            const rec = this.getFilteredCausas().reverse().slice(0, 5);
-            document.getElementById('tablaIngresosRecientes').innerHTML = rec.length ? `<table><thead><tr><th>Exp.</th><th>Nivel</th><th>Pase</th></tr></thead><tbody>${rec.map(c=>`<tr><td><strong>${c.numero}</strong></td><td>N${c.nivelOperador}</td><td style="font-size:0.8rem">${this.fmtDt(c.fechaPaseSecretario)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty-state">Sin datos</div>';
-        },
-        renderDistribucion() {
-            const pend = this.getFilteredCausas().filter(c => c.estado === 'en_secretaria').sort((a,b)=>b.nivelOperador - a.nivelOperador);
-            document.getElementById('lblPendientesCount').textContent = pend.length;
-            if(!pend.length) return document.getElementById('tablaPendientes').innerHTML = '<div class="empty-state">No hay pendientes.</div>';
+            loadState() { const s = localStorage.getItem(this.config.storageKey); if (s) this.state = JSON.parse(s); },
+            saveState() { localStorage.setItem(this.config.storageKey, JSON.stringify(this.state)); },
+            generateId() { return typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : Date.now().toString() + Math.random().toString(36).substring(2); },
             
-            const opts = this.config.empleados.map(e => `<option value="${e.id}">${e.nombre} (${this.calcularCargaReal(e.id).toFixed(1)} Puntos)${this.tieneAtrasos(e.id)?'⚠️':''}</option>`).join('');
-            document.getElementById('tablaPendientes').innerHTML = `<table><thead><tr><th>Exp.</th><th>Nivel Op.</th><th>Revisión</th><th>Asignar</th><th>Acciones</th></tr></thead><tbody>${pend.map(c=>`
-                <tr><td><strong>${c.numero}</strong><br><small>${c.tipo}</small></td><td>N${c.nivelOperador}</td>
-                <td><select class="form-control" id="nv_${c.id}" style="padding:4px"><option value="1" ${c.nivelOperador===1?'selected':''}>N1</option><option value="2" ${c.nivelOperador===2?'selected':''}>N2</option><option value="3" ${c.nivelOperador===3?'selected':''}>N3</option><option value="4" ${c.nivelOperador===4?'selected':''}>N4</option></select></td>
-                <td><select class="form-control" id="em_${c.id}" style="padding:4px"><option value="">Seleccionar...</option>${opts}</select><button class="btn btn-outline btn-xs btn-auto" data-id="${c.id}" style="margin-top:4px">Auto</button></td>
-                <td><button class="btn btn-primary btn-sm btn-asig">Asignar</button> <button class="btn btn-danger btn-sm btn-elevar-sec" data-id="${c.id}"><i class="fas fa-gavel"></i></button> <button class="btn btn-outline btn-xs btn-ver" data-id="${c.id}"><i class="fas fa-eye"></i></button></td></tr>`).join('')}</tbody></table>`;
-        },
-        renderDefensor() {
-            const def = this.getFilteredCausas().filter(c => c.estado === 'en_defensor').reverse();
-            document.getElementById('tablaDefensor').innerHTML = def.length ? `<table><thead><tr><th>Expediente</th><th>Tipo</th><th>Acción</th></tr></thead><tbody>${def.map(c=>`<tr><td><strong>${c.numero}</strong></td><td>${c.tipo}</td><td><button class="btn btn-outline btn-sm btn-ver" data-id="${c.id}">Ver Historial</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty-state">Bandeja limpia.</div>';
-        },
-        renderMisTareas() {
-            const eId = document.getElementById('simularEmpleado').value;
-            const mis = this.getFilteredCausas().filter(c => c.empleadoId === eId).sort((a,b) => new Date(b.fechaAsignacion) - new Date(a.fechaAsignacion));
-            document.getElementById('tablaMisTareas').innerHTML = mis.length ? `<table><thead><tr><th>Exp.</th><th>Asignación</th><th>Vencimiento</th><th>Tiempo</th><th>Nivel</th><th>Acciones</th></tr></thead><tbody>${mis.map(c=>{
-                const done = c.estado==='finalizada';
-                return `<tr><td><strong>${c.numero}</strong><br><small>${c.tipo}</small></td><td style="font-size:0.8rem">${this.fmtDt(c.fechaAsignacion)}</td><td style="font-size:0.8rem">${c.fechaLimite?this.fmtDt(c.fechaLimite):'-'}</td>
-                <td>${done?'<span class="badge badge-green">Listo</span>':`<span class="cronometro" data-limite="${c.fechaLimite}">-</span>`}</td><td>N${c.nivelSecretario}</td>
-                <td>${!done?`<button class="btn btn-success btn-xs btn-ok" data-id="${c.id}">Cumplir</button> <button class="btn btn-warning btn-xs btn-dev" data-id="${c.id}">Devolver</button> <button class="btn btn-danger btn-xs btn-elv" data-id="${c.id}">Elevar</button>`:`<i class="fas fa-check" style="color:green"></i>`} <button class="btn btn-outline btn-xs btn-ver" data-id="${c.id}"><i class="fas fa-eye"></i></button></td></tr>`;
-            }).join('')}</tbody></table>` : '<div class="empty-state">Sin tareas.</div>';
-        },
-        renderGraficos() {
-            document.getElementById('tablaCargaDetalle').innerHTML = `<table><thead><tr><th>Empleado</th><th>Activas</th><th>Carga Real (Fatiga)</th><th>Moroso</th></tr></thead><tbody>${this.config.empleados.map(e=>{
-                const cReal = this.calcularCargaReal(e.id).toFixed(1); const act = this.state.causas.filter(c=>c.empleadoId===e.id && c.estado==='en_proceso').length; const mor = this.tieneAtrasos(e.id);
-                return `<tr><td><strong>${e.nombre}</strong></td><td>${act}</td><td>${cReal} Puntos</td><td>${mor?'<span class="badge badge-red">SÍ</span>':'-'}</td></tr>`;
-            }).join('')}</tbody></table>`;
-        },
-        renderAuditoria() {
-            const list = this.getFilteredCausas().reverse().slice(0, 50);
-            document.getElementById('tablaAuditoriaGeneral').innerHTML = list.length ? `<table><thead><tr><th>Expediente</th><th>Estado</th><th>Empleado</th><th>T. Res.</th><th>Ver</th></tr></thead><tbody>${list.map(c=>`<tr><td><strong>${c.numero}</strong></td><td><span class="badge badge-gray">${c.estado}</span></td><td>${this.getEmpName(c.empleadoId)}</td><td>${c.estado==='finalizada'?this.calcDur(c.fechaAsignacion, c.fechaFinalizacion):'-'}</td><td><button class="btn btn-outline btn-xs btn-ver" data-id="${c.id}"><i class="fas fa-eye"></i></button></td></tr>`).join('')}</tbody></table>` : '<div class="empty-state">Sin registros</div>';
-        },
-
-        actualizarKPIs() {
-            document.getElementById('kpiActivas').textContent = this.state.causas.filter(c=>c.estado==='en_proceso').length;
-            document.getElementById('kpiSinAsignar').textContent = this.state.causas.filter(c=>c.estado==='en_secretaria').length;
-            document.getElementById('kpiFinalizadas').textContent = this.state.causas.filter(c=>c.estado==='finalizada').length;
-            document.getElementById('kpiSaturados').textContent = this.config.empleados.filter(e=>this.calcularCargaReal(e.id)>=this.config.maxPuntosEmpleado || this.tieneAtrasos(e.id)).length;
-        },
-
-        // --- Events ---
-        bindEvents() {
-            document.getElementById('globalSearch').addEventListener('input', (e) => { this.state.searchTerm = e.target.value; this.renderActiveTab(); });
-            
-            document.getElementById('roleSelector').addEventListener('change', async (e) => { 
-                const targetRole = e.target.value;
-                const prevRole = document.body.getAttribute('data-role');
-                const simularSelect = document.getElementById('simularEmpleado');
-
-                if (targetRole === 'defensor' || targetRole === 'secretario') {
-                    const pwd = await this.askPrompt(`Ingrese clave de acceso para ${targetRole.toUpperCase()}:`, true);
-                    if (pwd !== this.config.passwords[targetRole]) {
-                        this.showToast('Clave incorrecta. Acceso denegado.', 'danger');
-                        e.target.value = prevRole;
-                        return;
-                    }
-                    this.showToast(`Acceso concedido a la vista de ${targetRole}`, 'success');
-                } else if (targetRole === 'empleado') {
-                    const pwd = await this.askPrompt('Ingrese su clave personal de empleado:', true);
-                    const emp = this.config.empleados.find(x => x.clave === pwd);
+            showToast(msg, type = 'success') {
+                const container = document.getElementById('toastContainer');
+                const icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', danger: 'fa-times-circle' };
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `<i class="fas ${icons[type]}"></i> ${msg}`;
+                container.appendChild(toast);
+                setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
+            },
+            askPrompt(title, isPassword = false) {
+                return new Promise((resolve) => {
+                    const modal = document.getElementById('modalPrompt');
+                    const input = document.getElementById('promptInput');
+                    document.getElementById('promptTitle').innerText = title;
                     
-                    if (!emp) {
-                        this.showToast('Clave de empleado no encontrada.', 'danger');
-                        e.target.value = prevRole;
-                        return;
-                    }
+                    input.type = isPassword ? 'password' : 'text';
+                    input.value = ''; modal.classList.add('active'); input.focus();
                     
-                    simularSelect.value = emp.id;
-                    simularSelect.disabled = true;
-                    this.showToast(`Bienvenido/a ${emp.nombre}. Panel personal bloqueado.`, 'success');
-                }
-
-                if (targetRole !== 'empleado') {
-                    simularSelect.disabled = false;
-                }
-
-                document.body.setAttribute('data-role', targetRole); 
-                document.querySelectorAll('.nav-tab:not([style*="display: none"])')[0]?.click(); 
-                this.refreshUI();
-            });
-
-            document.querySelectorAll('.nav-tab').forEach(t => t.addEventListener('click', (e) => { document.querySelectorAll('.nav-tab, .tab-panel').forEach(el=>el.classList.remove('active')); e.currentTarget.classList.add('active'); document.getElementById(e.currentTarget.dataset.target).classList.add('active'); this.refreshUI(); }));
-            
-            document.getElementById('formIngreso').addEventListener('submit', (e) => { e.preventDefault(); this.registrarCausa(document.getElementById('inpExpediente').value, document.getElementById('inpTipo').value, document.getElementById('inpObs').value, document.getElementById('inpNivel').value, document.getElementById('inpOperador').value); e.target.reset(); this.refreshUI(); });
-            
-            document.addEventListener('click', async (e) => {
-                const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id;
-                
-                if(btn.classList.contains('btn-asig')) { const eId = document.getElementById(`em_${id}`).value; if(!eId)return this.showToast('Seleccione empleado','warning'); this.asignarCausa(id, document.getElementById(`nv_${id}`).value, eId); this.refreshUI(); }
-                if(btn.classList.contains('btn-auto')) { this.asignarAlMenosCargado(id, document.getElementById(`nv_${id}`).value); this.refreshUI(); }
-                if(btn.classList.contains('btn-elevar-sec')) { const m = await this.askPrompt('Motivo elevación:'); if(m) { this.cambiarEstado(id,'en_defensor','Elevado Sec','Sec',m); this.refreshUI(); } }
-                
-                if(btn.classList.contains('btn-ok')) { this.cambiarEstado(id,'finalizada','Finalizado',this.getEmpName(document.getElementById('simularEmpleado').value)); this.refreshUI(); }
-                if(btn.classList.contains('btn-dev')) { const m = await this.askPrompt('Motivo devolución:'); if(m) { this.cambiarEstado(id,'en_secretaria','Devuelto',this.getEmpName(document.getElementById('simularEmpleado').value),m); this.refreshUI(); } }
-                if(btn.classList.contains('btn-elv')) { const m = await this.askPrompt('Motivo elevación:'); if(m) { this.cambiarEstado(id,'en_defensor','Elevado Emp',this.getEmpName(document.getElementById('simularEmpleado').value),m); this.refreshUI(); } }
-                
-                if(btn.id === 'btnDistribuirMasivo') { this.state.causas.filter(c=>c.estado==='en_secretaria').forEach(c=>this.asignarAlMenosCargado(c.id, c.nivelOperador)); this.refreshUI(); this.showToast('Distribución automática finalizada'); }
-                
-                if(btn.classList.contains('btn-ver')) { const c = this.state.causas.find(x=>x.id===id); document.getElementById('modalTituloExpediente').innerText=c.numero; document.getElementById('modalBodyMovimientos').innerHTML=c.historial.slice().reverse().map(m=>`<div class="movimiento-item"><span class="movimiento-fecha">${this.fmtDt(m.fecha)}</span><span class="movimiento-usuario">${m.usuario}</span><span class="movimiento-accion">${m.accion}</span><div class="movimiento-comentario">${m.comentario}</div></div>`).join(''); document.getElementById('modalTrazabilidad').classList.add('active'); }
-                if(btn.id === 'modalClose') document.getElementById('modalTrazabilidad').classList.remove('active');
-            });
-            document.getElementById('simularEmpleado').addEventListener('change', () => this.refreshUI());
-            document.getElementById('btnLimpiarStorage').addEventListener('click', async () => { if(await this.askPrompt('Escriba "SI" para borrar todo')==='SI') { localStorage.clear(); location.reload(); } });
-        },
-
-        // --- Helpers, Cronometros y Graficos ---
-        initSelects() { document.getElementById('simularEmpleado').innerHTML = this.config.empleados.map(e=>`<option value="${e.id}">${e.nombre}</option>`).join(''); },
-        getEmpName(id) { return this.config.empleados.find(e=>e.id===id)?.nombre || '-'; },
-        getSecName(id) { return this.config.secretarios.find(s=>s.id===id)?.nombre || '-'; },
-        fmtDt(iso) { if(!iso)return'-'; const d=new Date(iso); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; },
-        calcDur(ini,fin) { if(!ini||!fin)return'-'; const m=Math.floor((new Date(fin)-new Date(ini))/60000); return m<60?`${m}m`:m<1440?`${Math.floor(m/60)}h ${m%60}m`:`${Math.floor(m/1440)}d`; },
-        
-        iniciarCronometros() {
-            setInterval(() => {
-                document.querySelectorAll('.cronometro').forEach(el => {
-                    if(!el.dataset.limite) return;
-                    const diff = new Date(el.dataset.limite) - Date.now();
-                    const v = diff < 0; const abs = Math.abs(diff); const m = Math.floor(abs/60000);
-                    el.textContent = (v?'+':'') + (m<60?`${m}m`:m<1440?`${Math.floor(m/60)}h`:`${Math.floor(m/1440)}d`);
-                    el.className = `cronometro ${v?'vencido':'normal'}`;
+                    const cleanup = () => { modal.classList.remove('active'); btnConf.removeEventListener('click', onConf); btnCanc.removeEventListener('click', onCanc); };
+                    const onConf = () => { cleanup(); resolve(input.value.trim() || null); };
+                    const onCanc = () => { cleanup(); resolve(null); };
+                    
+                    const btnConf = document.getElementById('btnPromptConfirm');
+                    const btnCanc = document.getElementById('btnPromptCancel');
+                    btnConf.addEventListener('click', onConf); btnCanc.addEventListener('click', onCanc);
                 });
-            }, 60000);
-        },
+            },
 
-        initCharts() {
-            this.charts.carga = new Chart(document.getElementById('chartCargaEmpleados'), { type:'bar', data:{labels:[], datasets:[{label:'Puntos',data:[]}]}, options:{responsive:true,maintainAspectRatio:false} });
-            this.charts.estado = new Chart(document.getElementById('chartEstadoGlobal'), { type:'doughnut', data:{labels:['Sec','Proc','Fin','Def','Dev'], datasets:[{data:[], backgroundColor:['#f59e0b','#2563eb','#10b981','#8b5cf6','#f97316']}]}, options:{responsive:true,maintainAspectRatio:false} });
-            this.updateCharts();
-        },
-        updateCharts() {
-            if(this.charts.carga) { this.charts.carga.data.labels=this.config.empleados.map(e=>e.nombre); const d=this.config.empleados.map(e=>this.calcularCargaReal(e.id)); this.charts.carga.data.datasets[0].data=d; this.charts.carga.data.datasets[0].backgroundColor=d.map(p=>p>=20?'#ef4444':p>15?'#f59e0b':'#2563eb'); this.charts.carga.update(); }
-            if(this.charts.estado) { this.charts.estado.data.datasets[0].data=['en_secretaria','en_proceso','finalizada','en_defensor','devuelta_operador'].map(s=>this.state.causas.filter(c=>c.estado===s).length); this.charts.estado.update(); }
-        },
-        generarDemo() { if(!this.state.causas.length) { this.registrarCausa('111/2026','Otro','Demo',2,'DemoOp'); this.registrarCausa('222/2026','Amparo Salud','Demo2',4,'DemoOp'); } }
-    };
+            calcularCargaReal(empleadoId) {
+                const activos = this.state.causas.filter(c => c.empleadoId === empleadoId && c.estado === 'en_proceso').reduce((sum, c) => sum + (c.puntos || 0), 0);
+                const hoy = new Date().toDateString();
+                const resueltosHoy = this.state.causas.filter(c => c.empleadoId === empleadoId && c.estado === 'finalizada' && new Date(c.fechaFinalizacion).toDateString() === hoy).reduce((sum, c) => sum + (c.puntos || 0), 0);
+                return activos + (resueltosHoy * 0.4);
+            },
+            tieneAtrasos(empleadoId) {
+                const ahora = Date.now();
+                return this.state.causas.some(c => c.empleadoId === empleadoId && c.estado === 'en_proceso' && c.fechaLimite && new Date(c.fechaLimite).getTime() < ahora);
+            },
 
-    document.addEventListener('DOMContentLoaded', () => App.init());
-</script>
+            registrarCausa(num, tipo, obs, nivel, op) {
+                const sec = this.config.secretarios.sort((a,b) => this.state.causas.filter(c=>c.secretarioId===a.id && c.estado==='en_secretaria').length - this.state.causas.filter(c=>c.secretarioId===b.id && c.estado==='en_secretaria').length)[0];
+                const nueva = {
+                    id: this.generateId(), numero: num.toUpperCase().trim(), tipo, nivelOperador: parseInt(nivel), nivelSecretario: null, puntos: 0,
+                    observaciones: obs, estado: 'en_secretaria', secretarioId: sec.id, empleadoId: null, fechaPaseSecretario: new Date().toISOString(),
+                    fechaAsignacion: null, fechaFinalizacion: null, fechaLimite: null,
+                    historial: [{ fecha: new Date().toISOString(), accion: `Ingreso a Sec. (${sec.nombre})`, usuario: op, comentario: obs || 'Sin obs' }]
+                };
+                this.state.causas.push(nueva); this.saveState(); this.showToast(`Pase registrado: ${num}`);
+                return nueva;
+            },
+            asignarCausa(id, nivSec, empId, com = '', secId = null) {
+                const c = this.state.causas.find(x => x.id === id); if(!c || c.estado !== 'en_secretaria') return false;
+                c.nivelSecretario = parseInt(nivSec); c.puntos = this.config.nivelesPuntos[c.nivelSecretario]; c.empleadoId = empId; c.estado = 'en_proceso';
+                c.fechaAsignacion = new Date().toISOString(); c.fechaLimite = new Date(Date.now() + (this.config.nivelesDias[c.nivelSecretario]||3)*86400000).toISOString();
+                c.historial.push({ fecha: new Date().toISOString(), accion: `Asignado (Nivel ${c.nivelSecretario})`, usuario: this.getSecName(secId || c.secretarioId), comentario: com || `A ${this.getEmpName(empId)}` });
+                this.saveState(); return true;
+            },
+            cambiarEstado(id, nuevoEstado, accion, usuario, com) {
+                const c = this.state.causas.find(x => x.id === id); if(!c) return;
+                c.estado = nuevoEstado; 
+                if(nuevoEstado==='finalizada') c.fechaFinalizacion = new Date().toISOString();
+                if(nuevoEstado==='en_secretaria') { c.empleadoId=null; c.fechaAsignacion=null; c.fechaLimite=null; }
+                c.historial.push({ fecha: new Date().toISOString(), accion, usuario, comentario: com || '-' });
+                this.saveState(); this.showToast(`Causa ${c.numero} actualizada.`);
+            },
+            
+            asignarAlMenosCargado(id, nivSec) {
+                let mejorEmp = null; let menorCarga = Infinity;
+                this.config.empleados.forEach(e => {
+                    if(this.tieneAtrasos(e.id)) return;
+                    const carga = this.calcularCargaReal(e.id);
+                    if(carga < menorCarga) { menorCarga = carga; mejorEmp = e.id; }
+                });
+                if(!mejorEmp) {
+                    this.config.empleados.forEach(e => { const carga = this.calcularCargaReal(e.id); if(carga < menorCarga) { menorCarga = carga; mejorEmp = e.id; }});
+                }
+                if(mejorEmp) { this.asignarCausa(id, nivSec, mejorEmp, 'Auto-asignación inteligente'); return true; }
+                return false;
+            },
+
+            getFilteredCausas() {
+                if(!this.state.searchTerm) return this.state.causas;
+                const term = this.state.searchTerm.toLowerCase();
+                return this.state.causas.filter(c => c.numero.toLowerCase().includes(term));
+            },
+            refreshUI() { this.renderActiveTab(); this.actualizarKPIs(); this.updateCharts(); },
+            renderActiveTab() {
+                const act = document.querySelector('.nav-tab.active').dataset.target;
+                if(act === 'panelIngreso') this.renderIngreso();
+                if(act === 'panelDistribucion') this.renderDistribucion();
+                if(act === 'panelDefensor') this.renderDefensor();
+                if(act === 'panelEmpleado') this.renderMisTareas();
+                if(act === 'panelGraficos') this.renderGraficos();
+                if(act === 'panelAuditoria') this.renderAuditoria();
+            },
+
+            renderIngreso() {
+                const rec = this.getFilteredCausas().reverse().slice(0, 5);
+                document.getElementById('tablaIngresosRecientes').innerHTML = rec.length ? `<table><thead><tr><th>Exp.</th><th>Nivel</th><th>Pase</th></tr></thead><tbody>${rec.map(c=>`<tr><td><strong>${c.numero}</strong></td><td>N${c.nivelOperador}</td><td style="font-size:0.8rem">${this.fmtDt(c.fechaPaseSecretario)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty-state">Sin datos</div>';
+            },
+            renderDistribucion() {
+                const pend = this.getFilteredCausas().filter(c => c.estado === 'en_secretaria').sort((a,b)=>b.nivelOperador - a.nivelOperador);
+                document.getElementById('lblPendientesCount').textContent = pend.length;
+                if(!pend.length) return document.getElementById('tablaPendientes').innerHTML = '<div class="empty-state">No hay pendientes.</div>';
+                
+                const opts = this.config.empleados.map(e => `<option value="${e.id}">${e.nombre} (${this.calcularCargaReal(e.id).toFixed(1)} Puntos)${this.tieneAtrasos(e.id)?'⚠️':''}</option>`).join('');
+                document.getElementById('tablaPendientes').innerHTML = `<table><thead><tr><th>Exp.</th><th>Nivel Op.</th><th>Revisión</th><th>Asignar</th><th>Acciones</th></tr></thead><tbody>${pend.map(c=>`
+                    <tr><td><strong>${c.numero}</strong><br><small>${c.tipo}</small></td><td>N${c.nivelOperador}</td>
+                    <td><select class="form-control" id="nv_${c.id}" style="padding:4px"><option value="1" ${c.nivelOperador===1?'selected':''}>N1</option><option value="2" ${c.nivelOperador===2?'selected':''}>N2</option><option value="3" ${c.nivelOperador===3?'selected':''}>N3</option><option value="4" ${c.nivelOperador===4?'selected':''}>N4</option></select></td>
+                    <td><select class="form-control" id="em_${c.id}" style="padding:4px"><option value="">Seleccionar...</option>${opts}</select><button class="btn btn-outline btn-xs btn-auto" data-id="${c.id}" style="margin-top:4px">Auto</button></td>
+                    <td><button class="btn btn-primary btn-sm btn-asig">Asignar</button> <button class="btn btn-danger btn-sm btn-elevar-sec" data-id="${c.id}"><i class="fas fa-gavel"></i></button> <button class="btn btn-outline btn-xs btn-ver" data-id="${c.id}"><i class="fas fa-eye"></i></button></td></tr>`).join('')}</tbody></table>`;
+            },
+            renderDefensor() {
+                const def = this.getFilteredCausas().filter(c => c.estado === 'en_defensor').reverse();
+                document.getElementById('tablaDefensor').innerHTML = def.length ? `<table><thead><tr><th>Expediente</th><th>Tipo</th><th>Acción</th></tr></thead><tbody>${def.map(c=>`<tr><td><strong>${c.numero}</strong></td><td>${c.tipo}</td><td><button class="btn btn-outline btn-sm btn-ver" data-id="${c.id}">Ver Historial</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty-state">Bandeja limpia.</div>';
+            },
+            renderMisTareas() {
+                const eId = document.getElementById('simularEmpleado').value;
+                const mis = this.getFilteredCausas().filter(c => c.empleadoId === eId).sort((a,b) => new Date(b.fechaAsignacion) - new Date(a.fechaAsignacion));
+                document.getElementById('tablaMisTareas').innerHTML = mis.length ? `<table><thead><tr><th>Exp.</th><th>Asignación</th><th>Vencimiento</th><th>Tiempo</th><th>Nivel</th><th>Acciones</th></tr></thead><tbody>${mis.map(c=>{
+                    const done = c.estado==='finalizada';
+                    return `<tr><td><strong>${c.numero}</strong><br><small>${c.tipo}</small></td><td style="font-size:0.8rem">${this.fmtDt(c.fechaAsignacion)}</td><td style="font-size:0.8rem">${c.fechaLimite?this.fmtDt(c.fechaLimite):'-'}</td>
+                    <td>${done?'<span class="badge badge-green">Listo</span>':`<span class="cronometro" data-limite="${c.fechaLimite}">-</span>`}</td><td>N${c.nivelSecretario}</td>
+                    <td>${!done?`<button class="btn btn-success btn-xs btn-ok" data-id="${c.id}">Cumplir</button> <button class="btn btn-warning btn-xs btn-dev" data-id="${c.id}">Devolver</button> <button class="btn btn-danger btn-xs btn-elv" data-id="${c.id}">Elevar</button>`:`<i class="fas fa-check" style="color:green"></i>`} <button class="btn btn-outline btn-xs btn-ver" data-id="${c.id}"><i class="fas fa-eye"></i></button></td></tr>`;
+                }).join('')}</tbody></table>` : '<div class="empty-state">Sin tareas.</div>';
+            },
+            renderGraficos() {
+                document.getElementById('tablaCargaDetalle').innerHTML = `<table><thead><tr><th>Empleado</th><th>Activas</th><th>Carga Real (Fatiga)</th><th>Moroso</th></tr></thead><tbody>${this.config.empleados.map(e=>{
+                    const cReal = this.calcularCargaReal(e.id).toFixed(1); const act = this.state.causas.filter(c=>c.empleadoId===e.id && c.estado==='en_proceso').length; const mor = this.tieneAtrasos(e.id);
+                    return `<tr><td><strong>${e.nombre}</strong></td><td>${act}</td><td>${cReal} Puntos</td><td>${mor?'<span class="badge badge-red">SÍ</span>':'-'}</td></tr>`;
+                }).join('')}</tbody></table>`;
+            },
+            renderAuditoria() {
+                const list = this.getFilteredCausas().reverse().slice(0, 50);
+                document.getElementById('tablaAuditoriaGeneral').innerHTML = list.length ? `<table><thead><tr><th>Expediente</th><th>Estado</th><th>Empleado</th><th>T. Res.</th><th>Ver</th></tr></thead><tbody>${list.map(c=>`<tr><td><strong>${c.numero}</strong></td><td><span class="badge badge-gray">${c.estado}</span></td><td>${this.getEmpName(c.empleadoId)}</td><td>${c.estado==='finalizada'?this.calcDur(c.fechaAsignacion, c.fechaFinalizacion):'-'}</td><td><button class="btn btn-outline btn-xs btn-ver" data-id="${c.id}"><i class="fas fa-eye"></i></button></td></tr>`).join('')}</tbody></table>` : '<div class="empty-state">Sin registros</div>';
+            },
+
+            actualizarKPIs() {
+                document.getElementById('kpiActivas').textContent = this.state.causas.filter(c=>c.estado==='en_proceso').length;
+                document.getElementById('kpiSinAsignar').textContent = this.state.causas.filter(c=>c.estado==='en_secretaria').length;
+                document.getElementById('kpiFinalizadas').textContent = this.state.causas.filter(c=>c.estado==='finalizada').length;
+                document.getElementById('kpiSaturados').textContent = this.config.empleados.filter(e=>this.calcularCargaReal(e.id)>=this.config.maxPuntosEmpleado || this.tieneAtrasos(e.id)).length;
+            },
+
+            bindEvents() {
+                document.getElementById('globalSearch').addEventListener('input', (e) => { this.state.searchTerm = e.target.value; this.renderActiveTab(); });
+                
+                document.getElementById('roleSelector').addEventListener('change', async (e) => { 
+                    const targetRole = e.target.value;
+                    const prevRole = document.body.getAttribute('data-role');
+                    const simularSelect = document.getElementById('simularEmpleado');
+
+                    // --- Clave para administrador ---
+                    if (targetRole === 'admin') {
+                        const pwd = await this.askPrompt('Ingrese clave de administrador:', true);
+                        if (pwd !== this.config.passwords.admin) {
+                            this.showToast('Clave incorrecta. Acceso denegado.', 'danger');
+                            e.target.value = prevRole;
+                            return;
+                        }
+                        this.showToast('Acceso concedido como administrador', 'success');
+                    }
+
+                    if (targetRole === 'defensor' || targetRole === 'secretario') {
+                        const pwd = await this.askPrompt(`Ingrese clave de acceso para ${targetRole.toUpperCase()}:`, true);
+                        if (pwd !== this.config.passwords[targetRole]) {
+                            this.showToast('Clave incorrecta. Acceso denegado.', 'danger');
+                            e.target.value = prevRole;
+                            return;
+                        }
+                        this.showToast(`Acceso concedido a la vista de ${targetRole}`, 'success');
+                    } else if (targetRole === 'empleado') {
+                        const pwd = await this.askPrompt('Ingrese su clave personal de empleado:', true);
+                        const emp = this.config.empleados.find(x => x.clave === pwd);
+                        
+                        if (!emp) {
+                            this.showToast('Clave de empleado no encontrada.', 'danger');
+                            e.target.value = prevRole;
+                            return;
+                        }
+                        
+                        simularSelect.value = emp.id;
+                        simularSelect.disabled = true;
+                        this.showToast(`Bienvenido/a ${emp.nombre}. Panel personal bloqueado.`, 'success');
+                    }
+
+                    if (targetRole !== 'empleado') {
+                        simularSelect.disabled = false;
+                    }
+
+                    document.body.setAttribute('data-role', targetRole); 
+                    document.querySelectorAll('.nav-tab:not([style*="display: none"])')[0]?.click(); 
+                    this.refreshUI();
+                });
+
+                document.querySelectorAll('.nav-tab').forEach(t => t.addEventListener('click', (e) => { document.querySelectorAll('.nav-tab, .tab-panel').forEach(el=>el.classList.remove('active')); e.currentTarget.classList.add('active'); document.getElementById(e.currentTarget.dataset.target).classList.add('active'); this.refreshUI(); }));
+                
+                document.getElementById('formIngreso').addEventListener('submit', (e) => { e.preventDefault(); this.registrarCausa(document.getElementById('inpExpediente').value, document.getElementById('inpTipo').value, document.getElementById('inpObs').value, document.getElementById('inpNivel').value, document.getElementById('inpOperador').value); e.target.reset(); this.refreshUI(); });
+                
+                document.addEventListener('click', async (e) => {
+                    const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id;
+                    
+                    if(btn.classList.contains('btn-asig')) { const eId = document.getElementById(`em_${id}`).value; if(!eId)return this.showToast('Seleccione empleado','warning'); this.asignarCausa(id, document.getElementById(`nv_${id}`).value, eId); this.refreshUI(); }
+                    if(btn.classList.contains('btn-auto')) { this.asignarAlMenosCargado(id, document.getElementById(`nv_${id}`).value); this.refreshUI(); }
+                    if(btn.classList.contains('btn-elevar-sec')) { const m = await this.askPrompt('Motivo elevación:'); if(m) { this.cambiarEstado(id,'en_defensor','Elevado Sec','Sec',m); this.refreshUI(); } }
+                    
+                    if(btn.classList.contains('btn-ok')) { this.cambiarEstado(id,'finalizada','Finalizado',this.getEmpName(document.getElementById('simularEmpleado').value)); this.refreshUI(); }
+                    if(btn.classList.contains('btn-dev')) { const m = await this.askPrompt('Motivo devolución:'); if(m) { this.cambiarEstado(id,'en_secretaria','Devuelto',this.getEmpName(document.getElementById('simularEmpleado').value),m); this.refreshUI(); } }
+                    if(btn.classList.contains('btn-elv')) { const m = await this.askPrompt('Motivo elevación:'); if(m) { this.cambiarEstado(id,'en_defensor','Elevado Emp',this.getEmpName(document.getElementById('simularEmpleado').value),m); this.refreshUI(); } }
+                    
+                    if(btn.id === 'btnDistribuirMasivo') { this.state.causas.filter(c=>c.estado==='en_secretaria').forEach(c=>this.asignarAlMenosCargado(c.id, c.nivelOperador)); this.refreshUI(); this.showToast('Distribución automática finalizada'); }
+                    
+                    if(btn.classList.contains('btn-ver')) { const c = this.state.causas.find(x=>x.id===id); document.getElementById('modalTituloExpediente').innerText=c.numero; document.getElementById('modalBodyMovimientos').innerHTML=c.historial.slice().reverse().map(m=>`<div class="movimiento-item"><span class="movimiento-fecha">${this.fmtDt(m.fecha)}</span><span class="movimiento-usuario">${m.usuario}</span><span class="movimiento-accion">${m.accion}</span><div class="movimiento-comentario">${m.comentario}</div></div>`).join(''); document.getElementById('modalTrazabilidad').classList.add('active'); }
+                    if(btn.id === 'modalClose') document.getElementById('modalTrazabilidad').classList.remove('active');
+                });
+                document.getElementById('simularEmpleado').addEventListener('change', () => this.refreshUI());
+                document.getElementById('btnLimpiarStorage').addEventListener('click', async () => { if(await this.askPrompt('Escriba "SI" para borrar todo')==='SI') { localStorage.clear(); location.reload(); } });
+            },
+
+            initSelects() { document.getElementById('simularEmpleado').innerHTML = this.config.empleados.map(e=>`<option value="${e.id}">${e.nombre}</option>`).join(''); },
+            getEmpName(id) { return this.config.empleados.find(e=>e.id===id)?.nombre || '-'; },
+            getSecName(id) { return this.config.secretarios.find(s=>s.id===id)?.nombre || '-'; },
+            fmtDt(iso) { if(!iso)return'-'; const d=new Date(iso); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; },
+            calcDur(ini,fin) { if(!ini||!fin)return'-'; const m=Math.floor((new Date(fin)-new Date(ini))/60000); return m<60?`${m}m`:m<1440?`${Math.floor(m/60)}h ${m%60}m`:`${Math.floor(m/1440)}d`; },
+            
+            iniciarCronometros() {
+                setInterval(() => {
+                    document.querySelectorAll('.cronometro').forEach(el => {
+                        if(!el.dataset.limite) return;
+                        const diff = new Date(el.dataset.limite) - Date.now();
+                        const v = diff < 0; const abs = Math.abs(diff); const m = Math.floor(abs/60000);
+                        el.textContent = (v?'+':'') + (m<60?`${m}m`:m<1440?`${Math.floor(m/60)}h`:`${Math.floor(m/1440)}d`);
+                        el.className = `cronometro ${v?'vencido':'normal'}`;
+                    });
+                }, 60000);
+            },
+
+            initCharts() {
+                this.charts.carga = new Chart(document.getElementById('chartCargaEmpleados'), { type:'bar', data:{labels:[], datasets:[{label:'Puntos',data:[]}]}, options:{responsive:true,maintainAspectRatio:false} });
+                this.charts.estado = new Chart(document.getElementById('chartEstadoGlobal'), { type:'doughnut', data:{labels:['Sec','Proc','Fin','Def','Dev'], datasets:[{data:[], backgroundColor:['#f59e0b','#2563eb','#10b981','#8b5cf6','#f97316']}]}, options:{responsive:true,maintainAspectRatio:false} });
+                this.updateCharts();
+            },
+            updateCharts() {
+                if(this.charts.carga) { this.charts.carga.data.labels=this.config.empleados.map(e=>e.nombre); const d=this.config.empleados.map(e=>this.calcularCargaReal(e.id)); this.charts.carga.data.datasets[0].data=d; this.charts.carga.data.datasets[0].backgroundColor=d.map(p=>p>=20?'#ef4444':p>15?'#f59e0b':'#2563eb'); this.charts.carga.update(); }
+                if(this.charts.estado) { this.charts.estado.data.datasets[0].data=['en_secretaria','en_proceso','finalizada','en_defensor','devuelta_operador'].map(s=>this.state.causas.filter(c=>c.estado===s).length); this.charts.estado.update(); }
+            },
+            generarDemo() { if(!this.state.causas.length) { this.registrarCausa('111/2026','Otro','Demo',2,'DemoOp'); this.registrarCausa('222/2026','Amparo Salud','Demo2',4,'DemoOp'); } }
+        };
+
+        // ======================================================================
+        //  NUEVO: CONTROL DE PÁGINA DE INICIO / SISTEMA
+        // ======================================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos
+            const paginaInicio = document.getElementById('paginaInicio');
+            const sistema = document.getElementById('sistema');
+            const btnIngresar = document.getElementById('btnIngresarSistema');
+            const btnSalir = document.getElementById('btnSalir');
+            const modalConfirmacion = document.getElementById('modalConfirmacionSalida');
+            const btnConfirmarSalida = document.getElementById('btnConfirmarSalida');
+            const btnCancelarSalida = document.getElementById('btnCancelarSalida');
+
+            // Mostrar inicio, ocultar sistema al cargar
+            paginaInicio.classList.remove('oculta');
+            sistema.classList.remove('visible');
+            btnSalir.classList.remove('visible');
+
+            // Ingresar al sistema
+            btnIngresar.addEventListener('click', function() {
+                paginaInicio.classList.add('oculta');
+                // Esperar transición y mostrar sistema
+                setTimeout(() => {
+                    sistema.classList.add('visible');
+                    btnSalir.classList.add('visible');
+                    // Inicializar App solo la primera vez
+                    if (!window._appInicializado) {
+                        App.init();
+                        window._appInicializado = true;
+                    } else {
+                        App.refreshUI();
+                    }
+                }, 400);
+            });
+
+            // Mostrar modal de confirmación de salida
+            btnSalir.addEventListener('click', function() {
+                modalConfirmacion.classList.add('activo');
+            });
+
+            // Cerrar modal (cancelar)
+            btnCancelarSalida.addEventListener('click', function() {
+                modalConfirmacion.classList.remove('activo');
+            });
+
+            // Confirmar salida
+            btnConfirmarSalida.addEventListener('click', function() {
+                modalConfirmacion.classList.remove('activo');
+                // Ocultar sistema, mostrar inicio
+                sistema.classList.remove('visible');
+                btnSalir.classList.remove('visible');
+                paginaInicio.classList.remove('oculta');
+                // Resetear búsqueda global (opcional)
+                document.getElementById('globalSearch').value = '';
+                App.state.searchTerm = '';
+            });
+
+            // Clic fuera del modal para cerrar
+            modalConfirmacion.addEventListener('click', function(e) {
+                if (e.target === modalConfirmacion) {
+                    modalConfirmacion.classList.remove('activo');
+                }
+            });
+
+            // Tecla Escape cierra modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modalConfirmacion.classList.contains('activo')) {
+                    modalConfirmacion.classList.remove('activo');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
