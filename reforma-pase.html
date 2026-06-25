@@ -97,10 +97,8 @@
         .badge-rem { background:#e8eaf6; color:#3949ab; }
         .badge-score { background:#d1c4e9; color:#4527a0; }
         .crono { font-family:'JetBrains Mono','Courier New',monospace; padding:1px 8px; border-radius:30px; font-weight:600; font-size:.65rem; display:inline-block; white-space:nowrap; background:#e3f2fd; color:#1976d2; }
-        .crono.vencido { background:#ffebee; color:#c62828 !important; box-shadow:0 0 0 1px #ffcdd2; }
-        .crono.critico { background:#fff3e0; color:#e67e22 !important; box-shadow:0 0 0 1px #ffe0b2; }
-        .crono.medio { background:#e8f5e9; color:#2e7d32 !important; box-shadow:0 0 0 1px #c8e6c9; }
-        .crono.azul { background:#e3f2fd; color:#1976d2 !important; }
+        .crono.finalizado { background:#e8f5e9; color:#2e7d32; }
+        .crono.azul { background:#e3f2fd; color:#1976d2; }
         .exp-vencido { color:#c62828 !important; font-weight:700; }
         .exp-critico { color:#e67e22 !important; font-weight:600; }
         .chart-container { position:relative; height:220px; margin-top:10px; }
@@ -428,23 +426,18 @@
                 return map[estado] || estado;
             }
 
-            // ---------- CRONOMETRO ----------
-            function getTiempoRestante(fechaLimite) {
-                if (!fechaLimite) return null;
-                const diff = new Date(fechaLimite) - Date.now();
-                if (diff <= 0) return { ms: Math.abs(diff), vencido: true, porcentaje: 0 };
-                const c = state.causas.find(x => x.fechaLimite === fechaLimite);
-                let totalMs = 3 * 86400000;
-                if (c && c.fechaAsignacion) {
-                    totalMs = new Date(c.fechaLimite) - new Date(c.fechaAsignacion);
-                    if (totalMs <= 0) totalMs = 3 * 86400000;
-                }
-                const porcentaje = Math.min(100, (diff / totalMs) * 100);
-                return { ms: diff, vencido: false, porcentaje };
+            // ---------- CRONOMETRO (NUEVO: cuenta progresiva) ----------
+            function getTiempoTranscurrido(fechaInicio, fechaFin = null) {
+                if (!fechaInicio) return null;
+                const fin = fechaFin ? new Date(fechaFin) : new Date();
+                const inicio = new Date(fechaInicio);
+                if (isNaN(inicio.getTime())) return null;
+                const diff = fin - inicio;
+                return diff > 0 ? diff : 0;
             }
 
             function formatearTiempo(ms) {
-                if (ms === null || ms === undefined) return '—';
+                if (ms === null || ms === undefined || ms < 0) return '—';
                 const seg = Math.floor(ms / 1000);
                 const dias = Math.floor(seg / 86400);
                 const horas = Math.floor((seg % 86400) / 3600);
@@ -454,19 +447,48 @@
                 return `${String(horas).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
             }
 
-            function getCronoHtml(fechaLimite, numero) {
-                if (!fechaLimite) return '<span class="crono azul">—</span>';
-                const info = getTiempoRestante(fechaLimite);
-                if (!info) return '<span class="crono azul">—</span>';
-                const texto = formatearTiempo(info.ms);
-                let cls = 'crono'; let expCls = '';
-                if (info.vencido) { cls += ' vencido'; expCls = 'exp-vencido'; } 
-                else if (info.porcentaje < 20) { cls += ' critico'; expCls = 'exp-critico'; } 
-                else if (info.porcentaje < 50) { cls += ' medio'; } 
-                else { cls += ' azul'; }
-                return { crono: `<span class="${cls}">${texto}</span>`, expCls };
+            function getCronoHtml(causa) {
+                if (!causa || !causa.fechaAsignacion) {
+                    return { crono: '<span class="crono azul">—</span>', expCls: '' };
+                }
+
+                let ms = 0;
+                let finalizado = false;
+                let fechaFin = null;
+
+                if (causa.estado === 'en_proceso') {
+                    // En curso: desde asignación hasta ahora
+                    ms = getTiempoTranscurrido(causa.fechaAsignacion);
+                } else if (causa.estado === 'finalizada' || causa.estado === 'en_defensor') {
+                    // Finalizada o elevada: mostrar tiempo hasta la resolución del empleado o finalización
+                    fechaFin = causa.fechaResolucionEmpleado || causa.fechaFinalizacion;
+                    if (fechaFin) {
+                        ms = getTiempoTranscurrido(causa.fechaAsignacion, fechaFin);
+                        finalizado = true;
+                    } else {
+                        // Si no hay fecha de resolución, mostrar tiempo hasta ahora (no debería ocurrir)
+                        ms = getTiempoTranscurrido(causa.fechaAsignacion);
+                    }
+                } else {
+                    // Otros estados (secretaría, devuelto, etc.) no muestran cronómetro
+                    return { crono: '<span class="crono azul">—</span>', expCls: '' };
+                }
+
+                if (ms === null || ms < 0) {
+                    return { crono: '<span class="crono azul">—</span>', expCls: '' };
+                }
+
+                const texto = formatearTiempo(ms);
+                let cls = 'crono';
+                if (finalizado) {
+                    cls += ' finalizado'; // verde
+                } else {
+                    cls += ' azul';
+                }
+                return { crono: `<span class="${cls}">${texto}</span>`, expCls: '' };
             }
 
+            // ---------- FUNCIONES DEL SISTEMA (sin cambios) ----------
             function showToast(msg, type = 'success') {
                 const container = document.getElementById('toastContainer');
                 const icons = { success: 'bi-check-circle-fill', warning: 'bi-exclamation-triangle-fill', danger: 'bi-x-circle-fill', info: 'bi-info-circle-fill' };
@@ -567,7 +589,7 @@
                 cambiarEstado(id, 'remitido', `Remitido a ${dependencia.trim()}`, operador, `Dependencia: ${dependencia.trim()}`);
             }
 
-            // ---------- REPORTE OPERADOR (MODIFICADO) ----------
+            // ---------- REPORTES (sin cambios) ----------
             function generarReporte(operador) {
                 const causas = state.causas.filter(c => c.operador === operador);
                 const total = causas.length;
@@ -640,7 +662,6 @@
                 new bootstrap.Modal(document.getElementById('modalReporte')).show();
             }
 
-            // ---------- NUEVOS REPORTES SECRETARIO ----------
             function generarReporteSecretario(secId) {
                 const sec = CONFIG.secretarios.find(s => s.id === secId);
                 if (!sec) return;
@@ -723,7 +744,6 @@
                 new bootstrap.Modal(document.getElementById('modalReporte')).show();
             }
 
-            // ---------- REPORTE EMPLEADO (MODIFICADO) ----------
             function generarReporteEmpleado(empId) {
                 const emp = CONFIG.empleados.find(e => e.id === empId);
                 if (!emp) { showToast('Empleado no encontrado', 'danger'); return; }
@@ -840,7 +860,6 @@
 
                 let actionButtons = '';
                 if (currentRole === 'operador' && currentOperator) {
-                    /* Modificados para abrir el modal estructurado antes de mandar a la cola de impresión nativa */
                     actionButtons = `<div class="d-flex gap-2 mb-3 flex-wrap"><button class="btn btn-modern btn-modern-primary btn-modern-sm" id="btnReporteOperador"><i class="bi bi-file-earmark-text"></i> Reporte de actividad</button><button class="btn btn-modern btn-modern-outline btn-modern-sm" id="btnImprimirInforme"><i class="bi bi-printer"></i> Imprimir informe</button></div>`;
                 }
 
@@ -924,9 +943,10 @@
                 const optsEmpleados = CONFIG.empleados.map(e => `<option value="${e.id}">${e.nombre} (${calcularCargaReal(e.id).toFixed(1)} pts)${tieneAtrasos(e.id)?' ⚠️':''}</option>`).join('');
 
                 let secStats = CONFIG.secretarios.map(sec => {
-                    const asignadas = state.causas.filter(c => c.secretarioId === sec.id && c.estado !== 'en_secretaria').length;
+                    const asignadas = state.causas.filter(c => c.secretarioId === sec.id).length;
                     return { ...sec, asignadas };
                 });
+
                 let empStats = CONFIG.empleados.map(e => {
                     const activas = state.causas.filter(c => c.empleadoId === e.id && c.estado === 'en_proceso').length;
                     const carga = calcularCargaReal(e.id);
@@ -934,7 +954,6 @@
                 });
                 empStats.sort((a,b) => b.carga - a.carga);
 
-                /* Panel de acciones de impresión y filtro para el Secretario */
                 let secretarioActionButtons = '';
                 if (currentRole === 'secretario' || currentRole === 'admin' || currentRole === 'defensor') {
                     const secOptions = CONFIG.secretarios.map(s => `<option value="${s.id}" ${s.id === filtroSecretarioId ? 'selected' : ''}>${s.nombre}</option>`).join('');
@@ -1018,7 +1037,6 @@
 
                 if (total > 0) renderPagination('paginationDistribucion', total, totalPages, page, pState.perPage, (newPage, newPerPage) => { paginationState.distribucion.page = newPage; paginationState.distribucion.perPage = newPerPage; renderDistribucion(); });
 
-                /* Manejadores de eventos de filtro e impresión del Secretario */
                 const selFiltroSecretario = document.getElementById('selFiltroSecretario');
                 if (selFiltroSecretario) {
                     selFiltroSecretario.addEventListener('change', function() {
@@ -1209,12 +1227,13 @@
                                 <table class="table-modern table">
                                     <thead><tr><th>Expediente</th><th style="min-width:120px;">Empleado</th><th>Tipo</th><th>Asignación</th><th>Vencimiento</th><th>Tiempo</th><th>Nivel</th><th>Acciones</th></tr></thead>
                                     <tbody>${items.map(c => {
-                                        const done = c.estado === 'finalizada'; const cronoInfo = !done ? getCronoHtml(c.fechaLimite, c.numero) : null;
-                                        const expCls = cronoInfo ? cronoInfo.expCls : ''; const cronoHtml = cronoInfo ? cronoInfo.crono : '<span class="crono azul">—</span>';
+                                        const done = (c.estado === 'finalizada' || c.estado === 'en_defensor');
+                                        const cronoInfo = getCronoHtml(c);
+                                        const cronoHtml = cronoInfo ? cronoInfo.crono : '<span class="crono azul">—</span>';
                                         return `<tr>
-                                                <td><strong class="${expCls}">${c.numero}</strong></td><td>${getEmpName(c.empleadoId)}</td><td>${c.tipo}</td>
+                                                <td><strong>${c.numero}</strong></td><td>${getEmpName(c.empleadoId)}</td><td>${c.tipo}</td>
                                                 <td style="font-size:0.75rem;">${fmtDt(c.fechaAsignacion)}</td><td style="font-size:0.75rem;">${c.fechaLimite ? fmtDt(c.fechaLimite) : '-'}</td>
-                                                <td>${done ? '<span class="badge badge-estado badge-fin">✅ Listo</span>' : cronoHtml}</td><td>N${c.nivelSecretario}</td>
+                                                <td>${cronoHtml}</td><td>N${c.nivelSecretario}</td>
                                                 <td>
                                                     ${!done ? `<button class="btn btn-modern btn-modern-success btn-modern-sm btn-emp-cumplir" data-id="${c.id}">Cumplir</button>
                                                         <button class="btn btn-modern btn-modern-outline btn-modern-sm btn-emp-devolver" data-id="${c.id}">Devolver</button>
@@ -1443,7 +1462,7 @@
 
             function handleLogin() {
                 const rol = document.getElementById('loginRol').value; const pass = document.getElementById('loginPassword').value; const errorDiv = document.getElementById('loginError');
-                filtroSecretarioId = ''; // Reset filtro
+                filtroSecretarioId = '';
                 if (rol === 'operador') {
                     const operador = document.getElementById('loginOperador').value;
                     if (!operador) { errorDiv.textContent = '❌ Seleccione operador.'; errorDiv.style.display = 'block'; setTimeout(() => errorDiv.style.display = 'none', 3000); return; }
@@ -1477,7 +1496,7 @@
                 document.getElementById('appWrapper').classList.remove('visible'); document.getElementById('loginOverlay').classList.remove('hidden');
                 document.getElementById('loginRol').value = 'operador'; document.getElementById('loginPassword').value = '';
                 document.getElementById('operadorSelector').style.display = 'block'; document.getElementById('loginOperador').value = ''; currentOperator = '';
-                filtroSecretarioId = ''; // Reset filtro
+                filtroSecretarioId = '';
                 Object.values(chartInstances).forEach(ch => { try { ch.destroy(); } catch (_) {} }); chartInstances = {}; showToast('Sesión cerrada', 'warning');
             }
 
