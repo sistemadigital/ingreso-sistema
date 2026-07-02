@@ -1,0 +1,2698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictámenes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+            --text-color: #334155;
+            --text-light: #64748b;
+            --light-gray: #f8fafc;
+            --border-color: #e2e8f0;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-hover: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.2rem 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 0;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            text-align: center;
+            margin-top: 2px;
+            line-height: 1.1;
+        }
+
+        .monthly-stats {
+            display: none;
+            overflow-x: auto;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+        }
+
+        .monthly-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 5px;
+            min-width: 800px;
+        }
+
+        .month-stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 2px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            min-width: 50px;
+        }
+
+        .month-stat-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .month-stat-label {
+            font-size: 0.6rem;
+            opacity: 0.9;
+            text-align: center;
+            margin-top: 1px;
+            line-height: 1;
+        }
+
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+            background: var(--white);
+            padding: 15px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .filter-row {
+                flex-direction: row;
+            }
+        }
+
+        .year-filter, .month-filter, .topic-filter {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        select.form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            background-color: var(--white);
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #475569;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .table-container {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th, td {
+            padding: 10px 6px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: sticky;
+            top: 0;
+        }
+
+        th:hover {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+        }
+
+        tr {
+            transition: var(--transition);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--light-gray);
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 100px;
+        }
+
+        .action-btn {
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .btn-view {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .btn-view:hover {
+            background-color: #0891b2;
+            transform: translateY(-2px);
+        }
+
+        .btn-edit {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background-color: #d97706;
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            padding: 10px;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 95%;
+            max-height: 95vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            padding: 20px;
+            position: relative;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: var(--transition);
+            background: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+        }
+
+        .close-btn:hover {
+            color: var(--danger-color);
+            background-color: #fef2f2;
+        }
+
+        .modal-header {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-right: 30px;
+        }
+
+        .modal-body {
+            margin-bottom: 15px;
+        }
+
+        /* Formulario dividido */
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-left, .form-right {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        textarea.form-input {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .date-input {
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        .date-input:valid {
+            border-color: var(--success-color);
+        }
+
+        .date-input:invalid:not(:placeholder-shown) {
+            border-color: var(--danger-color);
+        }
+
+        /* Contenido con paginación */
+        .content-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #f8fafc;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .content-tools {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .word-count {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 12px;
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            border: none;
+            resize: none;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .content-area:focus {
+            outline: none;
+        }
+
+        .content-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #f8fafc;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .page-info {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .page-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-btn {
+            padding: 5px 10px;
+            border: 1px solid var(--border-color);
+            background-color: var(--white);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .page-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* Responsive mejorado para móviles */
+        @media (min-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            header {
+                padding: 1.2rem;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .stats {
+                gap: 10px;
+                padding: 12px;
+            }
+            
+            .stat-item {
+                padding: 8px 0;
+            }
+            
+            .stat-value {
+                font-size: 1.3rem;
+            }
+            
+            .stat-label {
+                font-size: 0.75rem;
+            }
+            
+            .monthly-stats {
+                padding: 12px;
+            }
+            
+            .monthly-stats-grid {
+                gap: 8px;
+            }
+            
+            .month-stat-item {
+                padding: 5px 3px;
+                min-width: 55px;
+            }
+            
+            .month-stat-value {
+                font-size: 0.95rem;
+            }
+            
+            .month-stat-label {
+                font-size: 0.65rem;
+            }
+            
+            .btn {
+                width: auto;
+                min-width: 140px;
+            }
+            
+            .search-container {
+                flex-direction: row;
+                align-items: center;
+            }
+            
+            .year-filter, .month-filter, .topic-filter {
+                width: auto;
+                min-width: 120px;
+            }
+            
+            .form-actions {
+                flex-direction: row;
+                justify-content: flex-end;
+            }
+            
+            .action-buttons {
+                flex-direction: row;
+                justify-content: center;
+            }
+            
+            .action-btn {
+                width: auto;
+                padding: 6px 12px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header-content {
+                flex-direction: row;
+                align-items: center;
+            }
+            
+            h1 {
+                text-align: left;
+                font-size: 1.8rem;
+            }
+            
+            .controls-container {
+                flex-direction: row;
+                align-items: center;
+            }
+            
+            .search-container {
+                flex: 1;
+            }
+            
+            .year-filter, .month-filter, .topic-filter {
+                width: 140px;
+            }
+            
+            .monthly-stats {
+                display: block;
+            }
+            
+            .monthly-stats-grid {
+                min-width: 1000px;
+            }
+            
+            .form-container {
+                flex-direction: row;
+            }
+            
+            .form-left, .form-right {
+                width: 50%;
+            }
+            
+            .modal-content {
+                max-width: 90%;
+                padding: 24px;
+            }
+            
+            .modal-title {
+                font-size: 1.5rem;
+            }
+            
+            .content-area {
+                max-height: 400px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .header-content {
+                flex-direction: row;
+            }
+            
+            table {
+                min-width: 100%;
+            }
+            
+            th, td {
+                padding: 12px 8px;
+                font-size: 0.9rem;
+                max-width: 150px;
+            }
+            
+            .action-buttons {
+                flex-direction: row;
+            }
+            
+            .action-btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .monthly-stats-grid {
+                min-width: 1200px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .modal-content {
+                max-width: 1200px;
+                padding: 24px;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 15px;
+            color: var(--text-light);
+        }
+        
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--border-color);
+        }
+        
+        .empty-state p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+        
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+            cursor: pointer;
+            z-index: 100;
+            transition: var(--transition);
+        }
+        
+        .floating-btn:hover {
+            transform: translateY(-5px) rotate(5deg);
+            box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .pagination-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background-color: var(--white);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 120px;
+        }
+        
+        .pagination-btn:hover:not(:disabled) {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .pagination-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .pagination-info {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .year-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background-color: #e0f2fe;
+            color: var(--primary-color);
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .topic-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            background-color: #e0e7ff;
+            color: #3730a3;
+        }
+        
+        .text-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            background-color: #f0f9ff;
+            color: var(--info-color);
+            border: 1px solid #bae6fd;
+        }
+        
+        .text-yes {
+            background-color: #d1fae5;
+            color: #059669;
+            border-color: #a7f3d0;
+        }
+        
+        .text-no {
+            background-color: #fef2f2;
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+        
+        .time-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background-color: #f0f9ff;
+            color: var(--info-color);
+            font-size: 0.7rem;
+            font-weight: 600;
+            border: 1px solid #bae6fd;
+            white-space: normal;
+            word-break: break-word;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 18px;
+            border-radius: var(--radius-sm);
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: var(--shadow);
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease-out;
+            max-width: 90%;
+            text-align: center;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+        
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+        
+        .notification.success {
+            background-color: var(--success-color);
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .created-date {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+        
+        /* Nuevos estilos para campos adicionales */
+        .firma-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .firma-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .firma-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .firma-option label {
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .dynamic-firma-field {
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .dynamic-firma-field.active {
+            display: block;
+        }
+        
+        .subrogante-input {
+            margin-top: 10px;
+        }
+        
+        /* Expediente en negrita */
+        .expediente-bold {
+            font-weight: 700 !important;
+        }
+        
+        /* Usuario asignado */
+        .user-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background-color: #f0f9ff;
+            color: var(--primary-color);
+            font-size: 0.7rem;
+            font-weight: 500;
+            border: 1px solid #bae6fd;
+            word-break: break-word;
+        }
+        
+        /* Firma defensor badge */
+        .firma-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            word-break: break-word;
+        }
+        
+        .firma-si {
+            background-color: #d1fae5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .firma-no {
+            background-color: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fde68a;
+        }
+        
+        .firma-subrogante {
+            background-color: #e0f2fe;
+            color: var(--info-color);
+            border: 1px solid #bae6fd;
+        }
+        
+        /* Estilos para resaltar búsqueda */
+        .search-highlight {
+            background-color: yellow;
+            color: black;
+            font-weight: bold;
+            padding: 2px 0;
+        }
+        
+        /* Mejoras para móviles */
+        @media (max-width: 479px) {
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+                padding: 8px;
+            }
+            
+            .stat-item:nth-child(1) {
+                grid-column: 1 / span 3;
+                margin-bottom: 5px;
+            }
+            
+            .stat-value {
+                font-size: 1.1rem;
+            }
+            
+            .stat-label {
+                font-size: 0.65rem;
+            }
+            
+            .pagination-btn {
+                min-width: 100px;
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .pagination-info {
+                min-width: 100px;
+                font-size: 0.85rem;
+            }
+            
+            .modal-content {
+                padding: 15px;
+            }
+            
+            .firma-options {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            
+            .content-area {
+                font-size: 16px;
+            }
+            
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stat-item:nth-child(1) {
+                grid-column: 1 / span 2;
+            }
+        }
+        
+        /* Scroll suave para móviles */
+        .table-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .table-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        .content-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .content-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .content-area::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        .monthly-stats::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .monthly-stats::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .monthly-stats::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        
+        .monthly-stats::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>Dictámenes</h1>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="totalRecords">0</span>
+                        <span class="stat-label">Total</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="trimestre1">0</span>
+                        <span class="stat-label">Ene-Mar</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="trimestre2">0</span>
+                        <span class="stat-label">Abr-Jun</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="trimestre3">0</span>
+                        <span class="stat-label">Jul-Sep</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="trimestre4">0</span>
+                        <span class="stat-label">Oct-Dic</span>
+                    </div>
+                </div>
+                
+                <!-- Estadísticas mensuales -->
+                <div class="monthly-stats" id="monthlyStats">
+                    <div class="monthly-stats-grid" id="monthlyStatsGrid">
+                        <!-- Se llenará dinámicamente con JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="controls-container">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Buscar por número, asunto, expediente o cualquier campo...">
+                <div class="filter-row">
+                    <div class="year-filter">
+                        <label for="yearFilter" class="form-label">Año:</label>
+                        <select id="yearFilter" class="form-input">
+                            <option value="todos">Todos</option>
+                        </select>
+                    </div>
+                    <div class="month-filter">
+                        <label for="monthFilter" class="form-label">Mes:</label>
+                        <select id="monthFilter" class="form-input">
+                            <option value="todos">Todos</option>
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </div>
+                    <div class="topic-filter">
+                        <label for="topicFilter" class="form-label">Temática:</label>
+                        <select id="topicFilter" class="form-input">
+                            <option value="todos">Todas</option>
+                            <option value="Civil">Civil</option>
+                            <option value="Familia">Familia</option>
+                            <option value="Laboral">Laboral</option>
+                            <option value="Otro">Otro</option>
+                            <option value="Penal">Penal</option>
+                            <option value="Violencia Familiar">Violencia Familiar</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button id="newRecordBtn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nuevo Dictamen
+            </button>
+        </div>
+        
+        <div class="table-container">
+            <table id="recordsTable">
+                <thead>
+                    <tr>
+                        <th>N°</th>
+                        <th>Año</th>
+                        <th>Asunto</th>
+                        <th>Fecha de Dictamen</th>
+                        <th>Temática</th>
+                        <th>Usuario Asignado</th>
+                        <th>Firma Defensor</th>
+                        <th>Expediente</th>
+                        <th>Texto</th>
+                        <th>Registrado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsBody">
+                    </tbody>
+            </table>
+            <div id="emptyState" class="empty-state">
+                <i class="fas fa-file-contract"></i>
+                <p>No hay dictámenes registrados</p>
+                <button id="emptyStateBtn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Crear primer dictamen
+                </button>
+            </div>
+        </div>
+
+        <div class="pagination">
+            <button id="prevPageBtn" class="pagination-btn" disabled>
+                <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <span class="pagination-info" id="pageInfo">Página 1 de 1</span>
+            <button id="nextPageBtn" class="pagination-btn" disabled>
+                Siguiente <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div id="recordModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Detalles del Dictamen</h2>
+            </div>
+            <div class="modal-body">
+                <form id="recordForm">
+                    <input type="hidden" id="recordId">
+                    <div class="form-container">
+                        <div class="form-left">
+                            <div class="form-group">
+                                <label for="subject" class="form-label">Asunto *</label>
+                                <input type="text" id="subject" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="dictamenDate" class="form-label">Fecha de Dictamen *</label>
+                                <input type="text" id="dictamenDate" class="form-input date-input" 
+                                       pattern="(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}"
+                                       placeholder="DD/MM/AAAA"
+                                       required
+                                       title="Formato: DD/MM/AAAA (Día: 01-31, Mes: 01-12, Año: 4 dígitos)">
+                                <small class="created-date">Formato: DD/MM/AAAA (ej: 15/03/2024)</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="topic" class="form-label">Temática del Dictamen *</label>
+                                <select id="topic" class="form-input" required>
+                                    <option value="">Seleccione una temática</option>
+                                    <option value="Civil">Civil</option>
+                                    <option value="Familia">Familia</option>
+                                    <option value="Laboral">Laboral</option>
+                                    <option value="Otro">Otro</option>
+                                    <option value="Penal">Penal</option>
+                                    <option value="Violencia Familiar">Violencia Familiar</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="assignedUser" class="form-label">Usuario asignado</label>
+                                <select id="assignedUser" class="form-input">
+                                    <option value="">Seleccione un usuario</option>
+                                    <option value="Bazante Nadia Romina">Bazante Nadia Romina</option>
+                                    <option value="Boillat Cesar Enrique">Boillat Cesar Enrique</option>
+                                    <option value="Cardozo Maria Raquel">Cardozo Maria Raquel</option>
+                                    <option value="Cedron Noelia Aurora">Cedron Noelia Aurora</option>
+                                    <option value="Corrales Alicia Mariela">Corrales Alicia Mariela</option>
+                                    <option value="Escobar Monica Graciela">Escobar Monica Graciela</option>
+                                    <option value="Fioravante Romulo">Fioravante Romulo</option>
+                                    <option value="Gonzalez Alberto Misael">Gonzalez Alberto Misael</option>
+                                    <option value="Gonzalez Juan Jose">Gonzalez Juan Jose</option>
+                                    <option value="Gudiño Natalia Esther">Gudiño Natalia Esther</option>
+                                    <option value="Magnani Enzo Luciano">Magnani Enzo Luciano</option>
+                                    <option value="Ortega Lucia Noemi">Ortega Lucia Noemi</option>
+                                    <option value="Pablos Patricia">Pablos Patricia</option>
+                                    <option value="Palacios Ana Gabriela">Palacios Ana Gabriela</option>
+                                    <option value="Ramos Marcelo Gustavo">Ramos Marcelo Gustavo</option>
+                                    <option value="Riveros Patricia Soledad">Riveros Patricia Soledad</option>
+                                    <option value="Sosa Rita Cecilia">Sosa Rita Cecilia</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="firmaDefensorGroup">
+                                <label class="form-label">Firma Defensor Titular</label>
+                                <div class="firma-options">
+                                    <div class="firma-option">
+                                        <input type="radio" id="firmaDefensorSi" name="firmaDefensor" value="Sí" checked>
+                                        <label for="firmaDefensorSi">Sí</label>
+                                    </div>
+                                    <div class="firma-option">
+                                        <input type="radio" id="firmaDefensorNo" name="firmaDefensor" value="No">
+                                        <label for="firmaDefensorNo">No</label>
+                                    </div>
+                                </div>
+                                <div class="dynamic-firma-field" id="subroganteField">
+                                    <label class="form-label">Firma Defensor Subrogante</label>
+                                    <input type="text" id="firmaDefensorSubrogante" class="form-input subrogante-input" placeholder="Nombre del defensor subrogante">
+                                </div>
+                            </div>
+                            <div class="form-group" id="createdAtContainer" style="display: none;">
+                                <label class="form-label">Registrado el</label>
+                                <div class="form-input" style="background-color: #f8fafc;" id="createdAtDisplay"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-right">
+                            <div class="form-group">
+                                <label for="content" class="form-label">Contenido del Dictamen *</label>
+                                <div class="content-container">
+                                    <div class="content-header">
+                                        <span class="word-count" id="wordCount">0 palabras</span>
+                                        <div class="content-tools">
+                                            <button type="button" id="clearContent" class="page-btn" title="Limpiar contenido">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <textarea id="content" class="content-area" placeholder="Escriba el contenido del dictamen aquí..." required></textarea>
+                                    <div class="content-pagination">
+                                        <span class="page-info" id="pageInfoContent">Página 1</span>
+                                        <div class="page-buttons">
+                                            <button type="button" id="prevPageContent" class="page-btn" disabled>
+                                                <i class="fas fa-chevron-left"></i>
+                                            </button>
+                                            <button type="button" id="nextPageContent" class="page-btn" disabled>
+                                                <i class="fas fa-chevron-right"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="expediente" class="form-label">Expediente</label>
+                                <input type="text" id="expediente" class="form-input" placeholder="Número o referencia del expediente (texto libre)">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" id="cancelBtn" class="btn btn-secondary">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="saveBtn">
+                            <span id="saveBtnText">Guardar</span>
+                            <span id="saveBtnSpinner" class="loading" style="display: none;"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="contentModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title">Dictamen #<span id="contentNumber"></span></h2>
+                <p><strong>Asunto:</strong> <span id="contentSubject"></span></p>
+                <p><strong>Fecha de Dictamen:</strong> <span id="contentDictamenDate"></span></p>
+                <p><strong>Temática:</strong> <span id="contentTopic"></span></p>
+                <p><strong>Usuario asignado:</strong> <span id="contentAssignedUser"></span></p>
+                <div id="firmaContainer">
+                    </div>
+                <p><strong>Expediente:</strong> <span id="contentExpediente"></span></p>
+                <p><strong>Registrado el:</strong> <span id="contentCreatedAt" class="time-badge"></span></p>
+            </div>
+            <div class="modal-body">
+                <div class="content-box">
+                    <p id="fullContent"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="viewAllBtn" class="floating-btn" title="Ver todos los registros">
+        <i class="fas fa-list"></i>
+    </div>
+
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA4PlV7FpUZsRSqJaFQrCRoKyShwpPQac",
+            authDomain: "librodictamen.firebaseapp.com",
+            projectId: "librodictamen",
+            storageBucket: "librodictamen.firebasestorage.app",
+            messagingSenderId: "5128868565",
+            appId: "1:5128868565:web:f13be4d1b408526ebd085c"
+        };
+
+        // Inicializar Firebase
+        let db;
+        let firebaseInitialized = false;
+        
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            firebaseInitialized = true;
+            console.log("Firebase inicializado correctamente");
+        } catch (error) {
+            console.error("Error inicializando Firebase:", error);
+            showNotification("Error de conexión con Firebase. La aplicación funcionará en modo local.", "error");
+            
+            // Firebase simulado para modo local
+            db = {
+                collection: () => ({
+                    orderBy: () => ({
+                        onSnapshot: () => {},
+                        get: () => Promise.resolve({ empty: true, docs: [] })
+                    }),
+                    doc: () => ({
+                        get: () => Promise.resolve({ exists: false }),
+                        update: () => Promise.resolve(),
+                        delete: () => Promise.resolve()
+                    }),
+                    add: () => Promise.resolve(),
+                    where: () => ({
+                        orderBy: () => ({
+                            limit: () => ({
+                                get: () => Promise.resolve({ empty: true, docs: [] })
+                            })
+                        })
+                    })
+                }),
+                runTransaction: async (callback) => {
+                    // Simulación básica para modo local
+                    const transaction = {
+                        get: (ref) => ref.get(),
+                        set: (ref, data) => Promise.resolve(),
+                        update: (ref, data) => Promise.resolve()
+                    };
+                    return callback(transaction);
+                }
+            };
+        }
+
+        // Función para obtener la fecha y hora actual en Argentina (UTC-3) como Timestamp
+        function getCurrentTimestampArgentina() {
+            return firebase.firestore.Timestamp.now();
+        }
+
+        // Función para formatear fecha/hora EN ARGENTINA (UTC-3)
+        function formatDateTimeArgentina(dateInput) {
+            if (!dateInput) return 'No disponible';
+            
+            let date;
+            
+            if (dateInput.toDate && typeof dateInput.toDate === 'function') {
+                date = dateInput.toDate();
+            } else if (dateInput instanceof Date) {
+                date = dateInput;
+            } else if (typeof dateInput === 'string') {
+                date = new Date(dateInput);
+            } else if (typeof dateInput === 'number') {
+                date = new Date(dateInput);
+            } else {
+                return 'No disponible';
+            }
+            
+            const argentinaTime = date.toLocaleString('es-AR', {
+                timeZone: 'America/Argentina/Buenos_Aires',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            
+            return argentinaTime;
+        }
+
+        // Función para convertir de DD/MM/AAAA a YYYY-MM-DD (para almacenar)
+        function formatDateForStorage(dateString) {
+            if (!dateString) return '';
+            
+            const parts = dateString.split('/');
+            if (parts.length === 3) {
+                const day = parts[0].padStart(2, '0');
+                const month = parts[1].padStart(2, '0');
+                const year = parts[2];
+                
+                return `${year}-${month}-${day}`;
+            }
+            return dateString;
+        }
+
+        // Función para convertir de YYYY-MM-DD a DD/MM/AAAA (para mostrar)
+        function formatDateForDisplay(dateString) {
+            if (!dateString) return '';
+            
+            if (dateString.includes('-')) {
+                const parts = dateString.split('-');
+                if (parts.length === 3) {
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+            } else if (dateString.includes('/')) {
+                return dateString;
+            }
+            return dateString;
+        }
+
+        // Función para validar fecha en formato DD/MM/AAAA
+        function isValidDate(dateString) {
+            const pattern = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+            if (!pattern.test(dateString)) return false;
+            
+            const parts = dateString.split('/');
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
+            const year = parseInt(parts[2], 10);
+            
+            if (year < 1900 || year > 2100) return false;
+            
+            const date = new Date(year, month - 1, day);
+            return date.getFullYear() === year && 
+                   date.getMonth() === month - 1 && 
+                   date.getDate() === day;
+        }
+
+        // Función para obtener el año de una fecha DD/MM/AAAA
+        function getYearFromDate(dateString) {
+            if (!dateString) return new Date().getFullYear().toString();
+            
+            const parts = dateString.split('/');
+            if (parts.length === 3) {
+                return parts[2];
+            }
+            
+            if (dateString.includes('-')) {
+                return dateString.split('-')[0];
+            }
+            
+            return new Date().getFullYear().toString();
+        }
+
+        // Función para obtener el mes de una fecha DD/MM/AAAA o YYYY-MM-DD
+        function getMonthFromDate(dateString) {
+            if (!dateString) return 0;
+            
+            let month = 0;
+            
+            if (dateString.includes('/')) {
+                // Formato DD/MM/AAAA
+                const parts = dateString.split('/');
+                if (parts.length === 3) {
+                    month = parseInt(parts[1], 10);
+                }
+            } else if (dateString.includes('-')) {
+                // Formato YYYY-MM-DD
+                const parts = dateString.split('-');
+                if (parts.length === 3) {
+                    month = parseInt(parts[1], 10);
+                }
+            }
+            
+            return month;
+        }
+
+        // Función para mostrar notificaciones
+        function showNotification(message, type = "info") {
+            const notification = document.createElement("div");
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Obtener el siguiente número de dictamen para un año de forma atómica (con transacción)
+        async function getNextNumberAtomic(year) {
+            if (!firebaseInitialized) {
+                // Modo local: sin concurrencia, usar el método anterior
+                const yearRecords = records.filter(record => record.year === year);
+                if (yearRecords.length === 0) return 1;
+                const numbers = yearRecords.map(record => record.number);
+                return Math.max(...numbers) + 1;
+            }
+
+            const counterRef = db.collection("contadores").doc(year.toString());
+
+            try {
+                const result = await db.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(counterRef);
+                    if (!doc.exists) {
+                        // Si no existe el contador para este año, crearlo con valor 1
+                        transaction.set(counterRef, { year: Number(year), currentNumber: 1 });
+                        return 1;
+                    } else {
+                        const newNumber = doc.data().currentNumber + 1;
+                        transaction.update(counterRef, { currentNumber: newNumber });
+                        return newNumber;
+                    }
+                });
+                return result;
+            } catch (error) {
+                console.error("Error en transacción para obtener número:", error);
+                // Fallback: intentar obtener el máximo de los registros existentes
+                const snapshot = await db.collection("dictamenes")
+                    .where("year", "==", year)
+                    .orderBy("number", "desc")
+                    .limit(1)
+                    .get();
+                if (snapshot.empty) return 1;
+                return snapshot.docs[0].data().number + 1;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const recordsBody = document.getElementById('recordsBody');
+            const emptyState = document.getElementById('emptyState');
+            const recordModal = document.getElementById('recordModal');
+            const contentModal = document.getElementById('contentModal');
+            const recordForm = document.getElementById('recordForm');
+            const searchInput = document.getElementById('searchInput');
+            const yearFilter = document.getElementById('yearFilter');
+            const monthFilter = document.getElementById('monthFilter');
+            const topicFilter = document.getElementById('topicFilter');
+            const newRecordBtn = document.getElementById('newRecordBtn');
+            const emptyStateBtn = document.getElementById('emptyStateBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const viewAllBtn = document.getElementById('viewAllBtn');
+            const closeButtons = document.querySelectorAll('.close-btn');
+            const prevPageBtn = document.getElementById('prevPageBtn');
+            const nextPageBtn = document.getElementById('nextPageBtn');
+            const pageInfo = document.getElementById('pageInfo');
+            const totalRecords = document.getElementById('totalRecords');
+            const saveBtn = document.getElementById('saveBtn');
+            const saveBtnText = document.getElementById('saveBtnText');
+            const saveBtnSpinner = document.getElementById('saveBtnSpinner');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const monthlyStats = document.getElementById('monthlyStats');
+            const monthlyStatsGrid = document.getElementById('monthlyStatsGrid');
+            
+            // Elementos para KPIs de trimestre
+            const trimestre1 = document.getElementById('trimestre1');
+            const trimestre2 = document.getElementById('trimestre2');
+            const trimestre3 = document.getElementById('trimestre3');
+            const trimestre4 = document.getElementById('trimestre4');
+            
+            // Elementos del formulario
+            const dictamenDateInput = document.getElementById('dictamenDate');
+            const topicSelect = document.getElementById('topic');
+            const assignedUserSelect = document.getElementById('assignedUser');
+            const firmaDefensorSi = document.getElementById('firmaDefensorSi');
+            const firmaDefensorNo = document.getElementById('firmaDefensorNo');
+            const subroganteField = document.getElementById('subroganteField');
+            const firmaDefensorSubroganteInput = document.getElementById('firmaDefensorSubrogante');
+            const expedienteInput = document.getElementById('expediente');
+            const createdAtContainer = document.getElementById('createdAtContainer');
+            const createdAtDisplay = document.getElementById('createdAtDisplay');
+            
+            // Elementos de contenido con paginación
+            const contentTextarea = document.getElementById('content');
+            const wordCount = document.getElementById('wordCount');
+            const clearContent = document.getElementById('clearContent');
+            const pageInfoContent = document.getElementById('pageInfoContent');
+            const prevPageContent = document.getElementById('prevPageContent');
+            const nextPageContent = document.getElementById('nextPageContent');
+            
+            // Variables de estado
+            let records = [];
+            let editingId = null;
+            let filteredRecords = [];
+            let currentPage = 1;
+            const recordsPerPage = 10;
+            const currentYear = new Date().getFullYear();
+            const startYear = 2026;
+            
+            // Variables para paginación de contenido
+            let contentPages = [];
+            let currentContentPage = 1;
+            const wordsPerPage = 5000;
+            
+            // Nombres de meses para mostrar
+            const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            
+            // Inicializar la aplicación
+            function init() {
+                setupEventListeners();
+                if (firebaseInitialized) {
+                    setupFirestoreListeners();
+                } else {
+                    loadRecordsFromLocalStorage();
+                }
+            }
+            
+            // Configurar listeners de Firestore
+            function setupFirestoreListeners() {
+                loadingOverlay.style.display = 'flex';
+                
+                // Escuchar cambios en la colección de dictámenes
+                db.collection("dictamenes")
+                    .orderBy("dictamenDate", "desc")
+                    .onSnapshot((snapshot) => {
+                        records = [];
+                        snapshot.forEach((doc) => {
+                            const data = doc.data();
+                            records.push({ 
+                                id: doc.id, 
+                                number: data.number || 0,
+                                year: data.year || new Date(data.dictamenDate).getFullYear(),
+                                subject: data.subject || '',
+                                dictamenDate: data.dictamenDate || '',
+                                topic: data.topic || '',
+                                assignedUser: data.assignedUser || '',
+                                firmaDefensor: data.firmaDefensor || '',
+                                firmaDefensorSubrogante: data.firmaDefensorSubrogante || '',
+                                expediente: data.expediente || '',
+                                content: data.content || '',
+                                createdAt: data.createdAt || null
+                            });
+                        });
+                        
+                        // ORDENAMIENTO DESCENDENTE POR NÚMERO (Y AÑO)
+                        records.sort((a, b) => {
+                            if (Number(a.year) !== Number(b.year)) {
+                                return Number(b.year) - Number(a.year);
+                            }
+                            return Number(b.number) - Number(a.number);
+                        });
+                        
+                        updateYearFilter();
+                        updateStats();
+                        updateTrimestreStats();
+                        updateMonthlyStats();
+                        renderTable();
+                        
+                        loadingOverlay.style.display = 'none';
+                    }, (error) => {
+                        console.error("Error escuchando cambios:", error);
+                        showNotification("Error cargando datos de Firestore. Usando modo local.", "error");
+                        loadRecordsFromLocalStorage();
+                        
+                        loadingOverlay.style.display = 'none';
+                    });
+            }
+            
+            // Cargar registros desde localStorage como respaldo
+            function loadRecordsFromLocalStorage() {
+                try {
+                    const storedRecords = localStorage.getItem('dictamenes');
+                    if (storedRecords) {
+                        records = JSON.parse(storedRecords);
+                        
+                        // ORDENAMIENTO DESCENDENTE POR NÚMERO (Y AÑO)
+                        records.sort((a, b) => {
+                            if (Number(a.year) !== Number(b.year)) {
+                                return Number(b.year) - Number(a.year);
+                            }
+                            return Number(b.number) - Number(a.number);
+                        });
+
+                        updateYearFilter();
+                        updateStats();
+                        updateTrimestreStats();
+                        updateMonthlyStats();
+                        renderTable();
+                    } else {
+                        emptyState.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error("Error cargando registros:", error);
+                    records = [];
+                    emptyState.style.display = 'block';
+                }
+            }
+            
+            // Guardar registros en localStorage como respaldo
+            function saveRecordsToLocalStorage() {
+                try {
+                    localStorage.setItem('dictamenes', JSON.stringify(records));
+                } catch (error) {
+                    console.error("Error guardando registros:", error);
+                }
+            }
+            
+            // Configurar event listeners
+            function setupEventListeners() {
+                newRecordBtn.addEventListener('click', openNewRecordModal);
+                emptyStateBtn.addEventListener('click', openNewRecordModal);
+                cancelBtn.addEventListener('click', closeModal);
+                recordForm.addEventListener('submit', saveRecord);
+                searchInput.addEventListener('input', filterRecords);
+                yearFilter.addEventListener('change', filterRecords);
+                monthFilter.addEventListener('change', filterRecords);
+                topicFilter.addEventListener('change', filterRecords);
+                viewAllBtn.addEventListener('click', viewAllRecords);
+                prevPageBtn.addEventListener('click', goToPrevPage);
+                nextPageBtn.addEventListener('click', goToNextPage);
+                
+                // Event listeners para fecha con formato DD/MM/AAAA
+                dictamenDateInput.addEventListener('input', function(e) {
+                    applyDateMask(e.target);
+                });
+                
+                // Validar fecha al perder el foco
+                dictamenDateInput.addEventListener('blur', function(e) {
+                    validateDateField(e.target);
+                });
+                
+                // Event listeners para firma defensor
+                firmaDefensorNo.addEventListener('change', function() {
+                    if (this.checked) {
+                        subroganteField.classList.add('active');
+                        firmaDefensorSubroganteInput.focus();
+                    }
+                });
+                
+                firmaDefensorSi.addEventListener('change', function() {
+                    if (this.checked) {
+                        subroganteField.classList.remove('active');
+                        firmaDefensorSubroganteInput.value = '';
+                    }
+                });
+                
+                // Event listeners para contenido con paginación
+                contentTextarea.addEventListener('input', updateWordCount);
+                clearContent.addEventListener('click', clearContentText);
+                prevPageContent.addEventListener('click', goToPrevContentPage);
+                nextPageContent.addEventListener('click', goToNextContentPage);
+                
+                closeButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        recordModal.style.display = 'none';
+                        contentModal.style.display = 'none';
+                    });
+                });
+                
+                // Cerrar modal al hacer clic fuera del contenido
+                window.addEventListener('click', function(event) {
+                    if (event.target === recordModal) {
+                        recordModal.style.display = 'none';
+                    }
+                    if (event.target === contentModal) {
+                        contentModal.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Aplicar máscara para fecha DD/MM/AAAA
+            function applyDateMask(input) {
+                let value = input.value.replace(/\D/g, '');
+                
+                if (value.length > 8) {
+                    value = value.slice(0, 8);
+                }
+                
+                if (value.length >= 2) {
+                    value = value.slice(0, 2) + '/' + value.slice(2);
+                }
+                if (value.length >= 5) {
+                    value = value.slice(0, 5) + '/' + value.slice(5);
+                }
+                
+                input.value = value;
+                
+                if (value.length === 10 && isValidDate(value)) {
+                    input.style.borderColor = 'var(--success-color)';
+                } else if (value.length > 0) {
+                    input.style.borderColor = 'var(--danger-color)';
+                } else {
+                    input.style.borderColor = 'var(--border-color)';
+                }
+            }
+            
+            // Validar campo de fecha
+            function validateDateField(input) {
+                if (input.value && !isValidDate(input.value)) {
+                    input.style.borderColor = 'var(--danger-color)';
+                    return false;
+                }
+                return true;
+            }
+            
+            // Actualizar contador de palabras
+            function updateWordCount() {
+                const text = contentTextarea.value;
+                const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+                wordCount.textContent = `${words} palabras`;
+            }
+            
+            // Actualizar paginación de contenido
+            function updateContentPagination() {
+                const totalPages = contentPages.length;
+                pageInfoContent.textContent = `Página ${currentContentPage} de ${totalPages}`;
+
+                contentTextarea.value = contentPages[currentContentPage - 1] || '';
+
+                prevPageContent.disabled = currentContentPage === 1;
+                nextPageContent.disabled = currentContentPage === totalPages || totalPages === 0;
+            }
+            
+            // Ir a página anterior de contenido
+            function goToPrevContentPage() {
+                if (currentContentPage > 1) {
+                    contentPages[currentContentPage - 1] = contentTextarea.value;
+                    currentContentPage--;
+                    updateContentPagination();
+                }
+            }
+            
+            // Ir a página siguiente de contenido
+            function goToNextContentPage() {
+                if (currentContentPage < contentPages.length) {
+                    contentPages[currentContentPage - 1] = contentTextarea.value;
+                    currentContentPage++;
+                    updateContentPagination();
+                }
+            }
+            
+            // Limpiar contenido
+            function clearContentText() {
+                if (confirm('¿Está seguro de que desea limpiar todo el contenido?')) {
+                    contentTextarea.value = '';
+                    updateWordCount();
+                    contentPages = [''];
+                    currentContentPage = 1;
+                    updateContentPagination();
+                }
+            }
+            
+            // Obtener todo el contenido uniendo páginas
+            function getFullContent() {
+                if (contentPages.length === 0) {
+                    contentPages = [contentTextarea.value];
+                } else {
+                    contentPages[currentContentPage - 1] = contentTextarea.value;
+                }
+                return contentPages.join('');
+            }
+            
+            // Actualizar filtro de años
+            function updateYearFilter() {
+                const years = new Set();
+                
+                for (let year = startYear; year <= currentYear + 5; year++) {
+                    years.add(year.toString());
+                }
+                
+                records.forEach(record => {
+                    if (record.year) {
+                        years.add(record.year.toString());
+                    }
+                });
+                
+                const sortedYears = Array.from(years).sort((a, b) => b - a);
+                
+                yearFilter.innerHTML = '<option value="todos">Todos</option>';
+                sortedYears.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearFilter.appendChild(option);
+                });
+            }
+            
+            // Actualizar estadísticas principales
+            function updateStats() {
+                totalRecords.textContent = records.length;
+            }
+            
+            // Actualizar estadísticas por trimestre, considerando todos los filtros activos
+            function updateTrimestreStats() {
+                const searchText = searchInput.value.trim();
+                const selectedYear = yearFilter.value;
+                const selectedMonth = monthFilter.value;
+                const selectedTopic = topicFilter.value;
+                
+                const hasActiveFilter = searchText || selectedYear !== 'todos' || selectedMonth !== 'todos' || selectedTopic !== 'todos';
+                const recordsToCheck = hasActiveFilter ? filteredRecords : records;
+                
+                let trim1 = 0, trim2 = 0, trim3 = 0, trim4 = 0;
+                
+                recordsToCheck.forEach(record => {
+                    const month = getMonthFromDate(record.dictamenDate);
+                    
+                    if (month >= 1 && month <= 3) {
+                        trim1++;
+                    } else if (month >= 4 && month <= 6) {
+                        trim2++;
+                    } else if (month >= 7 && month <= 9) {
+                        trim3++;
+                    } else if (month >= 10 && month <= 12) {
+                        trim4++;
+                    }
+                });
+                
+                trimestre1.textContent = trim1;
+                trimestre2.textContent = trim2;
+                trimestre3.textContent = trim3;
+                trimestre4.textContent = trim4;
+            }
+            
+            // Actualizar estadísticas mensuales, considerando todos los filtros activos
+            function updateMonthlyStats() {
+                monthlyStatsGrid.innerHTML = '';
+                
+                const searchText = searchInput.value.trim();
+                const selectedYear = yearFilter.value;
+                const selectedMonth = monthFilter.value;
+                const selectedTopic = topicFilter.value;
+                
+                const hasActiveFilter = searchText || selectedYear !== 'todos' || selectedMonth !== 'todos' || selectedTopic !== 'todos';
+                const recordsToCheck = hasActiveFilter ? filteredRecords : records;
+                
+                const monthCounts = Array(12).fill(0);
+                
+                recordsToCheck.forEach(record => {
+                    const month = getMonthFromDate(record.dictamenDate);
+                    if (month >= 1 && month <= 12) {
+                        monthCounts[month - 1]++;
+                    }
+                });
+                
+                monthCounts.forEach((count, index) => {
+                    const monthStatItem = document.createElement('div');
+                    monthStatItem.className = 'month-stat-item';
+                    
+                    monthStatItem.innerHTML = `
+                        <span class="month-stat-value">${count}</span>
+                        <span class="month-stat-label">${monthNames[index]}</span>
+                    `;
+                    
+                    monthlyStatsGrid.appendChild(monthStatItem);
+                });
+                
+                const hasData = monthCounts.some(count => count > 0);
+                monthlyStats.style.display = hasData ? 'block' : 'none';
+            }
+            
+            // Renderizar la tabla de registros
+            function renderTable() {
+                recordsBody.innerHTML = '';
+                
+                const searchText = searchInput.value.trim();
+                const selectedYear = yearFilter.value;
+                const selectedMonth = monthFilter.value;
+                const selectedTopic = topicFilter.value;
+                const hasActiveFilter = searchText || selectedYear !== 'todos' || selectedMonth !== 'todos' || selectedTopic !== 'todos';
+                
+                const recordsToRender = hasActiveFilter ? filteredRecords : records;
+                
+                if (recordsToRender.length === 0) {
+                    emptyState.style.display = 'block';
+                    updatePagination(0);
+                    return;
+                }
+                
+                emptyState.style.display = 'none';
+                
+                const totalPages = Math.ceil(recordsToRender.length / recordsPerPage);
+                
+                if (currentPage > totalPages) {
+                    currentPage = totalPages > 0 ? totalPages : 1;
+                }
+                
+                updatePagination(recordsToRender.length);
+                
+                const startIndex = (currentPage - 1) * recordsPerPage;
+                const endIndex = startIndex + recordsPerPage;
+                const paginatedRecords = recordsToRender.slice(startIndex, endIndex);
+                
+                paginatedRecords.forEach(record => {
+                    const row = document.createElement('tr');
+                    
+                    let registroDisplay = 'No disponible';
+                    if (record.createdAt) {
+                        registroDisplay = formatDateTimeArgentina(record.createdAt);
+                    }
+                    
+                    const hasText = record.content && record.content.trim() !== '';
+                    
+                    let firmaDisplay = record.firmaDefensor || 'Sí';
+                    let firmaClass = 'firma-si';
+                    
+                    if (record.firmaDefensor === 'No') {
+                        firmaDisplay = record.firmaDefensorSubrogante ? 'Subrogante' : 'No';
+                        firmaClass = record.firmaDefensorSubrogante ? 'firma-subrogante' : 'firma-no';
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${record.number}</td>
+                        <td><span class="year-badge">${record.year}</span></td>
+                        <td>${record.subject}</td>
+                        <td>${formatDateForDisplay(record.dictamenDate)}</td>
+                        <td><span class="topic-badge">${record.topic || 'Sin especificar'}</span></td>
+                        <td>${record.assignedUser ? `<span class="user-badge">${record.assignedUser}</span>` : 'No asignado'}</td>
+                        <td><span class="firma-badge ${firmaClass}">${firmaDisplay}</span></td>
+                        <td><span class="expediente-bold">${record.expediente || 'No especificado'}</span></td>
+                        <td>
+                            <span class="text-badge ${hasText ? 'text-yes' : 'text-no'}">
+                                ${hasText ? 'Sí' : 'No'}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="time-badge">${registroDisplay}</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn btn-view view-content" data-id="${record.id}">
+                                    <i class="fas fa-eye"></i> Ver
+                                </button>
+                                <button class="action-btn btn-edit edit-record" data-id="${record.id}">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="action-btn btn-delete delete-record" data-id="${record.id}">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    
+                    recordsBody.appendChild(row);
+                });
+                
+                // Agregar event listeners a los botones de acción
+                document.querySelectorAll('.view-content').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        viewContent(id);
+                    });
+                });
+                
+                document.querySelectorAll('.edit-record').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        editRecord(id);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-record').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        deleteRecord(id);
+                    });
+                });
+            }
+            
+            // Actualizar paginación
+            function updatePagination(totalRecords) {
+                const totalPages = Math.ceil(totalRecords / recordsPerPage);
+                pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+                
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+            }
+            
+            // Ir a la página anterior
+            function goToPrevPage() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            }
+            
+            // Ir a la página siguiente
+            function goToNextPage() {
+                const searchText = searchInput.value.trim();
+                const selectedYear = yearFilter.value;
+                const selectedMonth = monthFilter.value;
+                const selectedTopic = topicFilter.value;
+                const hasActiveFilter = searchText || selectedYear !== 'todos' || selectedMonth !== 'todos' || selectedTopic !== 'todos';
+                const recordsToRender = hasActiveFilter ? filteredRecords : records;
+                const totalPages = Math.ceil(recordsToRender.length / recordsPerPage);
+                
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                }
+            }
+            
+            // Abrir modal para nuevo registro
+            function openNewRecordModal() {
+                editingId = null;
+                document.getElementById('modalTitle').textContent = 'Nuevo Dictamen';
+                recordForm.reset();
+                
+                const today = new Date();
+                const day = String(today.getDate()).padStart(2, '0');
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const year = today.getFullYear();
+                dictamenDateInput.value = `${day}/${month}/${year}`;
+                dictamenDateInput.style.borderColor = 'var(--success-color)';
+                
+                topicSelect.value = '';
+                assignedUserSelect.value = '';
+                
+                firmaDefensorSi.checked = true;
+                firmaDefensorNo.checked = false;
+                subroganteField.classList.remove('active');
+                firmaDefensorSubroganteInput.value = '';
+                
+                expedienteInput.value = '';
+                
+                createdAtContainer.style.display = 'none';
+                
+                contentTextarea.value = '';
+                updateWordCount();
+                contentPages = [];
+                currentContentPage = 1;
+                updateContentPagination();
+                
+                recordModal.style.display = 'flex';
+            }
+            
+            // Cerrar modal
+            function closeModal() {
+                recordModal.style.display = 'none';
+            }
+            
+            // Guardar registro (nuevo o editado)
+            async function saveRecord(e) {
+                e.preventDefault();
+                
+                if (!validateDateField(dictamenDateInput)) {
+                    showNotification("Por favor, ingrese una fecha de dictamen válida en formato DD/MM/AAAA", "error");
+                    dictamenDateInput.focus();
+                    return;
+                }
+                
+                saveBtnText.style.display = 'none';
+                saveBtnSpinner.style.display = 'inline-block';
+                saveBtn.disabled = true;
+                
+                const subject = document.getElementById('subject').value;
+                const dictamenDate = dictamenDateInput.value;
+                const topic = topicSelect.value;
+                const assignedUser = assignedUserSelect.value;
+                const expediente = expedienteInput.value;
+                const content = getFullContent();
+                
+                const firmaDefensor = document.querySelector('input[name="firmaDefensor"]:checked').value;
+                const firmaDefensorSubrogante = firmaDefensor === 'No' ? firmaDefensorSubroganteInput.value : '';
+                
+                if (!subject || !dictamenDate || !content || !topic) {
+                    showNotification("Por favor, complete los campos obligatorios (*)", "error");
+                    saveBtnText.style.display = 'inline-block';
+                    saveBtnSpinner.style.display = 'none';
+                    saveBtn.disabled = false;
+                    return;
+                }
+                
+                const year = getYearFromDate(dictamenDate);
+                
+                try {
+                    if (editingId === null) {
+                        const nextNumber = await getNextNumberAtomic(year);
+                        const createdAt = getCurrentTimestampArgentina();
+                        
+                        const newRecord = {
+                            number: nextNumber,
+                            year: year,
+                            subject,
+                            dictamenDate: formatDateForStorage(dictamenDate),
+                            topic,
+                            assignedUser,
+                            firmaDefensor,
+                            firmaDefensorSubrogante,
+                            expediente,
+                            content,
+                            createdAt: createdAt
+                        };
+                        
+                        if (firebaseInitialized) {
+                            await db.collection("dictamenes").add(newRecord);
+                            showNotification("Dictamen creado correctamente", "success");
+                        } else {
+                            newRecord.id = Date.now().toString();
+                            records.push(newRecord);
+                            saveRecordsToLocalStorage();
+                            showNotification("Dictamen creado correctamente (modo local)", "success");
+                        }
+                    } else {
+                        if (firebaseInitialized) {
+                            const recordRef = db.collection("dictamenes").doc(editingId);
+                            const existingRecord = await recordRef.get();
+                            
+                            if (existingRecord.exists) {
+                                const data = existingRecord.data();
+                                let updateData = {
+                                    subject,
+                                    dictamenDate: formatDateForStorage(dictamenDate),
+                                    topic,
+                                    assignedUser,
+                                    firmaDefensor,
+                                    firmaDefensorSubrogante,
+                                    expediente,
+                                    content,
+                                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                };
+                                
+                                if (year !== data.year) {
+                                    const nextNumber = await getNextNumberAtomic(year);
+                                    updateData.number = nextNumber;
+                                    updateData.year = year;
+                                }
+                                
+                                await recordRef.update(updateData);
+                                showNotification("Dictamen actualizado correctamente", "success");
+                            }
+                        } else {
+                            const index = records.findIndex(record => record.id === editingId);
+                            
+                            if (index !== -1) {
+                                const data = records[index];
+                                let updateData = {
+                                    subject,
+                                    dictamenDate: formatDateForStorage(dictamenDate),
+                                    topic,
+                                    assignedUser,
+                                    firmaDefensor,
+                                    firmaDefensorSubrogante,
+                                    expediente,
+                                    content,
+                                    updatedAt: new Date().toISOString()
+                                };
+                                
+                                if (year !== data.year) {
+                                    const nextNumber = await getNextNumberAtomic(year);
+                                    updateData.number = nextNumber;
+                                    updateData.year = year;
+                                } else {
+                                    updateData.number = data.number;
+                                    updateData.year = data.year;
+                                }
+                                
+                                records[index] = { ...records[index], ...updateData };
+                                saveRecordsToLocalStorage();
+                                showNotification("Dictamen actualizado correctamente (modo local)", "success");
+                            }
+                        }
+                    }
+                    
+                    if (!firebaseInitialized) {
+                        updateYearFilter();
+                        updateStats();
+                        updateTrimestreStats();
+                        updateMonthlyStats();
+                        renderTable();
+                    }
+                    
+                    closeModal();
+                    recordForm.reset();
+                    
+                } catch (error) {
+                    console.error("Error guardando el registro:", error);
+                    showNotification("Error al guardar el registro. Por favor, intenta nuevamente.", "error");
+                } finally {
+                    saveBtnText.style.display = 'inline-block';
+                    saveBtnSpinner.style.display = 'none';
+                    saveBtn.disabled = false;
+                }
+            }
+            
+            // Eliminar un registro
+            async function deleteRecord(id) {
+                if (!confirm('¿Está seguro de que desea eliminar este dictamen? Esta acción no se puede deshacer.')) {
+                    return;
+                }
+
+                if (firebaseInitialized) {
+                    try {
+                        await db.collection("dictamenes").doc(id).delete();
+                        showNotification("Dictamen eliminado correctamente", "success");
+                    } catch (error) {
+                        console.error("Error eliminando:", error);
+                        showNotification("Error al eliminar el dictamen", "error");
+                        return;
+                    }
+                } else {
+                    const index = records.findIndex(record => record.id === id);
+                    if (index !== -1) {
+                        records.splice(index, 1);
+                        saveRecordsToLocalStorage();
+                        showNotification("Dictamen eliminado correctamente (modo local)", "success");
+                    } else {
+                        showNotification("Registro no encontrado", "error");
+                        return;
+                    }
+                }
+
+                // Actualizar la vista
+                updateYearFilter();
+                updateStats();
+                updateTrimestreStats();
+                updateMonthlyStats();
+                filterRecords(); // Re-aplica filtros y renderiza
+            }
+            
+            // Ver contenido completo de un dictamen
+            function viewContent(id) {
+                const record = records.find(record => record.id === id);
+                
+                if (record) {
+                    document.getElementById('contentNumber').textContent = `${record.number}/${record.year}`;
+                    document.getElementById('contentSubject').textContent = record.subject;
+                    document.getElementById('contentDictamenDate').textContent = formatDateForDisplay(record.dictamenDate);
+                    document.getElementById('contentTopic').textContent = record.topic || 'Sin especificar';
+                    document.getElementById('contentAssignedUser').textContent = record.assignedUser || 'No asignado';
+                    document.getElementById('contentExpediente').textContent = record.expediente || 'No especificado';
+                    
+                    let registroDisplay = 'No disponible';
+                    if (record.createdAt) {
+                        registroDisplay = formatDateTimeArgentina(record.createdAt);
+                    }
+                    document.getElementById('contentCreatedAt').textContent = registroDisplay;
+                    
+                    const firmaContainer = document.getElementById('firmaContainer');
+                    firmaContainer.innerHTML = '';
+                    
+                    if (record.firmaDefensor === 'No' && record.firmaDefensorSubrogante) {
+                        firmaContainer.innerHTML = `
+                            <p><strong>Firma Defensor Titular:</strong> No</p>
+                            <p><strong>Firma Defensor Subrogante:</strong> ${record.firmaDefensorSubrogante}</p>
+                        `;
+                    } else if (record.firmaDefensor) {
+                        firmaContainer.innerHTML = `<p><strong>Firma Defensor Titular:</strong> ${record.firmaDefensor}</p>`;
+                    }
+                    
+                    const formattedContent = record.content ? record.content.replace(/\n/g, '<br>') : '';
+                    document.getElementById('fullContent').innerHTML = formattedContent;
+                    
+                    contentModal.style.display = 'flex';
+                }
+            }
+            
+            // Editar un registro existente
+            function editRecord(id) {
+                const record = records.find(record => record.id === id);
+                
+                if (record) {
+                    editingId = id;
+                    document.getElementById('modalTitle').textContent = 'Editar Dictamen';
+                    document.getElementById('recordId').value = record.id;
+                    document.getElementById('subject').value = record.subject;
+                    
+                    dictamenDateInput.value = formatDateForDisplay(record.dictamenDate);
+                    dictamenDateInput.style.borderColor = 'var(--success-color)';
+                    
+                    topicSelect.value = record.topic || '';
+                    assignedUserSelect.value = record.assignedUser || '';
+                    expedienteInput.value = record.expediente || '';
+                    
+                    if (record.firmaDefensor === 'No') {
+                        firmaDefensorNo.checked = true;
+                        firmaDefensorSi.checked = false;
+                        subroganteField.classList.add('active');
+                        firmaDefensorSubroganteInput.value = record.firmaDefensorSubrogante || '';
+                    } else {
+                        firmaDefensorSi.checked = true;
+                        firmaDefensorNo.checked = false;
+                        subroganteField.classList.remove('active');
+                        firmaDefensorSubroganteInput.value = '';
+                    }
+                    
+                    if (record.createdAt) {
+                        createdAtContainer.style.display = 'block';
+                        createdAtDisplay.textContent = formatDateTimeArgentina(record.createdAt);
+                    } else {
+                        createdAtContainer.style.display = 'none';
+                    }
+                    
+                    contentTextarea.value = record.content || '';
+                    updateWordCount();
+                    contentPages = [];
+                    currentContentPage = 1;
+                    updateContentPagination();
+                    
+                    recordModal.style.display = 'flex';
+                }
+            }
+            
+            // Filtrar registros
+            function filterRecords() {
+                const searchText = searchInput.value.trim();
+                const selectedYear = yearFilter.value;
+                const selectedMonth = monthFilter.value;
+                const selectedTopic = topicFilter.value;
+                
+                const isNumberOnly = /^\d+$/.test(searchText);
+                
+                filteredRecords = records.filter(record => {
+                    const yearMatch = selectedYear === 'todos' || record.year.toString() === selectedYear;
+                    
+                    let monthMatch = selectedMonth === 'todos';
+                    if (selectedMonth !== 'todos') {
+                        const month = getMonthFromDate(record.dictamenDate);
+                        monthMatch = month.toString() === selectedMonth;
+                    }
+                    
+                    const topicMatch = selectedTopic === 'todos' || record.topic === selectedTopic;
+                    
+                    if (!searchText) {
+                        return yearMatch && monthMatch && topicMatch;
+                    }
+                    
+                    const searchLower = searchText.toLowerCase();
+                    
+                    if (isNumberOnly) {
+                        const numberMatch = record.number.toString() === searchText;
+                        if (numberMatch) return yearMatch && monthMatch && topicMatch && true;
+                    }
+                    
+                    const textMatch = 
+                        (record.subject && record.subject.toLowerCase().includes(searchLower)) ||
+                        (record.topic && record.topic.toLowerCase().includes(searchLower)) ||
+                        (record.assignedUser && record.assignedUser.toLowerCase().includes(searchLower)) ||
+                        (record.expediente && record.expediente.toLowerCase().includes(searchLower)) ||
+                        (record.content && record.content.toLowerCase().includes(searchLower)) ||
+                        (record.firmaDefensor && record.firmaDefensor.toLowerCase().includes(searchLower)) ||
+                        (record.firmaDefensorSubrogante && record.firmaDefensorSubrogante.toLowerCase().includes(searchLower)) ||
+                        (record.year && record.year.toString().toLowerCase().includes(searchLower)) ||
+                        (formatDateForDisplay(record.dictamenDate) && formatDateForDisplay(record.dictamenDate).toLowerCase().includes(searchLower)) ||
+                        (!isNumberOnly && record.number.toString().toLowerCase().includes(searchLower));
+                    
+                    return yearMatch && monthMatch && topicMatch && textMatch;
+                });
+                
+                currentPage = 1;
+                updateTrimestreStats();
+                updateMonthlyStats();
+                renderTable();
+            }
+            
+            // Ver todos los registros en el modal de contenido
+            function viewAllRecords() {
+                if (records.length === 0) {
+                    showNotification('No hay registros para mostrar.', 'error');
+                    return;
+                }
+
+                let allContent = '';
+
+                records.forEach(record => {
+                    const formattedContent = record.content ? record.content.replace(/\n/g, '<br>') : '';
+                    
+                    let registroDisplay = 'No disponible';
+                    if (record.createdAt) {
+                        registroDisplay = formatDateTimeArgentina(record.createdAt);
+                    }
+                    
+                    let firmaText = '';
+                    if (record.firmaDefensor === 'No' && record.firmaDefensorSubrogante) {
+                        firmaText = `<strong>Firma Defensor Titular:</strong> No<br><strong>Firma Defensor Subrogante:</strong> ${record.firmaDefensorSubrogante}`;
+                    } else if (record.firmaDefensor) {
+                        firmaText = `<strong>Firma Defensor Titular:</strong> ${record.firmaDefensor}`;
+                    }
+                    
+                    allContent += `
+                        <h3>Dictamen ${record.number}/${record.year}</h3>
+                        <p><strong>Asunto:</strong> ${record.subject}</p>
+                        <p><strong>Fecha de Dictamen:</strong> ${formatDateForDisplay(record.dictamenDate)}</p>
+                        <p><strong>Temática:</strong> ${record.topic || 'Sin especificar'}</p>
+                        <p><strong>Usuario asignado:</strong> ${record.assignedUser || 'No asignado'}</p>
+                        <p>${firmaText}</p>
+                        <p><strong>Expediente:</strong> ${record.expediente || 'No especificado'}</p>
+                        <p><strong>Registrado el:</strong> ${registroDisplay}</p>
+                        <p><strong>Contenido:</strong> ${formattedContent}</p>
+                        <hr>
+                    `;
+                });
+
+                document.getElementById('contentNumber').textContent = 'Todos';
+                document.getElementById('contentSubject').textContent = 'Lista completa de dictámenes';
+                document.getElementById('contentDictamenDate').textContent = '';
+                document.getElementById('contentTopic').textContent = '';
+                document.getElementById('contentAssignedUser').textContent = '';
+                document.getElementById('contentExpediente').textContent = '';
+                document.getElementById('contentCreatedAt').textContent = '';
+                document.getElementById('firmaContainer').innerHTML = '';
+                document.getElementById('fullContent').innerHTML = allContent;
+                contentModal.style.display = 'flex';
+            }
+            
+            // Inicializar la aplicación
+            init();
+        });
+    </script>
+</body>
+</html>
