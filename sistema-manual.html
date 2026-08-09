@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual de Uso · Sistema Digital Defensoría</title>
+  <!-- Google Fonts (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* ==== estilos base ==== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f2f6fc;
+      color: #1e293b;
+      padding: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .app-header {
+      max-width: 1400px;
+      margin: 0 auto 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #dce5ef;
+    }
+
+    /* título con estilo botón */
+    .titulo-boton {
+      flex: 1;
+      background: transparent;
+      border: 2px solid #2563eb;
+      border-radius: 60px;
+      padding: 0.6rem 1.8rem;
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+      color: #0b2b4a;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: background 0.2s, box-shadow 0.2s;
+      min-height: 3.5rem;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+      white-space: nowrap;
+    }
+
+    @media (max-width: 640px) {
+      .titulo-boton {
+        font-size: 1.2rem;
+        padding: 0.4rem 1rem;
+        white-space: normal;
+        flex: 1 1 100%;
+      }
+    }
+
+    /* Botón Video con efecto vidrio (glassmorphism) */
+    .btn-video {
+      background: rgba(249, 115, 22, 0.15);  /* naranja muy transparente */
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(249, 115, 22, 0.25);
+      box-shadow: 0 4px 20px rgba(249, 115, 22, 0.08);
+      color: #000;
+      padding: 0.6rem 1.4rem;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      transition: background 0.25s, transform 0.2s, box-shadow 0.25s;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .btn-video:hover {
+      background: rgba(249, 115, 22, 0.25);
+      box-shadow: 0 6px 28px rgba(249, 115, 22, 0.15);
+      transform: scale(1.02);
+    }
+
+    .btn-video i {
+      font-size: 1.2rem;
+    }
+
+    /* intro */
+    .intro {
+      max-width: 1400px;
+      margin: 0 auto 2rem;
+      background: white;
+      border-radius: 24px;
+      padding: 1.8rem 2.2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      border: 1px solid #e2eaf2;
+    }
+
+    .intro p {
+      font-size: 1.05rem;
+      color: #334155;
+    }
+
+    .intro strong {
+      color: #0b2b4a;
+    }
+
+    /* barra de herramientas */
+    .toolbar {
+      max-width: 1400px;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      background: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 60px;
+      border: 1px solid #e2eaf2;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .toolbar .search-box {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      align-items: center;
+      background: #f1f5f9;
+      border-radius: 40px;
+      padding: 0.3rem 1rem;
+      border: 1px solid #e2eaf2;
+      transition: border 0.2s;
+    }
+
+    .toolbar .search-box:focus-within {
+      border-color: #2563eb;
+      background: #ffffff;
+    }
+
+    .toolbar .search-box i {
+      color: #94a3b8;
+      margin-right: 0.6rem;
+    }
+
+    .toolbar .search-box input {
+      border: none;
+      background: transparent;
+      padding: 0.6rem 0;
+      font-size: 0.95rem;
+      width: 100%;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .toolbar .search-box input::placeholder {
+      color: #94a3b8;
+    }
+
+    .toolbar .btn-imprimir {
+      background: #1e293b;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.4rem;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .toolbar .btn-imprimir:hover {
+      background: #0f172a;
+    }
+
+    .toolbar .contador {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-left: auto;
+    }
+
+    /* Grid de tarjetas */
+    .grid {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 20px;
+      border: 1px solid #e2eaf2;
+      box-shadow: 0 4px 12px rgba(0, 20, 40, 0.04);
+      overflow: hidden;
+      transition: box-shadow 0.25s, transform 0.2s;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 24px rgba(0, 20, 40, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      padding: 1.2rem 1.5rem;
+      background: #fafcff;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      border-bottom: 1px solid #eef3f8;
+      transition: background 0.15s;
+    }
+
+    .card-header i {
+      font-size: 1.6rem;
+      color: #2563eb;
+      width: 2.2rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .card-header h3 {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #0b2b4a;
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    .card-header .acciones {
+      margin-left: auto;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .card-header .acciones .btn-print-card {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0.2rem 0.4rem;
+      border-radius: 8px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .card-header .acciones .btn-print-card:hover {
+      background: #eef3f8;
+      color: #0b2b4a;
+    }
+
+    .card-header .arrow {
+      color: #94a3b8;
+      transition: transform 0.3s;
+      font-size: 1rem;
+      margin-left: 0.2rem;
+    }
+
+    .card.abierto .card-header .arrow {
+      transform: rotate(180deg);
+    }
+
+    .card-body {
+      padding: 1.2rem 1.5rem 0.8rem;
+      flex: 1;
+    }
+
+    .card-body .resumen {
+      color: #475569;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-body .detalle {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.45s cubic-bezier(0.22, 1, 0.36, 1), padding 0.3s ease;
+      padding: 0;
+      color: #1e293b;
+    }
+
+    .card.abierto .card-body .detalle {
+      max-height: 3000px;
+      padding: 0.8rem 0 0.2rem;
+    }
+
+    .card-body .detalle ul,
+    .card-body .detalle ol {
+      margin: 0.3rem 0 0.8rem 1.4rem;
+    }
+
+    .card-body .detalle li {
+      margin-bottom: 0.25rem;
+      font-size: 0.92rem;
+    }
+
+    .card-body .detalle p {
+      margin-bottom: 0.6rem;
+      font-size: 0.92rem;
+    }
+
+    .card-body .detalle strong {
+      color: #0b2b4a;
+    }
+
+    .card-footer {
+      padding: 0.5rem 1.5rem 1.2rem;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      display: flex;
+      justify-content: flex-end;
+      border-top: 1px solid transparent;
+    }
+
+    .card.abierto .card-footer {
+      border-top-color: #eef3f8;
+    }
+
+    .card-footer i {
+      margin-right: 0.3rem;
+    }
+
+    .card.oculto {
+      display: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.2rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 1rem;
+      }
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .app-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .titulo-boton {
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+        white-space: normal;
+        flex: 1 1 100%;
+      }
+      .btn-video {
+        justify-content: center;
+        width: 100%;
+      }
+      .intro {
+        padding: 1.2rem;
+      }
+      .card-header {
+        padding: 1rem 1.2rem;
+      }
+      .card-header h3 {
+        font-size: 1rem;
+      }
+      .card-body {
+        padding: 1rem 1.2rem 0.5rem;
+      }
+      .toolbar {
+        border-radius: 30px;
+        padding: 0.6rem 1.2rem;
+        flex-wrap: wrap;
+      }
+      .toolbar .search-box {
+        min-width: 150px;
+        flex: 1 1 100%;
+      }
+      .toolbar .contador {
+        margin-left: 0;
+        width: 100%;
+        text-align: right;
+      }
+    }
+
+    .footer-note {
+      max-width: 1400px;
+      margin: 3rem auto 1rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: center;
+      border-top: 1px solid #dce5ef;
+      padding-top: 1.8rem;
+    }
+
+    /* estilos para impresión */
+    @media print {
+      body {
+        background: white;
+        padding: 0.5in;
+      }
+      .app-header,
+      .intro,
+      .toolbar,
+      .footer-note,
+      .card-header .acciones .btn-print-card,
+      .card-header .arrow {
+        display: none !important;
+      }
+      .grid {
+        display: block !important;
+        max-width: 100% !important;
+      }
+      .card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        margin-bottom: 1rem;
+        cursor: default !important;
+      }
+      .card .card-body .detalle {
+        max-height: none !important;
+        padding: 0.5rem 0 !important;
+        overflow: visible !important;
+      }
+      .card.abierto .card-body .detalle {
+        padding: 0.5rem 0 !important;
+      }
+      .card .card-footer {
+        border-top-color: #eef3f8 !important;
+      }
+      .card.oculto {
+        display: block !important;
+      }
+    }
+
+    .card.imprimir-individual {
+      border: 2px solid #2563eb !important;
+      box-shadow: 0 0 0 2px #2563eb !important;
+    }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="titulo-boton">
+    Sistema Digital · Manual de Uso
+  </div>
+  <a href="https://www.youtube.com/watch?v=fl6FMvBACps&t=147s" target="_blank" class="btn-video">
+    <i class="fab fa-youtube"></i> Video Presentación del Sistema Digital
+  </a>
+</header>
+
+<div class="intro">
+  <p><strong>Bienvenido al manual interactivo.</strong> Aquí encontrarás la descripción de todos los módulos del Sistema Digital de la Defensoría. <br>
+  Cada tarjeta representa un módulo. <strong>Haz clic en cualquier tarjeta</strong> para desplegar su información detallada. Todo el contenido está extraído de los documentos oficiales y redactado en un lenguaje claro y sencillo.</p>
+</div>
+
+<!-- Barra de herramientas -->
+<div class="toolbar">
+  <div class="search-box">
+    <i class="fas fa-search"></i>
+    <input type="text" id="filtroTexto" placeholder="Buscar por título o contenido..." oninput="filtrarCards()">
+  </div>
+  <button class="btn-imprimir" onclick="imprimirTodo()">
+    <i class="fas fa-print"></i> Imprimir manual
+  </button>
+  <span class="contador" id="contadorVisible">19 módulos</span>
+</div>
+
+<div class="grid" id="gridModulos">
+  <!-- ========== 1. EXPEDIENTES ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-folder-open"></i>
+      <h3>Expedientes</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Gestión de causas judiciales.</strong> Número, carátula, tipo de proceso, juzgado, prioridad, fechas, audiencias, vencimientos, diligencias, recursos, costas y observaciones.</p>
+      <div class="detalle">
+        <ul>
+          <li><strong>N° de expediente:</strong> solo números y "/", verificación de duplicados en base activa e histórica.</li>
+          <li><strong>Carátula:</strong> debe comenzar con letra mayúscula.</li>
+          <li><strong>Campos clave:</strong> Tipo de proceso, Juzgado, Prioridad (Alta/Media/Baja/Ninguna), Usuario asignado, Estado.</li>
+          <li><strong>Intervención:</strong> rol del defensor.</li>
+          <li><strong>Fechas:</strong> Inicio, Pase. Audiencias (múltiples), Cámara Gesell (con habilitación y campo NNyA).</li>
+          <li><strong>Vencimientos, Diligencias (con detalle), Recursos interpuestos.</strong></li>
+          <li><strong>Costas:</strong> múltiples fechas con indicador "a favor".</li>
+          <li><strong>Observaciones:</strong> editor de texto enriquecido.</li>
+          <li>Doble base de datos: <strong>Activa</strong> (trámite) e <strong>Histórica</strong> (finalizados/archivados). Los eventos se unifican para el calendario.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-database"></i> Base Activa + Histórica</div>
+  </div>
+
+  <!-- ========== 2. PARTES ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-users"></i>
+      <h3>Partes</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Registro de personas involucradas</strong> (clientes, partes). Datos personales, judiciales y adicionales.</p>
+      <div class="detalle">
+        <ul>
+          <li><strong>Datos personales:</strong> Apellido, Nombre, DNI, Domicilio, Ciudad, Teléfono, Email.</li>
+          <li><strong>Datos judiciales:</strong> Expte. más antiguo, Defensoría Patrocinante, Condición de parte, Defensoría MPC.</li>
+          <li><strong>Información adicional:</strong> NNyA involucrados, Situación médica, Situación laboral, Observaciones.</li>
+          <li>Búsqueda y filtros por cualquier campo. Vista detalle en modal, edición, impresión.</li>
+          <li><strong>KPIs:</strong> Total de registros, Activos, Inactivos.</li>
+          <li><strong>Validación:</strong> Detecta duplicados de Apellido+Nombre+DNI en tiempo real. Si DNI duplicado, bloquea el formulario.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-user-check"></i> Validación de duplicados</div>
+  </div>
+
+  <!-- ========== 3. EVENTOS Y CALENDARIO ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-calendar-alt"></i>
+      <h3>Eventos y Calendario</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Doble vista:</strong> tabla de eventos y calendario mensual. Tipos: audiencias, cámara Gesell, vencimientos, recursos, diligencias.</p>
+      <div class="detalle">
+        <ul>
+          <li><strong>Vista de Eventos (eventos.html):</strong> tabla con todos los eventos de ambas bases. Filtros por texto, fecha, tipo, proceso, trimestre, año. Panel izquierdo con reloj, eventos de hoy y estadísticas.</li>
+          <li><strong>Vista de Calendario (calendario-eventos.html):</strong> cuadrícula mensual con días destacados (actual, pasados, futuros) e indicadores de eventos. Modal al hacer clic en un día con todos los eventos (tipo, expte., juzgado, carátula, hora). Navegación mensual y botón al día actual.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-link"></i> Integración con expedientes</div>
+  </div>
+
+  <!-- ========== 4. MODELOS DE DOCUMENTOS ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-copy"></i>
+      <h3>Modelos de Documentos</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Galería de plantillas</strong> prediseñadas para oficios, escritos, actas, etc. Facilita la redacción estandarizada.</p>
+      <div class="detalle">
+        <p>Accede a modelos predefinidos que agilizan la creación de documentos recurrentes. Cada plantilla contiene la estructura y los campos típicos, solo debes completar los datos específicos.</p>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-file"></i> Plantillas listas para usar</div>
+  </div>
+
+  <!-- ========== 5. DOCUMENTOS DIGITALES ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <h3>Documentos Digitales</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Archivo general de documentos.</strong> Subir, buscar, descargar, editar y eliminar archivos (PDF, Word, etc.).</p>
+      <div class="detalle">
+        <ul>
+          <li>Lista completa con nombre, fecha de carga y tamaño.</li>
+          <li>Buscador para encontrar rápidamente un documento.</li>
+          <li>Subida de nuevos archivos desde tu computadora; almacenamiento en la nube (Cloudinary).</li>
+          <li>Descarga, edición (cambiar nombre/descripción) y eliminación.</li>
+          <li>Impresión del listado completo.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-cloud"></i> Almacenamiento en Cloudinary</div>
+  </div>
+
+  <!-- ========== 6. LIBROS DIGITALES ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-book"></i>
+      <h3>Libros Digitales</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Acceso directo</strong> a los cuatro libros principales: Escritos, Dictámenes, Oficios y Actas.</p>
+      <div class="detalle">
+        <p>Se presentan en forma de tarjetas. Al hacer clic en uno, se abre una vista de pantalla completa con el libro correspondiente (aplicación embebida). Botón "Volver" para regresar a la selección.</p>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-book-open"></i> Cuatro libros de registro</div>
+  </div>
+
+  <!-- ========== 7. ESCRITOS JUDICIALES ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-pen-fancy"></i>
+      <h3>Escritos Judiciales</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Registro de escritos presentados.</strong> Numeración automática por año, estadísticas trimestrales y mensuales.</p>
+      <div class="detalle">
+        <ul>
+          <li>Cabecera con total de escritos y distribución trimestral (Ene-Mar, Abr-Jun, etc.) y gráfico mensual.</li>
+          <li>Filtros por trimestre, año, tipo de escrito (demanda, recurso, patrocinio, etc.) y tipo de proceso (Familia, Civil, Penal, etc.).</li>
+          <li>Botón <strong>"Nuevo Escrito"</strong> con formulario para registrar tipo, proceso, usuario responsable y otros datos.</li>
+          <li>Exportación del listado filtrado a PDF para imprimir o compartir.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-print"></i> Exportación a PDF</div>
+  </div>
+
+  <!-- ========== 8. ACTAS ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-stamp"></i>
+      <h3>Actas</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Registro de actas</strong> de audiencias, reuniones o sesiones formales. Numeración automática por año.</p>
+      <div class="detalle">
+        <ul>
+          <li>Cabecera con total de actas y distribución trimestral y mensual.</li>
+          <li>Búsqueda en todos los campos (número, asunto, temática, contenido) y filtro por año.</li>
+          <li>Formulario de creación/edición: asunto, fecha del acta, temática, usuario asignado, firma del defensor (con opción de subrogante), secretario/a, expediente y contenido.</li>
+          <li>Contenido con contador de palabras y paginación para textos largos.</li>
+          <li>Vista detallada del acta completa.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-pencil-alt"></i> Contador de palabras</div>
+  </div>
+
+  <!-- ========== 9. OFICIOS ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-envelope"></i>
+      <h3>Oficios</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Registro de oficios.</strong> Numeración automática por año, estadísticas trimestrales y mensuales.</p>
+      <div class="detalle">
+        <ul>
+          <li>Cabecera con total de oficios, distribución trimestral y gráfico mensual.</li>
+          <li>Formulario: destinatario, fecha de remisión, fecha de respuesta (si existe), temática, usuario asignado, firma del defensor, secretario/a, expediente y contenido.</li>
+          <li>Búsqueda en todos los campos y filtros por año, mes y temática.</li>
+          <li>Vista detallada del oficio completo.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-mail-bulk"></i> Gestión de envíos</div>
+  </div>
+
+  <!-- ========== 10. DICTÁMENES ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-scale-balanced"></i>
+      <h3>Dictámenes</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Registro de dictámenes jurídicos.</strong> Numeración automática por año, búsqueda y filtros potentes.</p>
+      <div class="detalle">
+        <ul>
+          <li>Cabecera con total, trimestres y gráfico mensual.</li>
+          <li>Búsqueda en todos los campos y filtros por año, mes y temática.</li>
+          <li>Formulario: asunto, fecha del dictamen, temática, usuario, firma del defensor (con opción de subrogante), expediente y contenido.</li>
+          <li>Contenido con contador de palabras y paginación.</li>
+          <li>Vista detallada del dictamen completo.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-gavel"></i> Opiniones legales</div>
+  </div>
+
+  <!-- ========== 11. NOTIFICACIONES ELECTRÓNICAS ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-bell"></i>
+      <h3>Notificaciones Electrónicas</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Gestor de notificaciones</strong> judiciales y administrativas. Registro, búsqueda, edición y seguimiento.</p>
+      <div class="detalle">
+        <ul>
+          <li>Registro con fecha, número de expediente, carátula, juzgado, responsable, tipo (providencia, resolución, sentencia) y prioridad (baja, media, alta, urgente).</li>
+          <li>Filtros por texto, fecha, responsable, juzgado, tipo y prioridad en una sola línea.</li>
+          <li>Listado paginado (10 por página). Acciones: ver detalles, editar o imprimir.</li>
+          <li>Impresión del listado completo o ficha individual.</li>
+          <li>Almacenamiento en la nube con sincronización en tiempo real.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-sync-alt"></i> Sincronización en tiempo real</div>
+  </div>
+
+  <!-- ========== 12. PROTECCIÓN DE PERSONAS ADULTAS ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-user-plus"></i>
+      <h3>Protección de Adultos</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Casos de adultos mayores, capacidad, restricción e internación involuntaria.</strong> Cuatro tipos de casos.</p>
+      <div class="detalle">
+        <ul>
+          <li><strong>Tipos:</strong> Protección de Adulto Mayor, Determinación de Capacidad, Restricción de Capacidad, Internación Involuntaria (Art. 42 Ley de Salud Mental).</li>
+          <li>Formularios específicos con campos adaptados a la normativa (situación de vulnerabilidad, fundamentos, diagnóstico, etc.).</li>
+          <li>Dashboard con KPIs (total y por tipo). Búsqueda por nombre, DNI, tipo o estado (Abierto, En Proceso, Cerrado).</li>
+          <li>Seguimiento: historial con observaciones y fechas, posibilidad de eliminar seguimientos.</li>
+          <li>Vinculación con expedientes existentes y selección de organismos intervinientes (con posibilidad de agregar nuevos).</li>
+          <li>Impresión de detalle de caso o listado completo.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-heart"></i> Protección de derechos</div>
+  </div>
+
+  <!-- ========== 13. PROTECCIÓN DE NNyA ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-child"></i>
+      <h3>Protección de NNyA</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Casos de niños, niñas y adolescentes.</strong> Formulario con 9 pestañas y validaciones automáticas.</p>
+      <div class="detalle">
+        <ul>
+          <li><strong>9 pestañas:</strong> Datos personales, Medida y acogimiento, Información adicional, Información familiar, Medidas de protección, Garantías procesales, Requisitos RUFAAFA, Inhabilidades, Expediente y seguimiento.</li>
+          <li>Validaciones automáticas de requisitos legales (edad mínima, residencia en Misiones, etc.) con advertencias.</li>
+          <li>Dashboard con KPIs (total, abiertos, en proceso, cerrados). Filtros y paginación.</li>
+          <li>Seguimiento en línea de tiempo (agregar/eliminar). Vinculación con expedientes externos.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-shield-alt"></i> Protección integral</div>
+  </div>
+
+  <!-- ========== 14. DIRECTORIO DE ORGANISMOS ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-building"></i>
+      <h3>Directorio de Organismos</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Catálogo de instituciones</strong> (hospitales, ministerios, juzgados, municipalidades, etc.) con los que interactúa la defensoría.</p>
+      <div class="detalle">
+        <ul>
+          <li><strong>Categorías:</strong> Hospital, Ministerio, Centro Asistencial, Unidad de Traslado, Dirección Gubernamental, Fundación, Juzgado, Municipalidad, Otros.</li>
+          <li>Registro y edición con nombre, tipo, email, teléfono, persona de contacto y notas.</li>
+          <li>Búsqueda por texto o filtro por tipo. Impresión de listado por categoría, completo o ficha individual.</li>
+          <li>Accesos rápidos a <strong>Mapa de Ubicación</strong> y <strong>Policía de Misiones</strong>.</li>
+          <li>Sincronización en la nube; integración con módulos de protección (selección de organismo interviniente).</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-address-book"></i> Agenda de contactos</div>
+  </div>
+
+  <!-- ========== 15. MAPA JUDICIAL POSADAS Y GARUPÁ ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-map-marked-alt"></i>
+      <h3>Mapa Judicial Posadas y Garupá</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Mapa interactivo</strong> con zonas de influencia de las defensorías civiles y de familia en Posadas y Garupá.</p>
+      <div class="detalle">
+        <ul>
+          <li>Polígonos coloreados (Palacio de Justicia, Villa Cabello, Itaembé Miní, Itaembé Guazú, Garupá).</li>
+          <li>Popup al hacer clic con datos de la defensoría: número, titular, dirección, teléfono, secretarios.</li>
+          <li>Búsqueda por dirección (calle y altura) que ubica la ubicación y muestra la defensoría correspondiente.</li>
+          <li>Leyenda con zonas y colores para identificar jurisdicciones.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-location-dot"></i> Asignación geográfica</div>
+  </div>
+
+  <!-- ========== 16. MAPA DE CIRCUNSCRIPCIONES ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-map"></i>
+      <h3>Mapa de Circunscripciones</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Mapa provincial</strong> de Misiones con departamentos agrupados por las cinco circunscripciones judiciales.</p>
+      <div class="detalle">
+        <ul>
+          <li>Departamentos coloreados según circunscripción (1ª a 5ª).</li>
+          <li>Popup con detalles: circunscripción, cabecera (ciudad principal) y departamentos que la integran.</li>
+          <li>Búsqueda por ciudad o departamento que muestra la circunscripción.</li>
+          <li>Leyenda con colores y cabeceras.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-flag"></i> Circunscripciones judiciales</div>
+  </div>
+
+  <!-- ========== 17. GESTIÓN DE DILIGENCIADORES ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-truck"></i>
+      <h3>Gestión de Diligenciadores</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Registro de diligenciadores</strong> (notificadores) organizado por provincias. Incluye guía del BUS Federal.</p>
+      <div class="detalle">
+        <ul>
+          <li>Tarjetas por provincia con cantidad de diligenciadores. Al hacer clic, modal con dos pestañas: <strong>Requisitos BUS Federal</strong> (límite de hojas, firma digital, QR, particularidades) y <strong>Diligenciadores</strong> (nombre, domicilio, localidad, teléfono, email, tipo de ley, expediente).</li>
+          <li>CRUD completo dentro del modal. Filtros por nombre, localidad, email, tipo de ley y provincia.</li>
+          <li>Impresión por provincia o listado completo. Botón para mapa de ubicación.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-bus"></i> Notificaciones eficientes</div>
+  </div>
+
+  <!-- ========== 18. CONTROL DE PERSONAL EN FERIA JUDICIAL ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-calendar-check"></i>
+      <h3>Feria Judicial</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Asignación de personal</strong> durante ferias (Julio y Diciembre-Enero). Registro de días trabajados e inasistencias.</p>
+      <div class="detalle">
+        <ul>
+          <li>Registro de asignaciones: período, número de defensoría, agente, defensor de feria, encargado, fechas (cálculo automático de días).</li>
+          <li>Control de cumplimiento: días efectivos, inasistencias/licencias.</li>
+          <li>Métricas y gráficos (torta de cumplidos/inasistencias, reportes por empleado y por funcionario).</li>
+          <li>Tabla con registros, búsqueda, paginación, edición/eliminación. Impresión de reporte completo o tabla.</li>
+          <li>Validación de fechas dentro del período de feria.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-users-cog"></i> Gestión de guardias</div>
+  </div>
+
+  <!-- ========== 19. REGISTRO DE DÍAS CONCEDIDOS ========== -->
+  <div class="card" onclick="toggleCard(this)">
+    <div class="card-header">
+      <i class="fas fa-hourglass-half"></i>
+      <h3>Días Concedidos (Licencias)</h3>
+      <span class="acciones">
+        <button class="btn-print-card" onclick="event.stopPropagation(); imprimirCard(this)" title="Imprimir este módulo">
+          <i class="fas fa-print"></i>
+        </button>
+        <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="resumen"><strong>Registro de licencias, permisos y ausencias</strong> basado en el reglamento interno. Calendario visual y estadísticas.</p>
+      <div class="detalle">
+        <ul>
+          <li>Formulario: empleado, artículo del reglamento, cantidad de días, fecha de inicio y color identificador.</li>
+          <li>Calendario mensual con períodos coloreados por empleado y tooltips con nombres.</li>
+          <li>Validaciones inteligentes: alerta por registro duplicado y por solapamiento de períodos para el mismo empleado.</li>
+          <li>Estadísticas por usuario: gráfico de barras con total de días concedidos, desglose detallado. Filtros por rango de fechas, usuario, días mínimos, mes y año.</li>
+          <li>Tabla de registros con edición, búsqueda y paginación. Impresión de estadísticas o tabla.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-footer"><i class="fas fa-calendar-day"></i> Control de ausencias</div>
+  </div>
+</div>
+
+<div class="footer-note">
+  <i class="fas fa-cloud"></i> Todos los datos se almacenan en Firebase (nube) · Sincronización en tiempo real · Acceso con dominio @mpmisiones.gob.ar
+</div>
+
+<script>
+  // ---- toggle card ----
+  function toggleCard(cardElement) {
+    cardElement.classList.toggle('abierto');
+  }
+
+  // ---- filtro ----
+  function filtrarCards() {
+    const input = document.getElementById('filtroTexto');
+    const texto = input.value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.card');
+    let visibles = 0;
+    cards.forEach(card => {
+      const titulo = card.querySelector('.card-header h3')?.textContent?.toLowerCase() || '';
+      const resumen = card.querySelector('.card-body .resumen')?.textContent?.toLowerCase() || '';
+      const detalle = card.querySelector('.card-body .detalle')?.textContent?.toLowerCase() || '';
+      const footer = card.querySelector('.card-footer')?.textContent?.toLowerCase() || '';
+      const contenidoCompleto = titulo + ' ' + resumen + ' ' + detalle + ' ' + footer;
+      if (texto === '' || contenidoCompleto.includes(texto)) {
+        card.classList.remove('oculto');
+        visibles++;
+      } else {
+        card.classList.add('oculto');
+      }
+    });
+    document.getElementById('contadorVisible').textContent = visibles + ' módulos' + (visibles !== 1 ? '' : '');
+  }
+
+  // ---- imprimir todo ----
+  function imprimirTodo() {
+    window.print();
+  }
+
+  // ---- imprimir tarjeta individual ----
+  function imprimirCard(btn) {
+    const card = btn.closest('.card');
+    if (!card) return;
+    const clone = card.cloneNode(true);
+    clone.classList.add('abierto');
+    const printBtns = clone.querySelectorAll('.btn-print-card');
+    printBtns.forEach(b => b.remove());
+    const arrows = clone.querySelectorAll('.arrow');
+    arrows.forEach(a => a.remove());
+    const ventana = window.open('', '_blank', 'width=800,height=600');
+    if (!ventana) {
+      alert('Por favor, permita ventanas emergentes para imprimir.');
+      return;
+    }
+    const titulo = card.querySelector('.card-header h3')?.textContent || 'Módulo';
+    ventana.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>${titulo} - Manual Defensoría</title>
+        <style>
+          body { font-family: 'Inter', sans-serif; padding: 2rem; background: white; color: #1e293b; }
+          .card { border: 1px solid #ccc; border-radius: 16px; padding: 1.5rem; max-width: 800px; margin: 0 auto; }
+          .card-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; }
+          .card-header i { font-size: 1.8rem; color: #2563eb; }
+          .card-header h3 { font-size: 1.5rem; margin: 0; }
+          .card-body .resumen { font-weight: 500; margin-bottom: 0.5rem; }
+          .card-body .detalle { padding: 0.5rem 0; }
+          .card-body .detalle ul { margin: 0.5rem 0 0.8rem 1.4rem; }
+          .card-body .detalle li { margin-bottom: 0.25rem; }
+          .card-footer { margin-top: 1rem; color: #64748b; font-size: 0.85rem; border-top: 1px solid #e2eaf2; padding-top: 0.8rem; }
+          .oculto { display: none; }
+          .btn-print-card, .arrow { display: none !important; }
+        </style>
+        </head>
+        <body>
+          ${clone.outerHTML}
+          <p style="text-align:center;margin-top:2rem;color:#94a3b8;font-size:0.8rem;">Documento impreso desde el Manual de Uso · Sistema Digital Defensoría</p>
+        </body>
+      </html>
+    `);
+    ventana.document.close();
+    ventana.focus();
+    ventana.print();
+  }
+
+  // ---- inicializar contador ----
+  document.addEventListener('DOMContentLoaded', function() {
+    const total = document.querySelectorAll('.card').length;
+    document.getElementById('contadorVisible').textContent = total + ' módulos';
+  });
+</script>
+
+</body>
+</html>
