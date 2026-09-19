@@ -1,273 +1,573 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Mapa de Organismos - Precisión Posadas</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa de Organismos · Misiones, Argentina</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E8F3FB; --panel:#FFFFFF; --panel2:#F2F8FD; --line:#C9DEF0; --line-soft:#DCEAF5;
+  --ink:#0E2A3D; --mut:#4B6E86; --dim:#809CB0;
+  --clay:#1E88E5; --clay2:#4FA3E8; --leaf:#22B573; --teal:#00ACC1;
+  --gob:#F5B841; --sal:#FF7A6B; --edu:#62D9C9; --nat:#9CD65E; --tra:#8FB8FF;
+  --topo:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280' viewBox='0 0 280 280'%3E%3Cg fill='none' stroke='%231E88E5' stroke-opacity='.07'%3E%3Cpath d='M-20 40c50-24 90 20 150 2s70-28 170-12'/%3E%3Cpath d='M-20 96c56-26 96 16 156-2s64-24 164-8'/%3E%3Cpath d='M-20 152c46-20 100 22 152 0s78-26 168-10'/%3E%3Cpath d='M-20 208c52-24 88 18 148 0s84-24 172-10'/%3E%3Cpath d='M-20 264c58-26 94 14 154-4s70-22 166-8'/%3E%3C/g%3E%3C/svg%3E");
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  display:flex;height:100dvh;overflow:hidden;background:var(--bg);
+  color:var(--ink);font-family:'Instrument Sans',system-ui,sans-serif;
+}
+button{font-family:inherit;cursor:pointer}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#B9D4E8;border-radius:8px}
+::-webkit-scrollbar-thumb:hover{background:var(--clay)}
+::-webkit-scrollbar-track{background:transparent}
 
-    <style>
-        :root {
-            --gm-blue: #1a73e8;
-            --dark-blue: #00008B;
-            --glass-border: rgba(26, 115, 232, 0.5);
-            --sidebar-width: 320px;
-        }
+/* ============ PANEL LATERAL ============ */
+aside{
+  width:398px;flex:none;display:flex;flex-direction:column;z-index:50;
+  border-right:1px solid var(--line);
+  background:
+    radial-gradient(620px 320px at -12% -8%, rgba(30,136,229,.10), transparent 60%),
+    radial-gradient(520px 320px at 112% 112%, rgba(0,172,193,.08), transparent 60%),
+    var(--topo),
+    linear-gradient(180deg,#FFFFFF,#E8F3FB 70%);
+}
+.brand{padding:26px 22px 16px}
+.eyebrow{
+  display:flex;align-items:center;gap:9px;
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.18em;color:var(--clay);
+}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--leaf);animation:pulse 2.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,181,115,.5)}55%{box-shadow:0 0 0 7px rgba(34,181,115,0)}}
+h1{
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+  font-size:clamp(32px,3.2vw,42px);line-height:.98;letter-spacing:-.5px;margin-top:12px;
+  color:var(--ink);
+}
+h1 span{color:var(--clay)}
+.clockrow{display:flex;align-items:baseline;gap:10px;margin-top:16px}
+.clockrow .lbl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.18em;color:var(--dim)}
+#clock{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:var(--ink)}
+#dateStr{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--dim);text-transform:uppercase}
 
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Roboto', sans-serif; background: #f1f3f4; }
-        
-        /* Mapa siempre visible al 100% */
-        #map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+.searchwrap{position:relative;margin:4px 18px 12px}
+.searchwrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);pointer-events:none}
+#search{
+  width:100%;padding:12px 78px 12px 40px;font-size:14px;color:var(--ink);
+  background:#FFFFFF;border:1px solid var(--line);border-radius:12px;outline:none;
+  transition:border-color .2s, box-shadow .2s;font-family:inherit;
+}
+#search::placeholder{color:var(--dim)}
+#search:focus{border-color:var(--clay);box-shadow:0 0 0 3px rgba(30,136,229,.15)}
+#search::-webkit-search-cancel-button{display:none}
+kbd{
+  position:absolute;right:11px;top:50%;transform:translateY(-50%);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);
+  border:1px solid var(--line);border-radius:6px;padding:3px 7px;background:#F5FAFE;
+}
+#clear{
+  position:absolute;right:40px;top:50%;transform:translateY(-50%);
+  width:22px;height:22px;border-radius:50%;border:0;background:var(--line);color:var(--ink);
+  font-size:13px;line-height:1;display:grid;place-items:center;transition:background .15s;
+}
+#clear:hover{background:var(--clay);color:#fff}
 
-        /* Panel Izquierdo Flotante (Búsqueda) */
-        .sidebar-left {
-            position: absolute; top: 20px; left: 20px;
-            width: var(--sidebar-width);
-            max-height: calc(100vh - 40px);
-            background: white;
-            z-index: 1000;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+.chips{display:flex;flex-wrap:wrap;gap:7px;padding:0 18px 12px}
+.chip{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;
+  border:1px solid var(--line);background:#FFFFFF;color:var(--mut);
+  font-size:12px;font-weight:600;transition:all .18s;
+}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--c,var(--leaf))}
+.chip .n{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim)}
+.chip:hover{border-color:var(--clay);color:var(--ink);transform:translateY(-1px)}
+.chip.on{background:var(--clay);border-color:var(--clay);color:#fff}
+.chip.on .dot{background:#fff}
+.chip.on .n{color:rgba(255,255,255,.8)}
 
-        .search-box { display: flex; align-items: center; padding: 0 16px; min-height: 48px; border-bottom: 1px solid #f1f3f4; }
-        .search-box input { border: none; outline: none; flex: 1; font-size: 16px; font-family: 'Google Sans'; }
-        
-        #results-list { flex: 1; overflow-y: auto; background: white; }
-        .result-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f1f3f4; display: flex; align-items: center; }
-        .result-item:hover { background: #f8f9fa; }
-        .result-item .material-icons { margin-right: 12px; font-size: 20px; color: #70757a; }
-        .result-item div { font-size: 14px; font-weight: 500; color: #3c4043; }
+.meta-row{display:flex;justify-content:space-between;padding:2px 22px 8px;font-size:12px;color:var(--dim)}
+.meta-row b{color:var(--ink)}
+.meta-row .kb{font-family:'IBM Plex Mono',monospace;font-size:10px}
 
-        /* Panel Derecho Contenedor (Efecto Glass) */
-        .sidebar-right {
-            position: absolute; top: 20px; right: 20px;
-            width: var(--sidebar-width);
-            max-height: calc(100vh - 40px);
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 2px solid var(--glass-border);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+#list{flex:1;overflow-y:auto;padding:4px 12px 16px;display:flex;flex-direction:column;gap:6px;list-style:none}
+.item{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 12px;
+  background:transparent;border:1px solid transparent;border-radius:11px;color:inherit;
+  transition:background .18s, transform .18s, border-color .18s;
+  animation:fadeUp .4s both;animation-delay:var(--d);
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.item .bar{width:3px;align-self:stretch;border-radius:3px;background:var(--c);opacity:.55;transition:opacity .18s;flex:none}
+.it-body{flex:1;min-width:0}
+.it-name{display:block;font-size:14px;font-weight:600;color:var(--ink);line-height:1.3}
+.it-meta{display:block;font-size:11.5px;color:var(--dim);margin-top:2px}
+.go{opacity:0;transform:translateX(-5px);color:var(--clay);font-weight:700;transition:all .18s;flex:none}
+.item:hover{background:var(--panel2);transform:translateX(2px)}
+.item:hover .bar,.item.sel .bar{opacity:1}
+.item:hover .go,.item.sel .go{opacity:1;transform:none}
+.item.sel{background:linear-gradient(90deg,rgba(30,136,229,.14),rgba(30,136,229,.02));border-color:rgba(30,136,229,.5)}
+.item:focus-visible{outline:2px solid var(--clay);outline-offset:-2px}
+mark{background:rgba(30,136,229,.18);color:var(--clay);border-radius:3px;padding:0 1px}
 
-        .panel-header { padding: 20px; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
-        .panel-header h2 { 
-            margin: 0; 
-            font-family: 'Google Sans'; 
-            font-size: 20px; 
-            color: var(--dark-blue); 
-            text-align: center;
-        }
+#empty{padding:36px 20px;text-align:center;color:var(--mut);display:none}
+#empty .big{font-size:30px;margin-bottom:10px}
+#empty button{margin-top:14px;background:var(--clay);color:#fff;border:0;border-radius:9px;padding:9px 16px;font-weight:700;font-size:13px}
 
-        #panel-content { flex: 1; overflow-y: auto; padding: 10px 0; }
-        .empty-state { padding: 40px 20px; text-align: center; color: #70757a; font-size: 14px; }
+.side-foot{border-top:1px solid var(--line-soft);padding:14px 22px 16px}
+.fact{font-size:12px;color:var(--mut);line-height:1.55;min-height:38px;transition:opacity .45s}
+.fact::before{content:'✳ ';color:var(--clay)}
+.fact.swap{opacity:0}
 
-        .data-row { padding: 12px 20px; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
-        .label { font-size: 10px; font-weight: 700; color: var(--gm-blue); text-transform: uppercase; margin-bottom: 2px; }
-        .value { font-size: 14px; color: #202124; line-height: 1.4; word-break: break-word; }
+/* ============ ESCENARIO / MAPA ============ */
+#stage{flex:1;position:relative;background:#DCEAF5;min-width:0}
+#stage::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:4;
+  box-shadow:inset 0 0 0 1px rgba(30,136,229,.08),
+  inset 0 20px 44px -26px rgba(100,140,170,.20),
+  inset 0 -20px 44px -26px rgba(100,140,170,.20)}
+#map{position:absolute;inset:0;width:100%;height:100%;border:0;transition:opacity .45s ease}
 
-        .loading-line { height: 3px; width: 100%; background: rgba(0,0,0,0.05); position: relative; overflow: hidden; display: none; }
-        .loading-line::after { content: ""; position: absolute; left: -50%; width: 50%; height: 100%; background: var(--gm-blue); animation: load 1.2s infinite; }
-        @keyframes load { from { left: -50%; } to { left: 100%; } }
+#loader{position:absolute;inset:0;z-index:7;display:grid;place-items:center;
+  background:rgba(232,243,251,.65);backdrop-filter:blur(6px);transition:opacity .35s}
+#loader.hidden{opacity:0;pointer-events:none}
+.falls{display:flex;gap:5px;height:46px;justify-content:center}
+.falls i{width:5px;height:46px;border-radius:4px;background:linear-gradient(var(--teal),var(--leaf));
+  transform-origin:top;animation:fall 1.05s ease-in-out infinite}
+.falls i:nth-child(2){animation-delay:.12s}.falls i:nth-child(3){animation-delay:.24s}
+.falls i:nth-child(4){animation-delay:.36s}.falls i:nth-child(5){animation-delay:.48s}
+@keyframes fall{0%,100%{transform:scaleY(.15);opacity:.35}50%{transform:scaleY(1);opacity:1}}
+#loader p{margin-top:15px;text-align:center;font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--clay)}
 
-        /* Estilo del Pin */
-        .custom-pin { display: flex; align-items: center; justify-content: center; }
+.hud{position:absolute;top:16px;right:16px;z-index:5;display:flex;align-items:stretch;gap:3px;
+  padding:5px;border-radius:14px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);
+  border:1px solid var(--line);box-shadow:0 4px 16px rgba(30,80,130,.12)}
+.hud button,.hud a{
+  min-width:38px;height:38px;display:flex;align-items:center;justify-content:center;gap:7px;
+  background:transparent;border:0;border-radius:10px;color:var(--ink);font-size:16px;
+  text-decoration:none;transition:background .15s, transform .15s;
+}
+.hud button:hover,.hud a:hover{background:rgba(30,136,229,.10)}
+.hud button:active{transform:scale(.94)}
+#zlvl{display:grid;place-items:center;padding:0 7px;font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--clay);letter-spacing:.08em}
+.hud .sep{width:1px;background:var(--line);margin:7px 2px}
+#reset{padding:0 13px;font-size:12px;font-weight:600}
+#reset span{color:var(--clay)}
 
-        @media (max-width: 768px) {
-            .sidebar-left { width: calc(100% - 40px); max-height: 35vh; }
-            .sidebar-right { width: calc(100% - 40px); top: auto; bottom: 20px; max-height: 45vh; }
-        }
-    </style>
+#selcard{
+  position:absolute;left:16px;bottom:16px;z-index:6;width:min(372px,calc(100% - 32px));
+  background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
+  border:1px solid var(--line);border-left:3px solid var(--c,var(--clay));
+  border-radius:14px;padding:14px 16px;animation:cardIn .38s cubic-bezier(.2,.9,.3,1.15) both;
+  box-shadow:0 8px 28px rgba(30,80,130,.15);
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.sc-top{display:flex;align-items:center;gap:8px}
+.sc-dot{width:9px;height:9px;border-radius:50%;background:var(--c,var(--clay))}
+.sc-cat{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.16em;color:var(--mut);text-transform:uppercase}
+#scClose{margin-left:auto;width:24px;height:24px;border:0;border-radius:7px;background:rgba(30,136,229,.1);
+  color:var(--mut);font-size:12px;transition:background .15s}
+#scClose:hover{background:var(--clay);color:#fff}
+#selcard h2{font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;margin:7px 0 2px;line-height:1.15;color:var(--ink)}
+.sc-meta{font-size:12px;color:var(--mut)}
+.sc-coords{display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--clay);margin-top:7px}
+.sc-mode{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--dim);letter-spacing:.06em}
+.sc-desc{font-size:12.5px;color:var(--mut);line-height:1.55;margin-top:9px}
+.sc-link{display:inline-flex;align-items:center;gap:6px;margin-top:11px;font-size:12px;font-weight:700;
+  color:var(--teal);text-decoration:none}
+.sc-link:hover{text-decoration:underline}
+
+#drawerBtn{display:none;position:fixed;top:14px;left:14px;z-index:60;align-items:center;gap:9px;
+  padding:10px 14px;border-radius:12px;border:1px solid var(--line);
+  background:rgba(255,255,255,.92);backdrop-filter:blur(10px);color:var(--ink);font-size:13px;font-weight:600}
+#drawerBtn b{background:var(--clay);color:#fff;border-radius:999px;padding:1px 8px;
+  font-family:'IBM Plex Mono',monospace;font-size:11px}
+#backdrop{position:fixed;inset:0;background:rgba(14,42,61,.4);opacity:0;pointer-events:none;
+  transition:opacity .3s;z-index:45}
+#backdrop.show{opacity:1;pointer-events:auto}
+
+@media (max-width:880px){
+  aside{position:fixed;inset:0 auto 0 0;width:min(86vw,392px);transform:translateX(-104%);
+    transition:transform .32s cubic-bezier(.2,.8,.2,1);box-shadow:24px 0 60px rgba(30,80,130,.25)}
+  aside.open{transform:none}
+  #drawerBtn{display:flex}
+  #selcard{width:min(300px,calc(100% - 24px));left:12px;bottom:12px;padding:12px 14px}
+  #selcard h2{font-size:16px}
+  .hud{top:12px;right:12px}
+  #reset span{display:none}
+}
+</style>
 </head>
 <body>
 
-    <div id="map"></div>
+<button id="drawerBtn" aria-label="Abrir panel de organismos">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+  Organismos <b id="badge">0</b>
+</button>
+<div id="backdrop"></div>
 
-    <div class="sidebar-left">
-        <div class="search-box">
-            <span class="material-icons-outlined" style="margin-right: 12px; color: #70757a;">search</span>
-            <input type="text" id="busqueda" placeholder="Buscar organismos..." oninput="filtrar(this.value)">
-            <span class="material-icons-outlined" style="cursor:pointer" onclick="reset()">close</span>
-        </div>
-        <div id="loading" class="loading-line"></div>
-        <div id="results-list"></div>
+<!-- ══════════ PANEL ══════════ -->
+<aside id="panel" aria-label="Panel de organismos">
+  <header class="brand">
+    <div class="eyebrow"><span class="live-dot"></span> PROVINCIA DE MISIONES · REP. ARGENTINA</div>
+    <h1>Mapa de<br><span>Organismos</span></h1>
+    <div class="clockrow">
+      <span class="lbl">HORA LOCAL · UTC−3</span>
+      <span id="clock">--:--:--</span>
+      <span id="dateStr"></span>
     </div>
+  </header>
 
-    <div class="sidebar-right">
-        <div class="panel-header">
-            <h2>Mapa de Organismos</h2>
-        </div>
-        <div id="panel-content">
-            <div class="empty-state">
-                <span class="material-icons" style="font-size: 48px; opacity: 0.3;">info</span>
-                <p>Seleccione un organismo en la lista o el mapa para ver los detalles.</p>
-            </div>
-        </div>
+  <div class="searchwrap">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#809CB0" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="search" type="search" placeholder="Filtrar organismos…" autocomplete="off">
+    <button id="clear" hidden aria-label="Limpiar">×</button>
+    <kbd>/</kbd>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="meta-row">
+    <span><b id="count">0</b> organismos en vista</span>
+    <span class="kb">↑↓ navegar · ⏎ abrir</span>
+  </div>
+
+  <ul id="list"></ul>
+
+  <div id="empty">
+    <div class="big">🍃</div>
+    <p>Sin resultados para tu búsqueda.</p>
+    <button id="emptyReset">Limpiar filtros</button>
+  </div>
+
+  <footer class="side-foot">
+    <p id="fact" class="fact"></p>
+  </footer>
+</aside>
+
+<!-- ══════════ MAPA ══════════ -->
+<main id="stage">
+  <iframe id="map" title="Mapa de organismos de Misiones" referrerpolicy="no-referrer-when-downgrade" allow="fullscreen"></iframe>
+
+  <div id="loader">
+    <div>
+      <div class="falls"><i></i><i></i><i></i><i></i><i></i></div>
+      <p>Posicionando en el mapa…</p>
     </div>
+  </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCpPdY984mCYWQodeqA6ZVXFxedalExc34",
-            authDomain: "repositorio-documentos.firebaseapp.com",
-            databaseURL: "https://repositorio-documentos-default-rtdb.firebaseio.com",
-            projectId: "repositorio-documentos",
-            storageBucket: "repositorio-documentos.firebasestorage.app",
-            messagingSenderId: "359488594361",
-            appId: "1:359488594361:web:421264bbc3c5f8f7c01668"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+  <div class="hud">
+    <button id="zOut" title="Alejar" aria-label="Alejar">−</button>
+    <div id="zlvl">Z 8</div>
+    <button id="zIn" title="Acercar" aria-label="Acercar">+</button>
+    <div class="sep"></div>
+    <button id="reset" title="Volver a la vista provincial">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      <span>Misiones</span>
+    </button>
+    <button id="fs" title="Pantalla completa" aria-label="Pantalla completa">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+    </button>
+    <a id="gmaps" target="_blank" rel="noopener" title="Abrir en Google Maps">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+    </a>
+  </div>
 
-        let organismos = [];
-        const boundsMisiones = [[-28.15, -56.3], [-25.5, -53.4]];
-        const map = L.map('map', { zoomControl: false }).fitBounds(boundsMisiones);
-        
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
-        const markerGroup = L.layerGroup().addTo(map);
+  <div id="selcard" hidden></div>
+</main>
 
-        async function cargarBordeMisiones() {
-            try {
-                const url = "https://nominatim.openstreetmap.org/search?state=Misiones&country=Argentina&format=json&polygon_geojson=1&limit=1";
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data && data.length > 0 && data[0].geojson) {
-                    // Guardamos la capa en una variable para obtener sus límites
-                    const capaMisiones = L.geoJSON(data[0].geojson, {
-                        style: { color: "#00008B", weight: 4, opacity: 0.8, fillOpacity: 0 },
-                        interactive: false
-                    }).addTo(map);
-                    
-                    // Ajustamos el mapa para que encuadre perfectamente el polígono de Misiones
-                    map.fitBounds(capaMisiones.getBounds()); 
-                }
-            } catch (e) {}
-        }
-        cargarBordeMisiones();
+<!-- ══════════ FIREBASE ══════════ -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-        db.ref('organismos').on('value', (snap) => {
-            organismos = [];
-            snap.forEach(h => { organismos.push({ id: h.key, ...h.val() }); });
-            mostrarLista(organismos);
-        });
+<script>
+(()=>{
+"use strict";
+const $=s=>document.querySelector(s);
 
-        function mostrarLista(data) {
-            const list = document.getElementById('results-list');
-            list.innerHTML = data.map(o => `
-                <div class="result-item" onclick="ubicarYMostrar('${o.id}')">
-                    <span class="material-icons">business</span>
-                    <div>${o.nombre || 'Sin nombre'}</div>
-                </div>
-            `).join('');
-        }
+/* ─────────── FIREBASE ─────────── */
+const firebaseConfig = {
+  apiKey: "AIzaSyCpPdY984mCYWQodeqA6ZVXFxedalExc34",
+  authDomain: "repositorio-documentos.firebaseapp.com",
+  databaseURL: "https://repositorio-documentos-default-rtdb.firebaseio.com",
+  projectId: "repositorio-documentos",
+  storageBucket: "repositorio-documentos.firebasestorage.app",
+  messagingSenderId: "359488594361",
+  appId: "1:359488594361:web:421264bbc3c5f8f7c01668"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-        function filtrar(val) {
-            const term = val.toLowerCase();
-            const filtered = organismos.filter(o => 
-                (o.nombre && o.nombre.toLowerCase().includes(term)) || 
-                (o.direccion && o.direccion.toLowerCase().includes(term))
-            );
-            mostrarLista(filtered);
-        }
+/* ─────────── ESTADO ─────────── */
+const PALETTE=['#F5B841','#FF7A6B','#62D9C9','#9CD65E','#8FB8FF','#1E88E5','#00ACC1','#B794F4','#F0764B','#22B573'];
+let CATS={};
+let DATA=[];
+let dataLoaded=false;
 
-        async function ubicarYMostrar(id) {
-            document.getElementById('loading').style.display = "block";
-            const org = organismos.find(o => o.id === id);
-            let textoBusqueda = org.direccion || org.Notas || '';
-            
-            if (textoBusqueda.toLowerCase().includes("posadas")) {
-                textoBusqueda = `${org.nombre}, Posadas, Misiones, Argentina`;
-            } else {
-                textoBusqueda = `${org.nombre}, ${textoBusqueda}, Misiones, Argentina`;
-            }
+const PROV={lat:-26.85, lng:-54.85, z:8};
+const state={query:'', cat:'all', z:PROV.z, sel:null};
 
-            try {
-                const viewbox = "-56.3,-25.5,-53.4,-28.15";
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(textoBusqueda)}&viewbox=${viewbox}&bounded=1&limit=1`;
-                const res = await fetch(url);
-                const data = await res.json();
+const map=$('#map'), loader=$('#loader'), list=$('#list'), empty=$('#empty'),
+      card=$('#selcard'), chipsBox=$('#chips'), search=$('#search'), clearBtn=$('#clear');
 
-                if (data.length > 0) {
-                    const pos = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-                    dibujarPin(pos, org);
-                } else {
-                    const fallbackUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(org.nombre + ", Misiones")}&limit=1`;
-                    const resF = await fetch(fallbackUrl);
-                    const dataF = await resF.json();
-                    if(dataF.length > 0) {
-                        dibujarPin([parseFloat(dataF[0].lat), parseFloat(dataF[0].lon)], org);
-                    } else {
-                        rellenarPanel(org);
-                    }
-                }
-            } catch (e) { console.error(e); }
-            document.getElementById('loading').style.display = "none";
-        }
+/* ─────────── NORMALIZACIÓN ─────────── */
+const foldChar=c=>String(c).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const norm=s=>[...String(s)].map(foldChar).join('');
+const slug=s=>norm(s).replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'otros';
+const pick=(o,keys)=>{ for(const k of keys){ const v=o[k]; if(v!=null && String(v).trim()!=='') return String(v).trim(); } return ''; };
+const num=v=>{ const n=parseFloat(String(v).replace(',','.')); return Number.isFinite(n)?n:null; };
 
-        function dibujarPin(pos, org) {
-            markerGroup.clearLayers();
-            map.flyTo(pos, 16);
-            const marker = L.marker(pos, {
-                icon: L.divIcon({
-                    className: 'custom-pin',
-                    html: `<span class="material-icons" style="color:#ea4335; font-size:38px; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4))">place</span>`,
-                    iconSize: [38, 38], iconAnchor: [19, 38]
-                })
-            }).addTo(markerGroup);
-            rellenarPanel(org);
-            marker.on('click', () => rellenarPanel(org));
-        }
+function normalize(id,o){
+  const nombre    = pick(o,['nombre','Nombre','name','Name']) || 'Sin nombre';
+  const direccion = pick(o,['direccion','Dirección','Direccion','dirección','domicilio','Domicilio','address','Address']);
+  const notas     = pick(o,['Notas','notas','descripcion','Descripción','Descripcion','descripción','desc','Desc','observaciones','Observaciones','detalle','Detalle']);
+  const localidad = pick(o,['localidad','Localidad','municipio','Municipio','ciudad','Ciudad','departamento','Departamento']);
+  const catRaw    = pick(o,['categoria','Categoría','Categoria','categoría','tipo','Tipo','rubro','Rubro','area','Area','Área','área','sector','Sector']);
 
-        function rellenarPanel(org) {
-            const content = document.getElementById('panel-content');
-            let html = "";
-            const excluir = ['id', 'lat', 'lng', 'posicion'];
+  const catLabel  = catRaw || 'Organismos';
+  const cat       = slug(catLabel);
 
-            // Título principal dentro del contenido para enfatizar el nombre
-            html += `<div class="data-row" style="background: rgba(26, 115, 232, 0.05)"><div class="label">Organismo</div><div class="value" style="font-weight:700; font-size:16px;">${org.nombre}</div></div>`;
+  const lat = num(pick(o,['lat','Lat','latitude','latitud','Latitud']));
+  const lng = num(pick(o,['lng','Lng','lon','Lon','long','Long','longitude','longitud','Longitud']));
+  const hasPin = lat!=null && lng!=null;
 
-            Object.keys(org).forEach(key => {
-                if (!excluir.includes(key.toLowerCase()) && key.toLowerCase() !== 'nombre' && org[key] && org[key] !== "") {
-                    html += `
-                        <div class="data-row">
-                            <div class="label">${key.replace(/_/g, ' ')}</div>
-                            <div class="value">${org[key]}</div>
-                        </div>`;
-                }
-            });
-            content.innerHTML = html;
-        }
+  const q = [nombre, direccion, localidad, 'Misiones', 'Argentina'].filter(Boolean).join(', ');
 
-        function reset() {
-            document.getElementById('busqueda').value = "";
-            mostrarLista(organismos);
-            markerGroup.clearLayers();
-            document.getElementById('panel-content').innerHTML = `
-                <div class="empty-state">
-                    <span class="material-icons" style="font-size: 48px; opacity: 0.3;">info</span>
-                    <p>Seleccione un organismo en la lista o el mapa para ver los detalles.</p>
-                </div>`;
-            map.flyToBounds(boundsMisiones);
-        }
-    </script>
+  return {
+    id,
+    name: nombre,
+    muni: localidad || 'Misiones',
+    cat, catLabel,
+    mode: hasPin ? 'pin' : 'search',
+    lat, lng,
+    z: hasPin ? 16 : (localidad ? 14 : 13),
+    q,
+    desc: notas || direccion || 'Organismo registrado en el repositorio provincial.',
+    raw: o,
+    hay: norm([nombre, direccion, notas, localidad, catLabel].join(' · '))
+  };
+}
+
+/* ─────────── UTILIDADES ─────────── */
+function indexOfFold(text,query){
+  const fq=norm(query); if(!fq) return null;
+  const chars=[...String(text)]; let i=0,start=-1;
+  for(let t=0;t<chars.length;t++){
+    const f=foldChar(chars[t]);
+    if(f&&f[0]===fq[i]){ if(start<0)start=t; i++; if(i===fq.length)return[start,t+1]; }
+    else{ i=0;start=-1; if(f&&f[0]===fq[0]){start=t;i=1;} }
+  }
+  return null;
+}
+function hi(text,q){
+  if(!q) return text;
+  const m=indexOfFold(text,q); if(!m) return text;
+  return text.slice(0,m[0])+'<mark>'+text.slice(m[0],m[1])+'</mark>'+text.slice(m[1]);
+}
+const coordTxt=it=>(it.lat!=null && it.lng!=null)
+  ? `${Math.abs(it.lat).toFixed(4)}° S · ${Math.abs(it.lng).toFixed(4)}° O`
+  : `≈ ${it.muni}, Misiones`;
+const gmapsUrl=it=>{
+  if(!it) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('Provincia de Misiones, Argentina')}`;
+  const parts=[it.name, it.muni!=='Misiones'?it.muni:null, 'Misiones','Argentina'].filter(Boolean);
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parts.join(', '))}`;
+};
+
+/* ─────────── MAPA ─────────── */
+function srcFor(){
+  const it=state.sel;
+  if(it){
+    const q = (it.mode==='pin' && it.lat!=null)
+      ? `${it.lat},${it.lng}`
+      : (it.q || `${it.name}, Misiones`);
+    return `https://www.google.com/maps?q=${encodeURIComponent(q)}&z=${state.z}&hl=es&output=embed`;
+  }
+  return `https://www.google.com/maps?ll=${PROV.lat},${PROV.lng}&z=${state.z}&hl=es&output=embed`;
+}
+function loadMap(){
+  const src=srcFor();
+  $('#zlvl').textContent='Z '+state.z;
+  $('#gmaps').href=gmapsUrl(state.sel);
+  if(src===map.dataset.src){ loader.classList.add('hidden'); map.style.opacity=1; return; }
+  map.dataset.src=src;
+  loader.classList.remove('hidden'); map.style.opacity=.15;
+  map.src=src;
+}
+map.addEventListener('load',()=>{ loader.classList.add('hidden'); map.style.opacity=1; });
+
+$('#zIn').onclick =()=>{ state.z=Math.min(18,state.z+1); loadMap(); };
+$('#zOut').onclick=()=>{ state.z=Math.max(4, state.z-1); loadMap(); };
+$('#fs').onclick  =()=>{ document.fullscreenElement ? document.exitFullscreen() : $('#stage').requestFullscreen(); };
+$('#reset').onclick=clearSel;
+
+function clearSel(){
+  state.sel=null; state.z=PROV.z; loadMap();
+  card.hidden=true;
+  list.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));
+}
+
+/* ─────────── FICHA ─────────── */
+function fillCard(it){
+  const c=CATS[it.cat]||{label:it.catLabel,color:'#1E88E5'};
+  card.style.setProperty('--c',c.color);
+  card.innerHTML=`
+    <div class="sc-top"><span class="sc-dot"></span><span class="sc-cat">${c.label} · ${it.muni}</span>
+      <button id="scClose" aria-label="Cerrar">✕</button></div>
+    <h2>${it.name}</h2>
+    <span class="sc-coords">${coordTxt(it)} <span class="sc-mode">${it.mode==='pin'?'◉ PIN EXACTO':'◎ GEOCODIFICACIÓN GOOGLE'}</span></span>
+    <p class="sc-desc">${it.desc}</p>
+    <a class="sc-link" href="${gmapsUrl(it)}" target="_blank" rel="noopener">Abrir en Google Maps
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>`;
+  card.hidden=false;
+  card.style.animation='none'; void card.offsetWidth; card.style.animation='';
+  $('#scClose').onclick=clearSel;
+}
+
+/* ─────────── LISTADO + FILTROS ─────────── */
+function filtered(){
+  const q=norm(state.query.trim());
+  return DATA
+    .filter(it=>(state.cat==='all'||it.cat===state.cat) && (!q || it.hay.includes(q)))
+    .sort((a,b)=>a.name.localeCompare(b.name,'es'));
+}
+function renderList(){
+  if(!dataLoaded){
+    list.innerHTML='<li style="padding:24px 16px;color:var(--dim);font-size:13px;text-align:center">Cargando organismos…</li>';
+    empty.style.display='none'; $('#count').textContent='—'; return;
+  }
+  const items=filtered(), q=state.query.trim();
+  $('#count').textContent=items.length;
+  empty.style.display=items.length?'none':'block';
+  list.innerHTML=items.map((it,i)=>{
+    const c=CATS[it.cat]||{color:'#1E88E5',label:it.catLabel};
+    return `<li><button class="item${state.sel&&state.sel.id===it.id?' sel':''}" data-id="${it.id}" style="--c:${c.color};--d:${Math.min(i*26,420)}ms">
+      <span class="bar"></span>
+      <span class="it-body">
+        <span class="it-name">${hi(it.name,q)}</span>
+        <span class="it-meta">${hi(it.muni,q)} · ${c.label}</span>
+      </span>
+      <span class="go">→</span></button></li>`;
+  }).join('');
+}
+function select(it){
+  state.sel=it; state.z=it.z;
+  loadMap(); fillCard(it);
+  list.querySelectorAll('.item').forEach(e=>e.classList.toggle('sel',+e.dataset.id===it.id));
+  if(window.innerWidth<=880) closeDrawer();
+}
+list.addEventListener('click',e=>{
+  const b=e.target.closest('.item'); if(!b) return;
+  const it=DATA.find(d=>d.id===b.dataset.id); if(it) select(it);
+});
+list.addEventListener('keydown',e=>{
+  const items=[...list.querySelectorAll('.item')], i=items.indexOf(document.activeElement);
+  if(i<0) return;
+  if(e.key==='ArrowDown'){ e.preventDefault(); (items[i+1]||items[0]).focus(); }
+  if(e.key==='ArrowUp'){ e.preventDefault(); (items[i-1]||items.at(-1)).focus(); }
+});
+
+/* ─────────── BÚSQUEDA + CHIPS ─────────── */
+search.addEventListener('input',()=>{
+  state.query=search.value; clearBtn.hidden=!search.value; renderList();
+});
+clearBtn.onclick=()=>{ search.value=''; state.query=''; clearBtn.hidden=true; renderList(); search.focus(); };
+$('#emptyReset').onclick=clearBtn.onclick;
+
+function renderChips(){
+  const counts={all:DATA.length};
+  DATA.forEach(d=>counts[d.cat]=(counts[d.cat]||0)+1);
+  let html=`<button class="chip${state.cat==='all'?' on':''}" data-cat="all"><span class="dot"></span>Todos <span class="n">${counts.all}</span></button>`;
+  for(const k in CATS){
+    html+=`<button class="chip${state.cat===k?' on':''}" data-cat="${k}" style="--c:${CATS[k].color}"><span class="dot"></span>${CATS[k].label} <span class="n">${counts[k]||0}</span></button>`;
+  }
+  chipsBox.innerHTML=html;
+}
+chipsBox.addEventListener('click',e=>{
+  const c=e.target.closest('.chip'); if(!c) return;
+  state.cat=c.dataset.cat; renderChips(); renderList();
+});
+
+/* ─────────── TECLADO ─────────── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='/' && document.activeElement!==search){ e.preventDefault(); search.focus(); }
+  if(e.key==='Escape'){
+    if(document.activeElement===search){ search.blur(); }
+    closeDrawer();
+  }
+  if(e.key==='ArrowDown' && document.activeElement===search){ e.preventDefault(); list.querySelector('.item')?.focus(); }
+});
+
+/* ─────────── RELOJ Y DATOS VIVOS ─────────── */
+const fmtT=new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+const fmtD=new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',weekday:'short',day:'2-digit',month:'short'});
+$('#dateStr').textContent=fmtD.format(new Date());
+setInterval(()=>$('#clock').textContent=fmtT.format(new Date()),1000);
+$('#clock').textContent=fmtT.format(new Date());
+
+const FACTS=[
+ 'La selva Paranaense misionera concentra alrededor del 35 % de la biodiversidad argentina en menos del 1 % del territorio.',
+ 'El color colorado de la tierra se debe a la laterita, rica en óxidos de hierro.',
+ 'Las Cataratas del Iguazú fueron elegidas una de las Siete Maravillas Naturales del Mundo en 2011.',
+ 'Misiones produce cerca del 80 % de la yerba mate del país.',
+ 'Aproximadamente el 36 % del territorio provincial sigue cubierto por selva nativa.',
+ 'Las ruinas de San Ignacio Miní son Patrimonio Mundial de la UNESCO desde 1984.',
+ 'La provincia limita con dos países: Paraguay al norte y Brasil al este.',
+];
+let fi=0; const factEl=$('#fact'); factEl.textContent=FACTS[0];
+setInterval(()=>{ factEl.classList.add('swap');
+  setTimeout(()=>{ fi=(fi+1)%FACTS.length; factEl.textContent=FACTS[fi]; factEl.classList.remove('swap'); },450);
+},7000);
+
+/* ─────────── DRAWER MÓVIL ─────────── */
+const panel=$('#panel'), bd=$('#backdrop');
+function closeDrawer(){ panel.classList.remove('open'); bd.classList.remove('show'); }
+$('#drawerBtn').onclick=()=>{ panel.classList.add('open'); bd.classList.add('show'); };
+bd.onclick=closeDrawer;
+
+/* ─────────── CARGA FIREBASE ─────────── */
+db.ref('organismos').on('value', snap=>{
+  DATA=[];
+  const catSeen=new Map();
+
+  snap.forEach(h=>{
+    const o=h.val()||{};
+    const it=normalize(h.key,o);
+    DATA.push(it);
+    if(!catSeen.has(it.cat)) catSeen.set(it.cat,it.catLabel);
+  });
+
+  CATS={}; let i=0;
+  catSeen.forEach((label,key)=>{ CATS[key]={label, color:PALETTE[i++ % PALETTE.length]}; });
+
+  dataLoaded=true;
+  if(state.cat!=='all' && !CATS[state.cat]) state.cat='all';
+
+  if(state.sel){
+    const found=DATA.find(d=>d.id===state.sel.id);
+    if(found){ state.sel=found; fillCard(found); }
+    else { state.sel=null; card.hidden=true; }
+  }
+
+  $('#badge').textContent=DATA.length;
+  renderChips(); renderList();
+}, err=>{
+  console.error('Firebase:',err);
+  dataLoaded=true;
+  list.innerHTML='<li style="padding:24px 16px;color:var(--mut);font-size:13px;text-align:center">No se pudo cargar el listado.</li>';
+  empty.style.display='none';
+  $('#count').textContent='0';
+  $('#badge').textContent='0';
+});
+
+/* ─────────── INICIO ─────────── */
+renderChips(); renderList(); loadMap();
+})();
+</script>
 </body>
 </html>
