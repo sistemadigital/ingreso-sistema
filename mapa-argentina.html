@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Panel Federal de Diligenciadores</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
+
     <style>
         :root {
-            --dark-blue: #0d1b3e; 
+            --dark-blue: #0d1b3e;
             --celeste-argentina: #74ACDF;
             --gm-blue: #1a73e8;
             --province-panel-width: 220px;
@@ -22,7 +19,7 @@
         }
 
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Roboto', sans-serif; background: #f1f3f4; }
-        
+
         .main-container {
             position: absolute;
             top: 10px; left: 10px; right: 10px; bottom: 10px;
@@ -34,6 +31,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
+        /* ══════════ SIDEBAR PROVINCIAS ══════════ */
         .province-sidebar {
             width: var(--province-panel-width);
             background: #f8f9fa;
@@ -41,6 +39,7 @@
             display: flex;
             flex-direction: column;
             z-index: 1001;
+            flex: none;
         }
         .province-sidebar h3 {
             padding: 20px 15px; font-size: 13px; color: var(--dark-blue);
@@ -55,6 +54,7 @@
         .province-item:hover { background: #e8f0fe; }
         .province-item.active { background: var(--dark-blue); color: white; font-weight: 700; }
 
+        /* ══════════ SIDEBAR BÚSQUEDA ══════════ */
         .search-sidebar {
             width: var(--search-panel-width);
             background: white;
@@ -62,25 +62,111 @@
             display: flex;
             flex-direction: column;
             z-index: 1000;
+            flex: none;
         }
         .search-box { padding: 15px; }
         .search-box input {
             width: 100%; padding: 12px; border: 1px solid #ddd;
             border-radius: 8px; outline: none; box-sizing: border-box;
+            font-family: inherit; font-size: 14px;
+        }
+        .search-box input:focus { border-color: var(--gm-blue); box-shadow: 0 0 0 3px rgba(26,115,232,.15); }
+        #results-list { flex: 1; overflow-y: auto; }
+
+        /* ══════════ ESCENARIO / MAPA ══════════ */
+        .map-stage {
+            flex: 1;
+            position: relative;
+            background: #DCEAF5;
+            min-width: 0;
+            overflow: hidden;
+        }
+        #gmap {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            transition: opacity .4s ease;
+        }
+        .map-stage::after {
+            content: '';
+            position: absolute; inset: 0;
+            pointer-events: none;
+            z-index: 3;
+            box-shadow: inset 0 0 0 1px rgba(13,27,62,.08);
         }
 
-        #map { flex: 1; position: relative; z-index: 1; background: #aad3df; }
+        /* Loader */
+        .map-loader {
+            position: absolute; inset: 0; z-index: 6;
+            display: grid; place-items: center;
+            background: rgba(241,243,244,.72);
+            backdrop-filter: blur(5px);
+            transition: opacity .35s ease;
+        }
+        .map-loader.hidden { opacity: 0; pointer-events: none; }
+        .falls { display: flex; gap: 5px; height: 44px; justify-content: center; }
+        .falls i {
+            width: 5px; height: 44px; border-radius: 4px;
+            background: linear-gradient(var(--celeste-argentina), var(--dark-blue));
+            transform-origin: top;
+            animation: fall 1.05s ease-in-out infinite;
+        }
+        .falls i:nth-child(2) { animation-delay: .12s; }
+        .falls i:nth-child(3) { animation-delay: .24s; }
+        .falls i:nth-child(4) { animation-delay: .36s; }
+        .falls i:nth-child(5) { animation-delay: .48s; }
+        @keyframes fall {
+            0%, 100% { transform: scaleY(.15); opacity: .35; }
+            50%      { transform: scaleY(1);   opacity: 1; }
+        }
+        .map-loader p {
+            margin: 15px 0 0; text-align: center;
+            font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+            color: var(--dark-blue); font-weight: 700;
+        }
 
+        /* HUD del mapa */
+        .map-hud {
+            position: absolute; top: 16px; right: 16px; z-index: 7;
+            display: flex; align-items: stretch; gap: 3px; padding: 5px;
+            border-radius: 14px;
+            background: rgba(255,255,255,.94);
+            backdrop-filter: blur(10px);
+            border: 1px solid #d5dee8;
+            box-shadow: 0 4px 16px rgba(13,27,62,.14);
+            transition: right .3s ease;
+        }
+        .map-stage.panel-open .map-hud { right: 356px; }
+        .map-hud button, .map-hud a {
+            min-width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center;
+            background: transparent; border: 0; border-radius: 10px;
+            color: var(--dark-blue); font-size: 17px; font-weight: 700;
+            text-decoration: none; cursor: pointer; font-family: inherit;
+            transition: background .15s, transform .15s;
+        }
+        .map-hud button:hover, .map-hud a:hover { background: rgba(13,27,62,.09); }
+        .map-hud button:active { transform: scale(.94); }
+        #zlvl {
+            display: grid; place-items: center; padding: 0 8px;
+            font-size: 11px; color: var(--gm-blue); font-weight: 700; letter-spacing: .06em;
+        }
+        .map-hud .sep { width: 1px; background: #d5dee8; margin: 7px 2px; }
+
+        /* Botón reiniciar */
         .btn-reset {
             position: absolute; bottom: 20px; left: 20px;
-            z-index: 1000; background: white; border: 2px solid var(--dark-blue);
+            z-index: 7; background: white; border: 2px solid var(--dark-blue);
             border-radius: 50px; padding: 10px 20px; cursor: pointer;
             display: flex; align-items: center; gap: 8px;
             font-weight: bold; color: var(--dark-blue); box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: 0.3s;
+            transition: 0.3s; font-family: inherit; font-size: 14px;
         }
         .btn-reset:hover { background: var(--dark-blue); color: white; }
 
+        /* ══════════ PANEL DE DETALLE ══════════ */
         .details-sidebar {
             position: absolute; top: 0; right: 0;
             width: 340px; height: 100%;
@@ -92,9 +178,55 @@
         }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
+        .details-head {
+            padding: 22px 25px; background: var(--dark-blue); color: white;
+            position: relative;
+        }
+        .details-head .eyebrow {
+            font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+            opacity: .7; font-weight: 700;
+        }
+        .details-head h2 { margin: 8px 0 4px; font-size: 18px; line-height: 1.25; }
+        .details-head .sub { font-size: 11px; opacity: .8; }
+        .details-close {
+            position: absolute; top: 14px; right: 14px;
+            width: 28px; height: 28px; border-radius: 8px; border: 0;
+            background: rgba(255,255,255,.15); color: white;
+            font-size: 13px; cursor: pointer; line-height: 1;
+            display: grid; place-items: center;
+            transition: background .15s; font-family: inherit;
+        }
+        .details-close:hover { background: rgba(255,255,255,.32); }
+
         .data-row { padding: 15px 25px; border-bottom: 1px solid #f0f0f0; }
-        .label { font-size: 10px; color: var(--gm-blue); font-weight: bold; text-transform: uppercase; }
-        .value { font-size: 14px; color: #222; margin-top: 4px; }
+        .label { font-size: 10px; color: var(--gm-blue); font-weight: bold; text-transform: uppercase; letter-spacing: .06em; }
+        .value { font-size: 14px; color: #222; margin-top: 4px; line-height: 1.5; }
+
+        .nota {
+            padding: 20px; background: #fff9e6; margin: 15px; border-radius: 8px;
+            font-size: 13px; color: #555; border-left: 4px solid #ff9800;
+            line-height: 1.55;
+        }
+        .nota .label { color: #ff9800; margin-bottom: 5px; }
+
+        .btn-gmaps {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin: 16px; padding: 12px; border-radius: 9px;
+            background: var(--gm-blue); color: #fff; text-decoration: none;
+            font-weight: 700; font-size: 13px; transition: filter .15s;
+        }
+        .btn-gmaps:hover { filter: brightness(1.1); }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-thumb { background: #c3d3e2; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--celeste-argentina); }
+        ::-webkit-scrollbar-track { background: transparent; }
+
+        @media (max-width: 900px) {
+            :root { --province-panel-width: 150px; --search-panel-width: 220px; }
+            .map-stage.panel-open .map-hud { right: 16px; }
+        }
     </style>
 </head>
 <body>
@@ -112,7 +244,29 @@
         <div id="results-list"></div>
     </div>
 
-    <div id="map">
+    <!-- ══════════ MAPA EMBEBIDO GOOGLE ══════════ -->
+    <div class="map-stage" id="stage">
+        <iframe id="gmap"
+                title="Mapa de diligenciadores"
+                referrerpolicy="no-referrer-when-downgrade"
+                allow="fullscreen"></iframe>
+
+        <div class="map-loader" id="loader">
+            <div>
+                <div class="falls"><i></i><i></i><i></i><i></i><i></i></div>
+                <p>Posicionando en el mapa…</p>
+            </div>
+        </div>
+
+        <div class="map-hud">
+            <button id="zOut" title="Alejar" aria-label="Alejar">−</button>
+            <div id="zlvl">Z 4</div>
+            <button id="zIn" title="Acercar" aria-label="Acercar">+</button>
+            <div class="sep"></div>
+            <button id="fs" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
+            <a id="gmaps" target="_blank" rel="noopener" title="Abrir en Google Maps">↗</a>
+        </div>
+
         <button class="btn-reset" onclick="resetMapa()">
             <span class="material-icons">refresh</span> Reiniciar Mapa
         </button>
@@ -137,22 +291,14 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    /* ══════════ ESTADO GLOBAL ══════════ */
     let diligenciadores = [];
     let provinciaActual = "";
-    let capaArgentina = null;
-    let capaProvincia = null;
-    let argentinaGeojsons = []; // Guardar los geojsons para regenerar en reset
-    
-    const boundsArgentina = [[-56.5, -74], [-21, -53]];
-    const map = L.map('map', { zoomControl: false }).fitBounds(boundsArgentina);
-    const markerGroup = L.layerGroup().addTo(map);
-
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
 
     const provinciasList = [
-        "AMBA", "CABA", "Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes", 
-        "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja", "Mendoza", 
-        "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan", "San Luis", 
+        "AMBA", "CABA", "Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes",
+        "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja", "Mendoza",
+        "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan", "San Luis",
         "Santa Cruz", "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"
     ];
 
@@ -169,24 +315,113 @@
 
     const normalizar = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim() : "";
 
+    /* ══════════ VISTA DEL MAPA (GOOGLE MAPS EMBEBIDO) ══════════ */
+    const ARG_VISTA = { lat: -38.45, lng: -63.60, z: 4 };
+
+    const estado  = { lat: ARG_VISTA.lat, lng: ARG_VISTA.lng, z: ARG_VISTA.z, sel: null };
+    let   contexto = { lat: ARG_VISTA.lat, lng: ARG_VISTA.lng, z: ARG_VISTA.z };
+
+    const frame  = document.getElementById('gmap');
+    const loader = document.getElementById('loader');
+    const stage  = document.getElementById('stage');
+
+    let loadTimer = null;
+
+    function mostrarLoader() {
+        loader.classList.remove('hidden');
+        frame.style.opacity = .12;
+        clearTimeout(loadTimer);
+        loadTimer = setTimeout(ocultarLoader, 8000);
+    }
+    function ocultarLoader() {
+        loader.classList.add('hidden');
+        frame.style.opacity = 1;
+        clearTimeout(loadTimer);
+    }
+    frame.addEventListener('load', ocultarLoader);
+
+    function urlMapa() {
+        if (estado.sel) {
+            const d = estado.sel;
+            const q = [d.domicilio, d.localidad, d.provincia, 'Argentina']
+                        .filter(Boolean).join(', ');
+            return `https://www.google.com/maps?q=${encodeURIComponent(q)}&z=${estado.z}&hl=es&output=embed`;
+        }
+        return `https://www.google.com/maps?ll=${estado.lat},${estado.lng}&z=${estado.z}&hl=es&output=embed`;
+    }
+
+    function urlGoogleMaps() {
+        if (estado.sel) {
+            const d = estado.sel;
+            const q = [d.domicilio, d.localidad, d.provincia, 'Argentina']
+                        .filter(Boolean).join(', ');
+            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+        }
+        return `https://www.google.com/maps/@${estado.lat},${estado.lng},${estado.z}z`;
+    }
+
+    function cargarMapa() {
+        const src = urlMapa();
+        document.getElementById('zlvl').textContent = 'Z ' + estado.z;
+        document.getElementById('gmaps').href = urlGoogleMaps();
+
+        if (frame.dataset.src === src) { ocultarLoader(); return; }
+        frame.dataset.src = src;
+        mostrarLoader();
+        frame.src = src;
+    }
+
+    /* Convertir bounding boxes (Nominatim) en centro + zoom aproximado */
+    function cajasAVista(cajas) {
+        let s = 90, n = -90, w = 180, e = -180;
+        cajas.forEach(b => {
+            s = Math.min(s, b[0]); n = Math.max(n, b[1]);
+            w = Math.min(w, b[2]); e = Math.max(e, b[3]);
+        });
+        const lat = (s + n) / 2;
+        const lng = (w + e) / 2;
+        const zLng = Math.log2(360 / Math.max(0.02, e - w));
+        const zLat = Math.log2(360 / Math.max(0.02, n - s));
+        let z = Math.round(Math.min(zLng, zLat));
+        z = Math.max(4, Math.min(14, z));
+        return { lat: +lat.toFixed(5), lng: +lng.toFixed(5), z };
+    }
+
+    /* ══════════ CONTROLES DEL MAPA ══════════ */
+    document.getElementById('zIn').onclick = () => {
+        estado.z = Math.min(18, estado.z + 1);
+        if (!estado.sel) { contexto.z = estado.z; }
+        cargarMapa();
+    };
+    document.getElementById('zOut').onclick = () => {
+        estado.z = Math.max(3, estado.z - 1);
+        if (!estado.sel) { contexto.z = estado.z; }
+        cargarMapa();
+    };
+    document.getElementById('fs').onclick = () => {
+        if (document.fullscreenElement) { document.exitFullscreen(); }
+        else if (stage.requestFullscreen) { stage.requestFullscreen(); }
+    };
+
+    /* ══════════ CARGA INICIAL ══════════ */
     async function init() {
-        const argBorde = fetch('https://nominatim.openstreetmap.org/search?country=argentina&format=json&polygon_geojson=1&limit=1').then(r => r.json());
-        const malBorde = fetch('https://nominatim.openstreetmap.org/search?q=Islas+Malvinas&format=json&polygon_geojson=1&limit=1').then(r => r.json());
-
-        const results = await Promise.all([argBorde, malBorde]);
-        argentinaGeojsons = results.filter(r => r[0]).map(r => r[0].geojson);
-        capaArgentina = L.geoJSON(argentinaGeojsons, {
-            style: { color: '#0d1b3e', weight: 3, fillOpacity: 0, interactive: false }
-        }).addTo(map);
-
-        const snap = await getDocs(collection(db, 'diligenciadores'));
-        diligenciadores = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        try {
+            const snap = await getDocs(collection(db, 'diligenciadores'));
+            diligenciadores = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (e) {
+            console.error('Firebase:', e);
+            diligenciadores = [];
+            document.getElementById('results-list').innerHTML =
+                `<div style="padding:25px; color:#888; font-size:13px; text-align:center;">No se pudo cargar el listado.</div>`;
+        }
         renderProvincias();
         renderLista(diligenciadores);
+        cargarMapa();
     }
 
     function renderProvincias() {
         const container = document.getElementById('province-list');
+        container.innerHTML = '';
         provinciasList.forEach(p => {
             const div = document.createElement('div');
             div.className = 'province-item';
@@ -197,12 +432,14 @@
         });
     }
 
+    /* ══════════ FILTRO POR PROVINCIA ══════════ */
     window.filtrarProvincia = (prov) => {
         provinciaActual = prov;
-        document.getElementById('details-panel').style.display = 'none';
+        cerrarDetalle(false);
+
         document.querySelectorAll('.province-item').forEach(i => i.classList.remove('active'));
         document.getElementById(`item-${prov.replace(/ /g, '')}`)?.classList.add('active');
-        
+
         let filtrados;
         if (prov === "AMBA") {
             filtrados = diligenciadores.filter(d => {
@@ -214,16 +451,17 @@
             filtrados = diligenciadores.filter(d => normalizar(d.provincia) === normalizar(prov));
         }
         renderLista(filtrados);
+        centrarProvincia(prov);
+    };
 
-        if (capaProvincia) map.removeLayer(capaProvincia);
-
-        let queries = [];
+    async function centrarProvincia(prov) {
+        let queries;
         if (prov === "Tierra del Fuego") {
             queries = ["Provincia de Tierra del Fuego, Argentina", "Islas Malvinas"];
         } else if (prov === "AMBA") {
             queries = ["Área Metropolitana de Buenos Aires, Argentina"];
         } else if (prov === "CABA") {
-            queries = ["Ciudad Autonoma de Buenos Aires, Argentina"];
+            queries = ["Ciudad Autónoma de Buenos Aires, Argentina"];
         } else if (prov === "Chaco") {
             queries = ["Provincia del Chaco, Argentina"];
         } else if (prov === "Chubut") {
@@ -232,60 +470,67 @@
             queries = [`Provincia de ${prov}, Argentina`];
         }
 
-        Promise.all(queries.map(q => fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&polygon_geojson=1&limit=1`).then(r => r.json())))
-        .then(results => {
-            const geojsons = results.filter(r => r[0]).map(r => r[0].geojson);
-            if (geojsons.length > 0) {
-                capaProvincia = L.geoJSON(geojsons, {
-                    style: { color: '#74ACDF', weight: 4, fillOpacity: 0.15 }
-                }).addTo(map);
+        mostrarLoader();
+        try {
+            const results = await Promise.all(
+                queries.map(q =>
+                    fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`)
+                        .then(r => r.json())
+                        .catch(() => [])
+                )
+            );
+            const cajas = results
+                .filter(r => r[0] && r[0].boundingbox)
+                .map(r => r[0].boundingbox.map(Number));
 
-                if (prov === "Tierra del Fuego") {
-                    map.flyToBounds([[-56.0, -72.0], [-51.0, -57.0]], { duration: 1.5 });
-                } else {
-                    map.flyToBounds(capaProvincia.getBounds(), { padding: [30, 30], duration: 1.5 });
-                }
-            }
-        });
-    };
+            if (!cajas.length) { ocultarLoader(); return; }
 
+            const vista = cajasAVista(cajas);
+            contexto = { lat: vista.lat, lng: vista.lng, z: vista.z };
+            estado.lat = vista.lat;
+            estado.lng = vista.lng;
+            estado.z   = vista.z;
+            estado.sel = null;
+            cargarMapa();
+        } catch (e) {
+            console.error(e);
+            ocultarLoader();
+        }
+    }
+
+    /* ══════════ RESET ══════════ */
     window.resetMapa = () => {
-        // Eliminar capa provincial si existe
-        if (capaProvincia) {
-            map.removeLayer(capaProvincia);
-            capaProvincia = null;
-        }
-        // Eliminar capa nacional actual y volverla a crear limpia
-        if (capaArgentina) {
-            map.removeLayer(capaArgentina);
-        }
-        // Regenerar la capa nacional con los geojsons guardados
-        if (argentinaGeojsons.length > 0) {
-            capaArgentina = L.geoJSON(argentinaGeojsons, {
-                style: { color: '#0d1b3e', weight: 3, fillOpacity: 0, interactive: false }
-            }).addTo(map);
-        }
-        
-        markerGroup.clearLayers();
+        cerrarDetalle(false);
         provinciaActual = "";
-        document.getElementById('details-panel').style.display = 'none';
+        contexto = { lat: ARG_VISTA.lat, lng: ARG_VISTA.lng, z: ARG_VISTA.z };
+        estado.lat = ARG_VISTA.lat;
+        estado.lng = ARG_VISTA.lng;
+        estado.z   = ARG_VISTA.z;
+        estado.sel = null;
+
         document.querySelectorAll('.province-item').forEach(i => i.classList.remove('active'));
         document.getElementById('input-search').value = "";
         renderLista(diligenciadores);
-        map.flyToBounds(boundsArgentina, { duration: 1.5 });
+        cargarMapa();
     };
 
+    /* ══════════ BÚSQUEDA ══════════ */
     window.buscar = (term) => {
         const query = normalizar(term);
         const filtrados = diligenciadores.filter(d => {
             const p = normalizar(d.provincia);
             const l = normalizar(d.localidad);
-            const matchProv = (!provinciaActual) ? true : (provinciaActual === "AMBA" ? (listaAMBA_Imagen.includes(p) || listaAMBA_Imagen.includes(l)) : p === normalizar(provinciaActual));
+            const matchProv = (!provinciaActual)
+                ? true
+                : (provinciaActual === "AMBA"
+                    ? (listaAMBA_Imagen.includes(p) || listaAMBA_Imagen.includes(l))
+                    : p === normalizar(provinciaActual));
             return matchProv && (normalizar(d.diligenciador).includes(query) || l.includes(query));
         });
         renderLista(filtrados);
     };
 
+    /* ══════════ LISTADO ══════════ */
     function renderLista(data) {
         const list = document.getElementById('results-list');
         if (data.length === 0) {
@@ -300,43 +545,57 @@
         `).join('');
     }
 
+    /* ══════════ DETALLE ══════════ */
     window.verDetalle = (id) => {
         const d = diligenciadores.find(x => x.id === id);
+        if (!d) return;
+
+        estado.sel = d;
+        estado.z = d.domicilio ? 15 : 13;
+
         const panel = document.getElementById('details-panel');
         panel.style.display = 'block';
         panel.innerHTML = `
-            <div style="padding:25px; background:var(--dark-blue); color:white;">
-                <h2 style="margin:0; font-size:18px">${d.diligenciador}</h2>
-                <span style="font-size:11px; opacity:0.8">${d.tipoLey || 'Ley 22.172'}</span>
+            <div class="details-head">
+                <button class="details-close" onclick="cerrarDetalle()" aria-label="Cerrar">✕</button>
+                <div class="eyebrow">Diligenciador</div>
+                <h2>${d.diligenciador}</h2>
+                <span class="sub">${d.tipoLey || 'Ley 22.172'}</span>
             </div>
-            <div class="data-row"><div class="label">Ubicación</div><div class="value">${d.domicilio}, ${d.localidad}</div></div>
-            <div class="data-row"><div class="label">Contacto</div><div class="value">${d.telefono || 'Sin datos'}<br>${d.email || ''}</div></div>
-            <div style="padding:20px; background:#fff9e6; margin:15px; border-radius:8px; font-size:13px; color:#555; border-left: 4px solid #ff9800;">
-                <div class="label" style="color:#ff9800; margin-bottom:5px">Información Relevante</div>
+            <div class="data-row">
+                <div class="label">Ubicación</div>
+                <div class="value">${d.domicilio || 'Sin domicilio'}<br>${d.localidad || ''}, ${d.provincia || ''}</div>
+            </div>
+            <div class="data-row">
+                <div class="label">Contacto</div>
+                <div class="value">${d.telefono || 'Sin datos'}<br>${d.email || ''}</div>
+            </div>
+            <div class="nota">
+                <div class="label">Información Relevante</div>
                 ${d.expteDondeFigura || 'Registrado en el Panel Federal.'}
             </div>
+            <a class="btn-gmaps" href="${urlGoogleMaps()}" target="_blank" rel="noopener">
+                Abrir en Google Maps ↗
+            </a>
         `;
-        geocode(d);
+
+        stage.classList.add('panel-open');
+        cargarMapa();
     };
 
-    async function geocode(d) {
-        const q = `${d.domicilio}, ${d.localidad}, ${d.provincia}, Argentina`;
-        try {
-            const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);
-            const data = await r.json();
-            if (data[0]) {
-                const pos = [data[0].lat, data[0].lon];
-                markerGroup.clearLayers();
-                L.marker(pos, {
-                    icon: L.divIcon({
-                        html: '<span class="material-icons" style="color:#d32f2f; font-size:36px">place</span>',
-                        className: '', iconSize: [36, 36], iconAnchor: [18, 36]
-                    })
-                }).addTo(markerGroup);
-                map.flyTo(pos, 15);
-            }
-        } catch (e) { console.error(e); }
-    }
+    window.cerrarDetalle = (reubicar = true) => {
+        const tenia = !!estado.sel;
+        estado.sel = null;
+        document.getElementById('details-panel').style.display = 'none';
+        stage.classList.remove('panel-open');
+
+        if (reubicar && tenia) {
+            estado.lat = contexto.lat;
+            estado.lng = contexto.lng;
+            estado.z   = contexto.z;
+            cargarMapa();
+        }
+    };
 
     init();
 </script>
