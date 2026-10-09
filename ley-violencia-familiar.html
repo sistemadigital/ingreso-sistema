@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Violencia familiar – Ley XIV N.º 6 (antes Ley 3325)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light;--bg:#f6f7fb;--ink:#27304a;--mut:#66708c;--line:#e3e7f1;--card:#fff;--soft:#eef0fa;--mark:#ffe9a8;--ac:#4f5d77;--b:#e9edf3;--navy:var(--ink);--navy2:var(--ink);--burg:#b0436b;--gold:var(--mut);--serif:'Newsreader',Georgia,'Times New Roman',serif;--sans:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--th:96px}
+html{scroll-padding-top:calc(var(--th) + 12px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600;margin:0;line-height:1.15;color:var(--ink)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(246,247,251,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 20px}
+.r1{display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:1360px;margin:0 auto}
+.top .tt{font:600 20px/1.1 var(--serif);cursor:pointer;margin-right:6px}
+.top .tt small{display:block;font:600 10.5px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-top:3px}
+.search{flex:1 1 280px;display:flex}
+.search input{width:100%;padding:11px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);font:inherit;color:inherit}
+.search input:focus,.chip:focus-visible,.btn:focus-visible,.ib:focus-visible{outline:2px solid #7b83e6;outline-offset:2px}
+.ib,.btn.ghost{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:10px 14px;font:600 .85rem var(--sans);cursor:pointer}
+.ib:hover,.btn.ghost:hover{background:var(--soft)}
+#menu{display:none}
+#fc{display:flex;gap:8px;flex-wrap:wrap;margin:10px auto 0;max-width:1360px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 13px;font:500 .8rem var(--sans);color:var(--mut);cursor:pointer;display:inline-block}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.app{display:grid;grid-template-columns:290px minmax(0,1fr);max-width:1360px;margin:0 auto}
+aside{position:sticky;top:calc(var(--th) + env(safe-area-inset-top,0px));height:calc(100vh - var(--th) - env(safe-area-inset-top,0px));overflow:auto;padding:18px 12px 40px 20px;border-right:1px solid var(--line);font-size:14px}
+aside h5{margin:0 0 10px;font:700 11px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+aside details{margin-bottom:6px}
+aside summary{cursor:pointer;padding:8px 10px;border-radius:12px;font-weight:600;color:var(--ink);list-style:none;background:var(--card);border:1px solid var(--line)}
+aside summary::-webkit-details-marker{display:none}
+aside summary:hover,aside .l:hover{background:var(--soft)}
+aside .l{display:block;padding:5px 8px 5px 18px;border-radius:8px;color:var(--mut)}
+aside .l.on{color:var(--ink);font-weight:700;background:var(--soft)}
+main{padding:26px 28px 70px;min-width:0}
+.crumb{font-size:13px;color:var(--mut);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px}
+.crumb a:hover{color:var(--ink);text-decoration:underline}
+.hero{padding:26px 0 10px}
+.hero h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;letter-spacing:-.01em;max-width:20ch}
+.hero p{max-width:62ch;margin:12px 0 0;color:var(--mut);font-size:1.02rem}
+.eyebrow{font:700 .8rem var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ac)}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;display:flex;gap:6px;align-items:baseline;font-weight:600;font-size:.85rem}
+.stat b{font:600 1.15rem var(--serif)}
+.go{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+.go input{width:180px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+.btn{background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:12px;padding:10px 16px;font:600 .85rem var(--sans);cursor:pointer}
+.btn:hover{filter:brightness(1.2)}
+.btn.sm{padding:6px 12px;font-size:.8rem;border-radius:10px}
+.sec{margin:34px 0 14px;display:flex;align-items:baseline;gap:12px}
+.sec h2{font-size:clamp(1.5rem,3vw,2rem)}.sec span{color:var(--mut);font-size:.85rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.card{background:#fbfcff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--ac);transform:translateY(-2px)}
+.card h3{font-size:1.3rem}.card h3 .big{display:inline-block;font:700 .75rem var(--sans);color:var(--ac);background:var(--b);border-radius:8px;padding:2px 9px;margin-bottom:8px}
+.card p{margin:0;color:var(--mut);font-size:.86rem;flex:1}
+.meta{display:flex;flex-wrap:wrap;gap:8px;font-size:.78rem;font-weight:700}
+.meta span{background:var(--b);color:var(--ac);border-radius:999px;padding:3px 11px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.nh{background:var(--b);border-radius:22px;padding:22px 26px;margin-bottom:18px}
+.nh h1{font-size:clamp(1.5rem,3.2vw,2.15rem);margin:6px 0 12px}
+.nh .meta span{background:var(--card)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 22px;margin:16px 0}
+.box h4{font:700 .75rem var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ac);margin-bottom:8px}
+.box p{margin:0 0 8px}.box ul{margin:6px 0 0;padding-left:20px}.box li{margin:3px 0}
+.box li a,.x{color:var(--ac);font-weight:600;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.box li a:hover,.x:hover{text-decoration-color:var(--ac)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 10px}
+.art{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:12px 0;padding:16px 18px;scroll-margin-top:calc(var(--th) + 12px)}
+.art.hit{outline:2px solid var(--ac);outline-offset:2px}
+.art header{display:flex;gap:16px;align-items:flex-start}
+.num{flex:none;background:var(--b);color:var(--ac);font:700 .78rem var(--sans);border-radius:8px;padding:4px 10px;min-width:64px;text-align:center}
+.art h4{font-size:1.25rem}
+.sum{margin:5px 0 0;color:var(--mut);font-size:.9rem}
+.sum:before{content:"Síntesis · ";font:700 .72rem var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ac)}
+.acts{display:flex;gap:8px;margin:12px 0 0 80px;flex-wrap:wrap}
+.full{margin:14px 0 0 80px;padding:10px 14px;background:var(--b);border-radius:10px;font:400 1.02rem/1.6 var(--serif);color:#2c3550;max-height:420px;overflow:auto}
+.full p{margin:0 0 8px}.full p:last-child{margin:0}.full p.inc{padding-left:20px}
+mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px}
+.pn{display:flex;justify-content:space-between;gap:12px;margin-top:30px;flex-wrap:wrap}
+.res .art h4 small{display:block;font:500 .78rem var(--sans);color:var(--mut);margin-top:3px}
+.foot{margin-top:46px;padding-top:16px;border-top:1px solid var(--line);font-size:.8rem;color:var(--mut)}
+.hint,.cnt{color:var(--mut);font-size:.85rem;margin:6px 0}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(30px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:12px;opacity:0;transition:.25s;z-index:50;font-size:14px}
+#toast.on{opacity:1;transform:translateX(-50%)}
+.pz{background:var(--b);border-bottom:2px solid var(--ac);border-radius:3px;padding:0 2px;color:inherit}
+.chip.pzc{background:var(--b);border-color:transparent;color:var(--ac);font-weight:700;font-size:.75rem;padding:2px 9px;cursor:default}
+.zs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pzl{margin:8px 0 0;padding:8px 12px;list-style:none;background:#fbfcff;border:1px solid var(--line);border-radius:10px;font-size:.86rem}
+.pzl li{margin:2px 0}
+.tabs{display:flex;gap:8px;margin:16px 0 12px;flex-wrap:wrap}
+.tabs button:not(.ib){border:1px solid var(--line);background:var(--card);color:var(--mut);padding:7px 14px;border-radius:999px;font:500 .82rem var(--sans);cursor:pointer}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ctl{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 14px}
+.ctl input,.ctl select{padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;min-width:0}
+.ctl input[type=search]{flex:1 1 240px}.ctl input[type=number]{width:130px}
+.tb{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tb th{background:var(--b);color:var(--ac);font:700 .72rem var(--sans);letter-spacing:.08em;text-transform:uppercase;text-align:left;padding:11px 14px}
+.tb td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:top}
+.tb tr:hover td{background:#fbfcff}
+.nt{font-size:.8rem;color:var(--mut);margin-top:4px}
+.bd{display:inline-block;border-radius:999px;padding:2px 10px;font:700 .75rem var(--sans);white-space:nowrap}
+.bd.ok{background:#e3f5ee;color:#237f64}.bd.fix{background:#f6f1df;color:#85701f}.bd.rev{background:#fce9f0;color:#b0436b}
+.snip{margin:6px 0 0;color:var(--mut);font-size:.88rem}
+@media (max-width:900px){.app{display:block}#menu{display:inline-block}
+aside{position:fixed;z-index:30;top:calc(var(--th) + env(safe-area-inset-top,0px));left:0;width:min(86vw,330px);background:var(--bg);transform:translateX(-105%);transition:transform .2s;box-shadow:6px 0 24px rgba(0,0,0,.2)}
+aside.open{transform:none}main{padding:18px 14px 60px}.top .tt small{display:none}.top{padding:8px 12px}
+#fc{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.chip{white-space:nowrap}
+.acts,.full{margin-left:0}.art header{flex-direction:column;gap:8px}.nh{padding:18px}}
+@media (max-width:700px){.tb thead{display:none}.tb tr{display:block;border-top:1px solid var(--line)}.tb td{display:block;border:0;padding:4px 14px}.tb td:before{content:attr(data-l);display:block;font:700 .7rem var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)}}
+@media print{.top,aside,.ctl,.tabs,.bar,.acts,#toast{display:none!important}.app{display:block}body{background:#fff}.art,.card{break-inside:avoid}}
+.bd.den{background:#e6f1fb;color:#2c74b3}.bd.med{background:#fce9f0;color:#b0436b}.bd.pro{background:#f6f1df;color:#85701f}
+</style>
+</head>
+<body>
+<div class="top">
+ <div class="r1">
+  <button class="ib" id="menu" aria-label="Índice">☰</button>
+  <div class="tt" id="home">Ley XIV – N.º 6<small>Violencia familiar · Antes Ley 3325</small></div>
+  <label class="search"><input id="q" type="search" placeholder="Buscá con tus palabras: ej. medidas cautelares, denuncia, 48 horas, 4…" autocomplete="off" aria-label="Buscar"></label>
+  <a class="btn ghost" href="#/plazos">⏱ Plazos</a><button class="btn ghost" onclick="window.print()">Imprimir</button>
+ </div>
+</div>
+<div class="app"><aside id="side"></aside><main id="main"></main></div>
+<div id="toast"></div>
+<script id="d" type="application/json">{"arts":[{"n":1,"t":"Denuncia, alcance de la ley y grupo familiar","s":"Toda víctima de violencia familiar puede denunciar en forma verbal o escrita, con o sin patrocinio letrado, ante la Comisaría de la Mujer, otras dependencias policiales, jueces, defensorías, fiscalías o la Subsecretaría de Relaciones con la Comunidad y Violencia. Define el grupo familiar, extiende la ley a relaciones de noviazgo o pareja y a la falta razonable de cuidado; el trámite es gratuito.","p":["Toda persona que es víctima de violencia familiar, entendiéndose a la misma como toda acción, omisión, abuso o abandono que afecte la integridad física, psíquica, moral, sexual, patrimonial y la libertad de la misma en el ámbito familiar, aunque no configure delito, sea ésta en forma permanente o temporaria, puede denunciar estos hechos en forma verbal o escrita, con o sin patrocinio letrado, ante la Comisaría de la Mujer o cualquier otra dependencia policial, ante el Juez de Familia con competencia de acuerdo al domicilio del denunciante, Juez de Paz o Juez con competencia en asuntos de Familia, Defensorías o Fiscalías y ante la Subsecretaría de Relaciones con la Comunidad y Violencia dependiente del Ministerio de Gobierno, quienes deben dar intervención inmediata al Juez competente y solicitar medidas cautelares conexas, previstas en la legislación vigente.","Los organismos encargados de recibir las denuncias están obligados a tomar las que se realicen con reserva de identidad, en cuyo caso deben labrar un acta y seguir el trámite correspondiente de acuerdo con la naturaleza de la denuncia. Los denunciantes pueden concurrir en compañía de un tercero que les brinde contención, pero que no puede argumentar en la denuncia.","A los efectos de esta Ley, se entiende por grupo familiar el originado en el matrimonio o en las uniones de hecho y se incluyen a los descendientes directos de alguno de ellos, a los ascendientes, colaterales, consanguíneos y convivientes.","También se aplica esta Ley cuando se ejerce violencia familiar sobre la persona con quien se tiene o haya tenido relación de noviazgo o pareja, o con quien se estuvo vinculado por matrimonio o unión de hecho.","Los alcances de la presente Ley también comprenden toda falta razonable de cuidado, incluyendo el abandono psicofísico y afectivo y la negligencia en las obligaciones de alimentación y de educación obligatoria de los hijos, ascendientes y convivientes, sin perjuicio de las restantes vías procesales y las denuncias en los juzgados pertinentes.","El trámite establecido en la presente Ley tiene carácter gratuito."]},{"n":2,"t":"Obligación de denunciar y denuncia de terceros","s":"Si los damnificados son menores, incapaces, ancianos o discapacitados, denuncian sus representantes legales o el Ministerio Público; también están obligados los servicios asistenciales, educativos, sanitarios y de seguridad, y los funcionarios públicos. El incumplimiento se remite al fuero penal y cualquier persona puede denunciar y pedir identidad reservada.","p":["Cuando los damnificados son menores o incapaces, ancianos o discapacitados, los hechos deben ser denunciados por sus representantes legales o el Ministerio Público. También están obligados a efectuar la denuncia los servicios asistenciales sociales, educativos o sanitarios, de seguridad públicos o privados, y todo otro funcionario público en razón de su labor. El menor o incapaz puede directamente poner en conocimiento de los hechos a los organismos mencionados en el Artículo 1 de la presente Ley.","En caso de que las personas mencionadas precedentemente incumplen con la obligación establecida, el Juez interviniente debe citarlos de oficio a la causa y remitir los antecedentes al fuero penal.","De igual manera debe proceder respecto del tercero o superior jerárquico que por cualquier medio interfiere, obstaculiza o impide la denuncia.","Toda persona que tome conocimiento de un hecho de violencia familiar puede realizar voluntariamente la correspondiente denuncia, pudiendo solicitar la condición de identidad reservada."]},{"n":3,"t":"Remisión del legajo e informes","s":"Las actuaciones ante la Comisaría de la Mujer u otra dependencia forman un legajo que se remite al Juzgado de Familia en un plazo no superior a 48 horas, con copia de la denuncia para la víctima y el denunciante. El Juez puede pedir diagnóstico de interacción familiar, informes del lugar de trabajo y antecedentes judiciales y policiales.","p":["Las actuaciones que se lleven a cabo ante la Comisaría de la Mujer y cualquier otra dependencia policial o pública, mencionada en el Artículo 1 de la presente Ley, forman parte de un legajo que es remitido al Juzgado de Familia u otro Juzgado con competencia en asuntos de Familia para la tramitación de las actuaciones que correspondan, en un plazo no superior a las cuarenta y ocho (48) horas. Asimismo, debe entregarse una copia de la denuncia efectuada a la víctima y denunciante.","En tal caso, el Juez puede solicitar un diagnóstico de interacción familiar efectuado por peritos de diversas disciplinas especializadas en la temática, para determinar los daños físicos y psíquicos sufridos por la víctima, la situación de peligro y el medio socio ambiental de la familia. Las partes pueden solicitar otros informes técnicos.","También, si considera necesario, el Juez puede pedir un informe al lugar de trabajo o lugares en donde la parte denunciada realice actividades, o informes que estime corresponder, con el fin de contar con el mayor número de datos sobre la situación planteada. Además, debe pedir los antecedentes judiciales y policiales de la persona denunciada para elaborar un perfil lo más acertado posible de su conducta.","En el caso de que la denuncia se presente acompañada por un diagnóstico o informe producido por profesionales de instituciones públicas o privadas, el Juez puede prescindir del requerimiento de otros informes."]},{"n":4,"t":"Medidas cautelares","s":"El Juez puede adoptar, de oficio o a petición de la víctima y en cualquier etapa del proceso, ocho medidas que deben efectivizarse inmediatamente: exclusión del agresor/a de la vivienda, prohibición de acceso, reintegro al domicilio, alimentos provisorios, tenencia o guarda, resguardo del patrimonio, protección de niños, ancianos y discapacitados, y otras diligencias. Rigen hasta que el Juez ordene su caducidad.","p":["El Juez puede adoptar de oficio o a petición de la víctima, al tomar conocimiento de los hechos motivo de la denuncia o en cualquier etapa del proceso, las siguientes medidas cautelares, las que deben ser efectivizadas inmediatamente:","1) ordenar la exclusión inmediata del/la agresor/a de la vivienda donde habita el grupo familiar y ordenar el cese del deber de convivencia;","2) prohibir el acceso o presencia del/la agresor/a al domicilio del damnificado/a, los lugares de trabajo o de estudio o a determinadas áreas de concurrencia o de circulación de la persona afectada, asimismo, arbitrar los medios necesarios para que el agresor/a cese con todo acto de perturbación o intimidación contra las víctimas;","3) ordenar el reintegro al domicilio, a petición de quién ha debido salir del mismo por razones de seguridad personal y disponer en forma inmediata la exclusión, en tal caso, del/la agresor/a;","4) decretar provisoriamente alimentos, para lo cual se abre una cuenta bancaria donde se deben realizar los depósitos correspondientes. Si el alimentante trabaja en relación de dependencia, el Juez de oficio o a pedido de parte, debe ordenar los descuentos respectivos de su salario, la entrega del carnet de la obra social y fotocopia autenticada del recibo de sueldo que acredite su actualización de validez mensual;","5) establecer el régimen de tenencia o guarda que garantice el derecho de comunicación con los hijos, si así corresponde;","6) adoptar las medidas destinadas al resguardo del patrimonio común o personal de los afectados, como asimismo, la restitución inmediata de los efectos y documentaciones personales a la parte peticionante, si ésta se ha visto privada de los mismos por hechos de violencia familiar;","7) adoptar todos los recursos para que los niños, niñas, adolescentes, ancianos y discapacitados permanezcan en su ámbito familiar fuera del contacto con quien ejerce el maltrato;","8) ordenar todas las diligencias que considere pertinente para salvaguardar la integridad psicofísica de las personas afectadas.","El Juez debe establecer estas medidas de acuerdo con los antecedentes de la causa, la actitud de las partes, la gravedad de las conductas constatadas y los elementos que surjan de la petición.","Las mismas mantienen su vigencia hasta que el Juez ordene su caducidad y no pueden incumplir las partes.","Cuando la medida dictada requiere de la custodia o el auxilio de la fuerza pública para hacerse efectiva, el Juez así puede disponerlo, en caso de ser solvente debe el agresor/a asumir los costos y de ser insolvente someterlo/a a trabajo comunitario."]},{"n":5,"t":"Audiencias, programas y sanciones alternativas","s":"El Juez cita a las partes a audiencias separadas con los informes requeridos y puede instar a programas terapéuticos. Ante reincidencia en el incumplimiento, determina la asistencia obligatoria del agresor/a y del grupo familiar a programas, sin perjuicio de sanciones alternativas (amonestaciones o multa en tarea comunitaria) y de otras medidas.","p":["El Juez debe citar a las partes, en días y horas no coincidentes y, así lo amerita también al Ministerio Público, a comparecer en audiencias separadas, contando con los informes requeridos en el Artículo 3, párrafo 2 y 3 y debe comunicar a las partes los resultados de los mismos, salvo que las partes expresamente planteen una mediación conjunta voluntariamente. En las mismas y siempre que el Juez lo considere necesario, se debe instar al grupo familiar o a las partes involucradas a asistir a programas terapéuticos. En caso de aceptación, es responsabilidad de las partes acreditar periódicamente la concurrencia a la terapia.","Ante casos de reincidencias del incumplimiento de las órdenes emitidas, el Juez debe determinar la asistencia del agresor/a con carácter obligatorio y al grupo familiar a programas educativos o terapéuticos por el tiempo y modo que considere necesario, basado en los exámenes de expertos, sin perjuicio de adoptar alguna de las siguientes sanciones alternativas:","1) amonestaciones;","2) multa, en la figura de tarea comunitaria cuyo producido es destinado a instituciones públicas o privadas especializadas en violencia familiar.","Ante el incumplimiento de las obligaciones que impone la presente Ley, o la reiteración de hechos de violencia por parte del/la agresor/a, el Juez puede ordenar además cualquier otra medida que considere pertinente por el lapso y con las características que él determine."]},{"n":6,"t":"Reglamentación: asistencia, prevención y capacitación","s":"La reglamentación debe prever asistencia legal, médica y psicológica gratuita para el agresor/a y su grupo familiar, y los medios para diez objetivos: políticas de prevención, capacitación docente, equipos multidisciplinarios en centros de salud, grupos de autoayuda, capacitación de agentes de salud, personal femenino especializado y lugar privado, capacitación policial, casas-refugio, redes interinstitucionales con equipos móviles y capacitación del Poder Judicial.","p":["La reglamentación de esta Ley debe prever, además de las medidas conducentes a brindar al agresor/a y a su grupo familiar asistencia legal, médica y psicológica gratuita, los medios necesarios para alcanzar los siguientes objetivos:","1) articular políticas de prevención, atención y tratamiento de las víctimas, como también elaborar material informativo y de difusión sobre prevención de violencia familiar;","2) desarrollar programas de capacitación para docentes y directivos de todos los niveles de enseñanza orientados a la detección temprana, orientación a padres y derivación asistencial de casos, así como también a la formación preventiva de los alumnos;","3) crear en todos los centros de salud dependientes de la Provincia, equipos multidisciplinarios de atención de víctimas y sus familias especializados en esta problemática;","4) incentivar la formación de grupos de autoayuda con asistencia de profesionales expertos en el tema;","5) capacitar a los agentes de salud en todo el ámbito de la Provincia;","6) destinar en todas las Comisarías, o cualquier dependencia policial, Juzgado de Familia, Juzgado de Paz, Defensorías, Fiscalías y ante la Dirección de Violencia Familiar y de Género, personal femenino especializado en la materia y determinar un lugar privado para la atención y trato privilegiado para las víctimas;","7) capacitar a la Policía de la Provincia sobre los contenidos de la presente Ley, con el fin de alcanzar la correcta atención y contención y la efectividad del debido proceso;","8) invitar a los municipios y a las organizaciones comunitarias a la implementación de casas-refugio para las víctimas que lo necesiten;","9) promover en todos los municipios la formación de redes interinstitucionales con equipos móviles para tomar rápido contacto con las víctimas, proveer de asistencia y realizar las derivaciones correspondientes en coordinación con la Dirección de Violencia Familiar y de Género y la línea 102;","10) el Poder Judicial debe implementar un programa de capacitación permanente en materia de violencia doméstica destinado a todos sus funcionarios y magistrados, con el fin de una mejor administración de justicia, trato humanizado a las víctimas y el debido proceso."]},{"n":7,"t":"Patrocinantes Letrados Gratuito y Registro Provincial","s":"Se crea un cuerpo de Patrocinantes Letrados Gratuito, dependiente del Ministerio de Gobierno, para asesorar y patrocinar a las víctimas, y el Registro Provincial de Actuaciones de Violencia Familiar, al que jueces y funcionarios remiten los datos filiatorios y la identificación de la causa.","p":["Créase un cuerpo de Patrocinantes Letrados Gratuito, dependiente del Ministerio de Gobierno, destinado a brindar asesoramiento y patrocinio a las víctimas de violencia familiar.","Créase el Registro Provincial de Actuaciones de Violencia Familiar, que depende de la Subsecretaría de Relaciones con la Comunidad y Violencia dependiente del Ministerio de Gobierno, al cual deben remitir jueces y funcionarios públicos actuantes los datos filiatorios e identificación de la causa."]},{"n":8,"t":"Comunicación al Poder Ejecutivo","s":"Se comunica al Poder Ejecutivo.","p":["Comuníquese al Poder Ejecutivo."]}],"plazos":[{"n":1,"e":"Los organismos que reciben la denuncia dan intervención al Juez competente y solicitan medidas cautelares conexas","p":"Intervención inmediata","c":"den"},{"n":3,"e":"Remisión del legajo con las actuaciones al Juzgado de Familia u otro Juzgado con competencia en asuntos de Familia","p":"Plazo no superior a 48 horas","c":"den"},{"n":4,"e":"Momento en que el Juez puede adoptar las medidas cautelares","p":"Al tomar conocimiento de los hechos o en cualquier etapa del proceso","c":"med"},{"n":4,"e":"Efectivización de las medidas cautelares","p":"Inmediatamente","c":"med"},{"n":4,"e":"Vigencia de las medidas cautelares","p":"Hasta que el Juez ordene su caducidad","c":"med"},{"n":5,"e":"Acreditar la concurrencia a la terapia, en caso de aceptación de los programas terapéuticos","p":"Periódicamente","c":"pro"},{"n":5,"e":"Asistencia obligatoria del agresor/a y del grupo familiar a programas educativos o terapéuticos ante reincidencia en el incumplimiento","p":"Por el tiempo y modo que el Juez considere necesario","c":"pro"},{"n":5,"e":"Otras medidas ante el incumplimiento de las obligaciones o la reiteración de hechos de violencia","p":"Por el lapso que el Juez determine","c":"pro"}],"temas":[{"t":"Dónde se puede denunciar","l":"Art. 1","d":"Forma verbal o escrita, con o sin patrocinio letrado, ante la Comisaría de la Mujer, otras dependencias policiales, jueces, defensorías, fiscalías o la Subsecretaría de Relaciones con la Comunidad y Violencia.","a":1,"m":["Denuncia"]},{"t":"Quiénes están obligados a denunciar","l":"Art. 2","d":"Representantes legales, Ministerio Público, servicios asistenciales, educativos, sanitarios y de seguridad, y funcionarios públicos.","a":2,"m":["Denuncia","Fuero penal"]},{"t":"Plazo de 48 horas para remitir el legajo","l":"Art. 3","d":"Las actuaciones policiales o públicas se remiten al Juzgado de Familia en un plazo no superior a 48 horas, con copia de la denuncia para la víctima.","a":3,"m":["48 horas"]},{"t":"Medidas cautelares","l":"Art. 4","d":"Ocho medidas que el Juez puede adoptar de oficio o a petición de la víctima, de efecto inmediato y vigentes hasta su caducidad.","a":4,"m":["8 medidas","Efecto inmediato"]},{"t":"Incumplimiento y sanciones alternativas","l":"Art. 5","d":"Audiencias separadas, programas terapéuticos o educativos obligatorios ante reincidencia, amonestaciones y multa en tarea comunitaria.","a":5,"m":["Audiencias","Sanciones"]},{"t":"Objetivos de la reglamentación","l":"Art. 6","d":"Asistencia gratuita al agresor/a y su grupo familiar y diez objetivos de prevención, capacitación, atención y casas-refugio.","a":6,"m":["10 objetivos"]},{"t":"Patrocinio letrado gratuito y Registro Provincial","l":"Art. 7","d":"Cuerpo de Patrocinantes Letrados Gratuito y Registro Provincial de Actuaciones de Violencia Familiar.","a":7,"m":["Ministerio de Gobierno"]}]}</script>
+<script>
+const D=JSON.parse(document.getElementById('d').textContent),A=D.arts,P=D.plazos,T=D.temas,$=s=>document.querySelector(s),main=$('#main'),side=$('#side');
+const PAL=[['#5b50c4','#eeecfb'],['#2c74b3','#e6f1fb'],['#237f64','#e3f5ee'],['#b8602a','#fdefe4'],['#b0436b','#fce9f0'],['#85701f','#f6f1df'],['#4f5d77','#e9edf3']];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const LK=/\b([Aa]rt[íi]culos?)\s+(\d{1,3}(?:\s*(?:,|ó|o|y|a)\s*\d{1,3})*)(?!\s*\d)/g;
+const link=s=>s.replace(LK,(m,w,l)=>w+' '+l.replace(/\d+/g,n=>+n>=1&&+n<=A.length?`<a class="x" href="#/a/${+n}">${n}</a>`:n));
+const byN={};A.forEach(a=>{byN[a.n]=a;a.k=norm(a.t+' '+a.p.join(' '))});
+const col=n=>PAL[(n-1)%PAL.length][0],bg=n=>PAL[(n-1)%PAL.length][1];
+const rub=a=>a.t;
+const nIt=n=>byN[n].p.filter(p=>/^\d+\)\s/.test(p)).length;
+const cut=(s,k)=>{if(s.length<=k)return s;const c=s.slice(0,k),i=c.lastIndexOf(' ');return c.slice(0,i>0?i:k)+'…'};
+const CAT={den:'Denuncia',med:'Medidas cautelares',pro:'Proceso y sanciones'};
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1800)}
+function nav(){let h='<h5>Índice</h5><a class="l" data-t="1" href="#/texto"><b>Texto completo</b></a><a class="l" data-p="1" href="#/plazos"><b>Plazos y vigencias</b></a>';
+h+=`<details open style="margin-top:12px"><summary style="border-left:4px solid ${col(1)}">Artículos 1 a ${A.length}</summary>`;A.forEach(a=>h+=`<a class="l" data-a="${a.n}" href="#/a/${a.n}">Art. ${a.n} · ${esc(rub(a))}</a>`);h+='</details>';side.innerHTML=h}
+function markSide(sel){side.querySelectorAll('.l.on').forEach(x=>x.classList.remove('on'));if(!sel)return;const l=side.querySelector(sel);if(l){l.classList.add('on');if(l.parentElement.tagName=='DETAILS')l.parentElement.open=true}}
+
+/* Plazos detectados en el texto */
+const PZ=/((?:\(\d+\))(?:(?:\s*,\s*|\s+(?:o|u|y|e)\s+)(?:[a-záéíóúñ]+\s+)?\(\d+\))*)\s+(?:primeras\s+)?(d[ií]as(?:\s+h[aá]biles|\s+corridos)?|d[ií]a|meses|mes|a[ñn]os|a[ñn]o|horas|hora|minutos|semanas)/gi;
+A.forEach(a=>{const lab=new Set();a.zp=null;
+ a.p.forEach((p,pi)=>{for(const m of p.matchAll(PZ)){const nums=[...m[1].matchAll(/\((\d+)\)/g)].map(x=>+x[1]);lab.add(nums.join(' o ')+' '+m[2].toLowerCase());if(!a.zp)a.zp={pi,i:m.index,l:m[0].length}}});
+ a.z=[...lab]});
+const byPz={};P.forEach(r=>(byPz[r.n]=byPz[r.n]||[]).push(r));
+const hlpz=s=>s.replace(PZ,'<mark class="pz">$&</mark>');
+const zchips=a=>a.z.length?`<div class="zs">${a.z.map(z=>`<span class="chip pzc">⏱ ${esc(z)}</span>`).join('')}</div>`:'';
+const pzlist=a=>byPz[a.n]?`<ul class="pzl">${byPz[a.n].map(r=>`<li>⏱ ${esc(r.e)} — <b>${esc(r.p)}</b></li>`).join('')}</ul>`:'';
+
+function artHTML(a){const body=a.p.map(p=>`<p class="${/^(\d+|[a-zñ])\)\s|^[-•–]\s/.test(p)?'inc':''}">${link(hlpz(esc(p)))}</p>`).join('');
+return `<article class="art" id="a${a.n}" style="--ac:${col(a.n)};--b:${bg(a.n)}"><header><div class="num">Art. ${a.n}</div><div><h4>${esc(rub(a))}</h4><p class="sum">${link(esc(a.s))}</p>${zchips(a)}${pzlist(a)}</div></header><div class="acts"><button class="btn sm" data-act="t">Ver texto completo</button><button class="btn sm ghost" data-act="c" data-n="${a.n}">Copiar</button><button class="btn sm ghost" data-act="l" data-n="${a.n}">Enlace</button></div><div class="full" hidden>${body}</div></article>`}
+function card(a){return `<a class="card" href="#/a/${a.n}" style="--ac:${col(a.n)};--b:${bg(a.n)}"><h3><span class="big">Artículo ${a.n}</span>${esc(rub(a))}</h3><p>${esc(cut(a.s,170))}</p><div class="meta"><span>Art. ${a.n}</span>${a.z.length?`<span>⏱ ${esc(a.z[0])}</span>`:''}</div></a>`}
+function topic(t){return `<a class="card" href="#/a/${t.a}" style="--ac:${col(t.a)};--b:${bg(t.a)}"><h3><span class="big">${esc(t.l)}</span>${esc(t.t)}</h3><p>${esc(t.d)}</p><div class="meta">${t.m.map(x=>`<span>${esc(x)}</span>`).join('')}</div></a>`}
+const foot=()=>`<p class="foot">Los títulos y las síntesis de cada artículo son una guía de lectura redactada a partir del texto del documento; el PDF no incluye títulos de artículos. El texto completo reproduce la Ley XIV – N.º 6 (antes Ley 3325) según el documento cargado, y la tabla de plazos y vigencias se armó con lo que dice ese texto. Verifique siempre con la versión oficial vigente antes de su uso profesional.</p>`;
+function home(){
+main.innerHTML=`<section class="hero"><span class="eyebrow">Ley XIV – N.º 6 · Antes Ley 3325</span><h1>Ley sobre violencia familiar</h1><p>Texto completo de los ${A.length} artículos, con síntesis de cada artículo, búsqueda, referencias cruzadas entre artículos y tabla de plazos y vigencias.</p>
+<div class="stats"><div class="stat"><b>${A.length}</b><span>artículos</span></div><div class="stat"><b>${nIt(4)}</b><span>medidas cautelares</span></div><div class="stat"><b>${nIt(6)}</b><span>objetivos de la reglamentación</span></div><div class="stat"><b>${P.length}</b><span>plazos y vigencias</span></div></div>
+<div class="go"><input id="gn" type="number" min="1" max="${A.length}" placeholder="Ir al artículo N.º"><button class="btn" id="gb">Ir</button><a class="btn" href="#/texto" style="background:var(--navy2)">Leer el texto completo</a><a class="btn" href="#/plazos" style="background:var(--navy2)">⏱ Buscar plazos</a></div></section>
+<div class="sec"><h2>Artículos</h2><span>Acceso rápido a cada artículo de la ley</span></div><div class="grid">${A.map(card).join('')}</div>
+<div class="sec"><h2>Accesos rápidos por tema</h2><span>${T.length} temas</span></div><div class="grid">${T.map(topic).join('')}</div>${foot()}`;
+const go=()=>{const v=+$('#gn').value;if(v>=1&&v<=A.length)location.hash='/a/'+v;else toast('Ingrese un número entre 1 y '+A.length)};$('#gb').onclick=go;$('#gn').onkeydown=e=>e.key=='Enter'&&go()}
+function textoView(){
+let h=`<nav class="crumb"><a href="#/">Inicio</a><span>›</span><span>Texto completo</span></nav><header class="nh"><span class="eyebrow">Ley XIV – N.º 6 · Antes Ley 3325</span><h1>Texto completo</h1><div class="meta"><span>Arts. 1–${A.length}</span><span>${A.length} artículos</span></div></header>`;
+h+=`<div class="box"><h4>Resumen de la ley</h4><p>Comprende los artículos <b>1</b> a <b>${A.length}</b>, que regulan:</p><ul>${A.map(a=>`<li><a href="#/a/${a.n}"><b>Art. ${a.n}</b> – ${esc(rub(a))}</a></li>`).join('')}</ul></div>`;
+h+=`<div class="bar"><button class="btn sm" data-act="all">Expandir todos los textos</button><button class="btn sm ghost" data-act="none">Contraer todos</button></div>`+A.map(artHTML).join('');
+main.innerHTML=h+foot()}
+
+/* Búsqueda */
+const STOP=new Set('de del la las el los lo al a y e o u en con por para que se su sus es son ser un una unos unas como si no mas muy le les me mi yo tu te sobre entre hay ha han este esta esto ese esa cuando donde cual cuales quiero busco buscar necesito puede pueden debe deben'.split(' '));
+const words=s=>norm(s).match(/[a-z0-9]+/g)||[];
+function stem(w){w=w.replace(/^(.{3,}(?:ar|er|ir))(?:me|te|se|nos|lo|la|los|las|le|les)$/,'$1');if(/^\d+$/.test(w)||w.length<5)return w;
+ for(const x of ['amientos','amiento','imientos','imiento','aciones','acion','uciones','ucion','adores','adora','ador','mente','ables','ible','able','ando','iendo','ados','adas','idos','idas','ado','ada','ido','ida','ante','es','s','ar','er','ir','a','o','e'])if(w.endsWith(x)&&w.length-x.length>=4)return w.slice(0,-x.length);return w}
+const NUM={1:'uno un una',2:'dos',3:'tres',48:'cuarenta ocho'};
+const SYN=new Map();
+['violencia maltrato agresion agresor agresora','denuncia denunciar denunciante','victima damnificado damnificada afectada','juez magistrado juzgado','sancion multa amonestacion','abogado letrado patrocinio patrocinante','refugio casas','comisaria policia policial','plazo termino lapso periodo','tenencia guarda custodia'].forEach(g=>{const ws=g.split(' ').map(w=>stem(w));ws.forEach(w=>{if(!SYN.has(w))SYN.set(w,new Set());ws.forEach(x=>SYN.get(w).add(x))})});
+function accepted(t){const set=new Set(),s=stem(t);set.add(s);if(SYN.has(s))SYN.get(s).forEach(x=>set.add(x));if(/^\d+$/.test(t)&&NUM[+t])NUM[+t].split(' ').forEach(w=>set.add(stem(w)));for(const[n,ws]of Object.entries(NUM))if(ws.split(' ').includes(t))set.add(n);return set}
+const near=(a,t)=>{if(a===t)return true;const sh=a.length<t.length?a:t,lg=a.length<t.length?t:a;return sh.length>=4&&lg.startsWith(sh)&&sh.length/lg.length>=.6};
+const hit=(tokens,acc)=>{for(const a of acc)for(const t of tokens)if(near(a,t))return true;return false};
+let ixd=0;const idx=()=>{if(ixd)return;ixd=1;A.forEach(a=>{a._m=new Set(words(rub(a)+' '+a.s+' '+a.n).map(stem));a._a=new Set([...a._m,...words(a.p.join(' ')).map(stem)])})};
+const W=/[A-Za-zÁÉÍÓÚÜáéíóúüÑñ0-9]+/g,mk=(w,accs)=>{const s=stem(norm(w));return accs.some(a=>[...a].some(x=>near(x,s)))};
+function hl(t,accs){let o='',p=0;for(const m of t.matchAll(W)){o+=esc(t.slice(p,m.index))+(mk(m[0],accs)?'<mark>'+esc(m[0])+'</mark>':esc(m[0]));p=m.index+m[0].length}return o+esc(t.slice(p))}
+function search(v){const terms=[...new Set(words(v).filter(w=>!STOP.has(w)||/^\d+$/.test(w)))];if(!terms.length)return route();
+if(/^\d+$/.test(v.trim())&&byN[+v]){location.hash='/a/'+(+v);return}
+idx();main.style.cssText='';const accs=terms.map(accepted);
+const run=need=>A.filter(a=>accs.filter(x=>hit(a._a,x)).length>=need);
+let rs=run(terms.length),partial=false;if(!rs.length&&terms.length>1){partial=true;rs=run(Math.max(1,Math.ceil(terms.length/2)))}
+rs=rs.map(a=>({a,s:accs.some(x=>hit(a._m,x))?0:1,k:accs.filter(x=>hit(a._a,x)).length})).sort((x,y)=>y.k-x.k||x.s-y.s||x.a.n-y.a.n);
+const snip=a=>{const b=a.p.join(' ');let ix=0;for(const m of b.matchAll(W))if(mk(m[0],accs)){ix=m.index;break}const st=Math.max(0,ix-70);return(st?'…':'')+b.slice(st,st+240)+(b.length>st+240?'…':'')};
+markSide(null);
+main.innerHTML=`<nav class="crumb"><a href="#/">Inicio</a><span>›</span><span>Búsqueda</span></nav><div class="sec"><h2>Resultados para «${esc(v)}»</h2><span>${rs.length} artículo${rs.length==1?'':'s'}</span></div><p class="hint">${partial?'Coincidencia parcial: no hay artículos con todas las palabras, se muestran los que tienen al menos la mitad. ':''}La búsqueda entiende varias palabras en cualquier orden, sinónimos y números (3 = tres), y también busca dentro del texto completo.</p><div class="res">${rs.map(({a})=>`<article class="art" style="--ac:${col(a.n)};--b:${bg(a.n)}"><header><div class="num">Art. ${a.n}</div><div><h4>${hl(rub(a),accs)}</h4><p class="sum">${hl(snip(a),accs)}</p></div></header><div class="acts"><a class="btn sm" href="#/a/${a.n}">Abrir artículo en el texto completo</a></div></article>`).join('')||'<p>Sin coincidencias. Probá con otra palabra.</p>'}</div>`}
+
+/* Rutas */
+function route(){const h=location.hash.slice(1)||'/',m=h.match(/^\/a\/(\d+)/);side.classList.remove('open');main.style.cssText='';
+if(h=='/plazos'){plazosView();markSide('.l[data-p]');window.scrollTo(0,0);return}
+if(h=='/texto'){textoView();markSide('.l[data-t]');window.scrollTo(0,0);return}
+if(m&&byN[+m[1]]){const n=+m[1];textoView();markSide(`.l[data-a="${n}"]`);const e=document.getElementById('a'+n);if(e){e.classList.add('hit');e.querySelector('.full').hidden=false;e.querySelector('[data-act=t]').textContent='Ocultar texto completo';setTimeout(()=>e.scrollIntoView({block:'start'}),30)}return}
+home();markSide(null);window.scrollTo(0,0)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const act=b.dataset.act,art=b.closest('.art');
+if(act=='t'){const f=art.querySelector('.full');f.hidden=!f.hidden;b.textContent=f.hidden?'Ver texto completo':'Ocultar texto completo'}
+else if(act=='all'||act=='none')document.querySelectorAll('.art').forEach(x=>{x.querySelector('.full').hidden=act=='none';x.querySelector('[data-act=t]').textContent=act=='none'?'Ver texto completo':'Ocultar texto completo'});
+else if(act=='c'){const a=byN[+b.dataset.n];navigator.clipboard.writeText(`Ley XIV – N.º 6 (antes Ley 3325) – Artículo ${a.n}\n\n`+a.p.join('\n')+'\n').then(()=>toast('Texto copiado'),()=>toast('No se pudo copiar'))}
+else if(act=='l'){const u=location.href.split('#')[0]+'#/a/'+b.dataset.n;navigator.clipboard.writeText(u).then(()=>toast('Enlace copiado'),()=>toast('No se pudo copiar'))}});
+$('#home').onclick=()=>{$('#q').value='';location.hash='/';route()};
+let tm;$('#q').oninput=e=>{clearTimeout(tm);tm=setTimeout(()=>search(e.target.value),180)};
+$('#menu').onclick=()=>side.classList.toggle('open');
+
+/* Plazos y vigencias */
+function plazosView(){const nn=A.reduce((s,a)=>s+a.z.length,0);
+main.innerHTML=`<nav class="crumb"><a href="#/">Inicio</a><span>›</span><span>Plazos</span></nav>
+<header class="nh" style="--ac:var(--burg)"><span class="eyebrow" style="color:var(--burg)">Buscador</span><h1>Plazos y vigencias</h1><div class="meta"><span>${P.length} referencias de tiempo en el texto</span><span>${nn} plazo${nn==1?'':'s'} fijado${nn==1?'':'s'} en números</span></div></header>
+<div class="box"><h4>Cómo leer esta tabla</h4><p>Cada fila se armó con lo que dice el texto de los artículos. El artículo 3 es el único que fija un plazo en números (48 horas); en el resto la ley habla de intervención o efecto inmediato, de vigencia hasta la caducidad que ordene el Juez, de periodicidad o de lapsos que el Juez determina.</p></div>
+<div class="tabs"><button class="ib" style="margin-left:auto;color:var(--navy)" onclick="window.print()">🖨 Imprimir</button></div>
+<div class="ctl"><input type="search" id="pq" placeholder="Buscar por acción, artículo o palabra…"><select id="ps"><option value="">Todo ámbito</option><option value="den">Denuncia</option><option value="med">Medidas cautelares</option><option value="pro">Proceso y sanciones</option></select></div>
+<div id="pb"></div>`;
+['pq','ps'].forEach(id=>{$('#'+id).oninput=drawP});drawP()}
+function drawP(){const q=norm($('#pq').value).split(/\s+/).filter(Boolean),s=$('#ps').value,pb=$('#pb');
+const rs=P.filter(r=>{const k=norm('art '+r.n+' '+r.e+' '+r.p);if(!q.every(w=>k.includes(w)))return false;if(s&&r.c!=s)return false;return true});
+pb.innerHTML=`<p class="cnt">${rs.length} resultado${rs.length==1?'':'s'}</p><table class="tb"><thead><tr><th>Art.</th><th>Acción / evento</th><th>Plazo o vigencia</th><th>Ámbito</th></tr></thead><tbody>${rs.map(r=>`<tr><td data-l="Artículo"><a class="chip" href="#/a/${r.n}">${r.n}</a></td><td data-l="Acción / evento">${esc(r.e)}</td><td data-l="Plazo o vigencia"><b>${esc(r.p)}</b></td><td data-l="Ámbito"><span class="bd ${r.c}">${CAT[r.c]}</span></td></tr>`).join('')||'<tr><td colspan="4">Sin resultados.</td></tr>'}</tbody></table>`}
+
+addEventListener('hashchange',()=>{$('#q').value='';route()});
+const th=()=>document.documentElement.style.setProperty('--th',$('.top').offsetHeight+'px');addEventListener('resize',th);document.fonts&&document.fonts.ready.then(th);th();
+addEventListener('beforeprint',()=>document.querySelectorAll('.full').forEach(f=>f.hidden=false));
+nav();route();th();
+</script>
+</body>
+</html>
